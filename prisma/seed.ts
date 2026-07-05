@@ -98,6 +98,95 @@ const units: UnitSeed[] = [
       },
     ],
   },
+  {
+    title: 'School & Work',
+    order: 3,
+    lessons: [
+      {
+        title: 'In the Classroom',
+        order: 1,
+        words: [
+          { english: 'teacher', indonesian: 'guru' },
+          { english: 'student', indonesian: 'siswa' },
+          { english: 'pencil', indonesian: 'pensil' },
+          { english: 'paper', indonesian: 'kertas' },
+          { english: 'question', indonesian: 'pertanyaan' },
+          { english: 'answer', indonesian: 'jawaban' },
+          { english: 'lesson', indonesian: 'pelajaran' },
+        ],
+      },
+      {
+        title: 'Learning Verbs',
+        order: 2,
+        words: [
+          { english: 'to read', indonesian: 'membaca' },
+          { english: 'to write', indonesian: 'menulis' },
+          { english: 'to learn', indonesian: 'belajar' },
+          { english: 'to teach', indonesian: 'mengajar' },
+          { english: 'to ask', indonesian: 'bertanya' },
+          { english: 'to understand', indonesian: 'mengerti' },
+        ],
+      },
+      {
+        title: 'At Work',
+        order: 3,
+        words: [
+          { english: 'office', indonesian: 'kantor' },
+          { english: 'meeting', indonesian: 'rapat' },
+          { english: 'boss', indonesian: 'atasan' },
+          { english: 'salary', indonesian: 'gaji' },
+          { english: 'job', indonesian: 'pekerjaan' },
+          { english: 'busy', indonesian: 'sibuk' },
+          { english: 'schedule', indonesian: 'jadwal' },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'Travel',
+    order: 4,
+    lessons: [
+      {
+        title: 'Getting Around',
+        order: 1,
+        words: [
+          { english: 'airport', indonesian: 'bandara' },
+          { english: 'train', indonesian: 'kereta' },
+          { english: 'station', indonesian: 'stasiun' },
+          { english: 'ticket', indonesian: 'tiket' },
+          { english: 'map', indonesian: 'peta' },
+          { english: 'street', indonesian: 'jalan' },
+          { english: 'car', indonesian: 'mobil' },
+        ],
+      },
+      {
+        title: 'At the Hotel',
+        order: 2,
+        words: [
+          { english: 'luggage', indonesian: 'koper' },
+          { english: 'guest', indonesian: 'tamu' },
+          { english: 'key', indonesian: 'kunci' },
+          { english: 'floor', indonesian: 'lantai' },
+          { english: 'towel', indonesian: 'handuk' },
+          { english: 'blanket', indonesian: 'selimut' },
+        ],
+      },
+      {
+        title: 'Directions & Places',
+        order: 3,
+        words: [
+          { english: 'left', indonesian: 'kiri' },
+          { english: 'right', indonesian: 'kanan' },
+          { english: 'straight', indonesian: 'lurus' },
+          { english: 'near', indonesian: 'dekat' },
+          { english: 'far', indonesian: 'jauh' },
+          { english: 'market', indonesian: 'pasar' },
+          { english: 'beach', indonesian: 'pantai' },
+          { english: 'mountain', indonesian: 'gunung' },
+        ],
+      },
+    ],
+  },
 ]
 
 async function main() {

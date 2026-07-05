@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { nextStreak, utcDateOnly } from '@/lib/streak'
@@ -97,6 +98,10 @@ export async function submitScore(
       data: { xp: { increment: score }, ...streakUpdate, ...xpTodayUpdate },
     }),
   ])
+
+  // Segarkan seluruh tree layout supaya stats bar di header (streak/XP/level)
+  // ikut ter-update dalam respons action yang sama, tanpa hard refresh.
+  revalidatePath('/', 'layout')
 
   return { ok: true, score, accuracy, completed, totalXp: updatedUser.xp }
 }

@@ -8,9 +8,15 @@ import DailyGoalsCard from '@/components/learn/DailyGoalsCard'
 import StreakCard from '@/components/learn/StreakCard'
 import NextLessonCard from '@/components/learn/NextLessonCard'
 
-export default async function LearnPage() {
+export default async function LearnPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>
+}) {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
+
+  const { notice } = await searchParams
 
   const [units, user] = await Promise.all([
     prisma.unit.findMany({
@@ -76,6 +82,12 @@ export default async function LearnPage() {
     <div className="flex gap-6 lg:gap-8">
       {/* ─── Main: Journey Path ─── */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
+        {notice === 'practice-empty' && (
+          <p className="rounded-xl border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm font-medium text-amber-300">
+            Mode Practice terbuka setelah kamu menyelesaikan minimal 1 lesson —
+            mulai dari lesson pertama di bawah!
+          </p>
+        )}
         <header>
           <h1 className="text-2xl font-black tracking-tight text-zinc-100">
             Journey

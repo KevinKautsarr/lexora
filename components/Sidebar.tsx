@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Map, LayoutDashboard, Trophy, User, LogOut } from 'lucide-react'
+import { Map, Dumbbell, LayoutDashboard, Trophy, User, LogOut } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 
 const NAV_ITEMS = [
   { href: '/learn', label: 'Journey', icon: Map },
+  // exact: /game/[lessonId] datang dari Journey, jangan menyorot Practice
+  { href: '/game', label: 'Practice', icon: Dumbbell, exact: true },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
@@ -32,8 +34,10 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-2 py-4 lg:px-3">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(`${href}/`)
+        {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          const active = exact
+            ? pathname === href
+            : pathname === href || pathname.startsWith(`${href}/`)
           return (
             <Link
               key={href}
