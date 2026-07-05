@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { prisma } from '@/lib/prisma'
-import { computeUnlockedLessonIds } from '@/lib/progress'
+import {
+  computeUnlockedLessonIds,
+  findNextLessonRef,
+  type LessonOrderRef,
+} from '@/lib/progress'
 import { getSessionUser } from '@/lib/session'
 import JourneyPath, { type UnitSection } from '@/components/JourneyPath'
 import DailyGoalsCard from '@/components/learn/DailyGoalsCard'
@@ -18,10 +22,15 @@ export default async function LearnPage({
 
   const { notice } = await searchParams
 
-  const [units, user] = await Promise.all([
-    prisma.unit.findMany({
+  const [levels, user] = await Promise.all([
+    prisma.level.findMany({
       orderBy: { order: 'asc' },
-      include: { lessons: { orderBy: { order: 'asc' } } },
+      include: {
+        units: {
+          orderBy: { order: 'asc' },
+          include: { lessons: { orderBy: { order: 'asc' } } },
+        },
+      },
     }),
     prisma.user.findUnique({
       where: { id: sessionUser.id },
@@ -34,6 +43,8 @@ export default async function LearnPage({
     }),
   ])
 
+  const startLevelOrder = user?.startLevelOrder ?? 1
+
   // Map lessonId → best score
   const bestScoreMap = new Map<string, number | null>()
   for (const p of user?.lessonProgress ?? []) {
@@ -42,46 +53,26 @@ export default async function LearnPage({
 
   const completedIds = new Set(user?.lessonProgress.map((p) => p.lessonId) ?? [])
 
-  const lessonRefs = units.flatMap((unit) =>
-    unit.lessons.map((lesson) => ({
-      id: lesson.id,
-      order: lesson.order,
-      unitOrder: unit.order,
-    })),
-  )
-  const unlockedIds = computeUnlockedLessonIds(lessonRefs, completedIds)
-
-  // Find the "frontmost" lesson: first unlocked + not completed (in global sort order)
-  const sortedRefs = [...lessonRefs].sort(
-    (a, b) => a.unitOrder - b.unitOrder || a.order - b.order,
-  )
-  const frontmostId =
-    sortedRefs.find((l) => unlockedIds.has(l.id) && !completedIds.has(l.id))?.id ?? null
-
-  // Build UnitSection[] for JourneyPath
-  const unitSections: UnitSection[] = units.map((unit) => ({
-    id: unit.id,
-    title: unit.title,
-    order: unit.order,
-    lessons: unit.lessons.map((lesson, idx) => {
-      const completed = completedIds.has(lesson.id)
-      const unlocked = unlockedIds.has(lesson.id)
-      return {
+  const lessonRefs: LessonOrderRef[] = levels.flatMap((level) =>
+    level.units.flatMap((unit) =>
+      unit.lessons.map((lesson) => ({
         id: lesson.id,
-        title: lesson.title,
         order: lesson.order,
-        status: completed ? 'completed' : unlocked ? 'unlocked' : 'locked',
-        bestScore: bestScoreMap.get(lesson.id) ?? null,
-        isFrontmost: lesson.id === frontmostId,
-        isLastInUnit: idx === unit.lessons.length - 1,
-      }
-    }),
-  }))
+        unitOrder: unit.order,
+        levelOrder: level.order,
+      })),
+    ),
+  )
+  const unlockedIds = computeUnlockedLessonIds(lessonRefs, completedIds, startLevelOrder)
+
+  // Frontmost = lesson berikutnya pada rantai wajib (level >= startLevelOrder).
+  const frontmost = findNextLessonRef(lessonRefs, completedIds, startLevelOrder)
+  const activeLevelOrder = frontmost?.levelOrder ?? null
 
   return (
     <div className="flex gap-6 lg:gap-8">
-      {/* ─── Main: Journey Path ─── */}
-      <div className="flex min-w-0 flex-1 flex-col gap-6">
+      {/* ─── Main: Journey Path per Level ─── */}
+      <div className="flex min-w-0 flex-1 flex-col gap-8">
         {notice === 'practice-empty' && (
           <p className="rounded-xl border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm font-medium text-amber-300">
             Mode Practice terbuka setelah kamu menyelesaikan minimal 1 lesson —
@@ -101,7 +92,67 @@ export default async function LearnPage({
           </p>
         </header>
 
-        <JourneyPath units={unitSections} />
+        {levels.map((level) => {
+          const isActive = level.order === activeLevelOrder
+          const isFreelyOpen = level.order < startLevelOrder
+
+          const unitSections: UnitSection[] = level.units.map((unit) => ({
+            id: unit.id,
+            title: unit.title,
+            order: unit.order,
+            lessons: unit.lessons.map((lesson, idx) => {
+              const completed = completedIds.has(lesson.id)
+              const unlocked = unlockedIds.has(lesson.id)
+              return {
+                id: lesson.id,
+                title: lesson.title,
+                order: lesson.order,
+                status: completed ? 'completed' : unlocked ? 'unlocked' : 'locked',
+                bestScore: bestScoreMap.get(lesson.id) ?? null,
+                isFrontmost: lesson.id === frontmost?.id,
+                isLastInUnit: idx === unit.lessons.length - 1,
+              }
+            }),
+          }))
+
+          return (
+            <section key={level.id}>
+              <header
+                className={`mb-4 rounded-2xl border px-5 py-4 ${
+                  isActive
+                    ? 'border-emerald-600 bg-emerald-950/40'
+                    : 'border-zinc-800 bg-zinc-800/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`rounded-lg px-2.5 py-1 font-mono text-sm font-black ${
+                      isActive
+                        ? 'bg-emerald-500 text-emerald-950'
+                        : 'bg-zinc-700 text-zinc-200'
+                    }`}
+                  >
+                    {level.code}
+                  </span>
+                  <h2 className="text-lg font-bold text-zinc-100">{level.name}</h2>
+                  {isActive && (
+                    <span className="ml-auto rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-400">
+                      Sedang ditempuh
+                    </span>
+                  )}
+                  {isFreelyOpen && (
+                    <span className="ml-auto rounded-full bg-zinc-700/60 px-3 py-1 text-xs font-semibold text-zinc-400">
+                      Terbuka bebas
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-zinc-400">{level.description}</p>
+              </header>
+
+              <JourneyPath units={unitSections} />
+            </section>
+          )
+        })}
       </div>
 
       {/* ─── Right Sidebar (hidden < lg) ─── */}

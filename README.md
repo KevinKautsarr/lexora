@@ -1,50 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LEXORA 🇬🇧→🇮🇩
 
-## Getting Started
+Aplikasi belajar kosakata bahasa Inggris bergaya Duolingo: journey path per unit, game mencocokkan kata melawan waktu, XP, level, streak harian, dan leaderboard.
 
-First, run the development server:
+**Live demo:** https://lexorapp.vercel.app
+
+> _Screenshot menyusul — halaman Journey (dark theme, sidebar) dan game Match Madness._
+<!-- ![Journey](docs/screenshot-journey.png) -->
+<!-- ![Match Madness](docs/screenshot-game.png) -->
+
+## Fitur Utama
+
+- **Tingkatan CEFR (A1–C1)** — 5 tingkat × 3 unit × 3 lesson = 45 lesson / 360 kata, disusun mengacu penjenjangan CEFR. Konten seluruhnya dari `prisma/vocabulary-seed.json` (seed idempotent).
+- **Onboarding + placement test** — user baru memilih tingkat awal. Pilih Pemula (A1) → langsung mulai; tingkat lain → tes penempatan 12 soal pilihan ganda yang **dibuat dan dinilai di server** (klien tidak pernah menerima kunci jawaban). Lulus ≥9/12 menempatkan user di tingkat itu; gagal memberi rekomendasi tingkat yang pas.
+- **Journey path dengan unlock berlevel** — dikelompokkan per tingkat CEFR. Tingkat di bawah titik awal user terbuka bebas untuk review; tingkat aktif berantai (lesson berikutnya terbuka setelah sebelumnya selesai). Ditegakkan tiga lapis: UI, guard halaman, dan validasi server.
+- **Match Madness** — game mencocokkan kata Indonesia (kiri) ↔ Inggris (kanan) dalam 60 detik. Skor **dihitung di server**: klien hanya mengirim jumlah benar + percobaan, divalidasi terhadap isi lesson di database — skor tidak bisa dipalsukan dari client.
+- **Progresi pemain** — dua metrik berbeda: **Tingkat** (CEFR, kemampuan bahasa) dan **Level** (dari XP, 500 XP/level). Plus streak harian (basis hari UTC), streak terpanjang, dan daily goals (1 lesson + 50 XP per hari).
+- **Practice mode** — review acak dari kosakata lesson yang sudah diselesaikan, tanpa memengaruhi XP.
+- **Leaderboard** — peringkat XP semua pengguna, top-3 diberi badge, posisi sendiri selalu terlihat.
+- **Autentikasi** — email + password via Better Auth (session di database, ganti password perlu password lama, semua server action memvalidasi session).
+
+### Sistem Tingkatan CEFR & Placement Test
+
+Ada **dua konsep berbeda** yang sengaja dibedakan agar tidak rancu:
+
+| | **Tingkat** (CEFR) | **Level** (XP) |
+|---|---|---|
+| Arti | Kemampuan bahasa: A1 Pemula → C1 Mahir | Progres bermain: `floor(xp/500)+1` |
+| Berubah saat | Menyelesaikan lesson di tingkat lebih tinggi | Mengumpulkan XP |
+| Ditampilkan | "Tingkat: Menengah (B1)" | "Level 4" |
+
+**Placement test** (anti-curang):
+- Soal disampel di server (8 kata tingkat target + 4 tingkat di bawahnya), dikirim ke klien **tanpa penanda jawaban benar** — hanya prompt Indonesia + 4 opsi Inggris acak.
+- Penilaian membandingkan jawaban terhadap kunci yang diambil ulang dari database via `questionWordIds` — memanipulasi jawaban lewat request langsung tetap dinilai apa adanya oleh server.
+- Sesi tidak bisa di-submit dua kali; `startPlacement` berulang memakai sesi yang sama (anti re-roll soal).
+- Alasan pilihan ganda (bukan matching): matching memberi petunjuk silang sehingga menilai kemampuan terlalu tinggi; per-soal pilihan ganda lebih akurat sebagai alat ukur.
+
+## Tech Stack & Arsitektur
+
+| Lapisan | Teknologi |
+|---|---|
+| Framework | Next.js (App Router, Turbopack) + TypeScript |
+| Database | PostgreSQL serverless (Neon) via Prisma 7 + `@prisma/adapter-neon` |
+| Auth | Better Auth (Prisma adapter, session-based) |
+| UI | Tailwind CSS v4, lucide-react, dark theme |
+| Testing | Vitest (unit test logika murni) |
+
+Pola arsitektur yang dipakai:
+
+- **Server Components** untuk semua fetching data (tidak ada API route untuk read) — halaman meng-query Prisma langsung di server.
+- **Server Actions** untuk mutasi (`submitScore`, `updateName`) — setiap action memvalidasi session dan input di server, lalu `revalidatePath` menyegarkan UI dalam satu roundtrip.
+- **Logika murni terisolasi** di `lib/` (`progress.ts` unlock, `level.ts`, `streak.ts`, `scoring.ts`) — gampang di-unit-test dan dipakai bersama oleh halaman + validasi server.
+- **Anti-cheat**: perhitungan skor, cek unlock, dan streak semuanya server-side dalam satu transaksi Prisma.
+
+## Menjalankan Secara Lokal
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/KevinKautsarr/lexora.git
+cd lexora
+npm install                     # prisma generate otomatis via postinstall
+
+cp .env.example .env            # lalu isi nilainya (lihat komentar di dalamnya)
+
+npx prisma migrate dev          # buat tabel
+npx prisma db seed              # isi 5 tingkat CEFR / 45 lesson / 360 kata dari JSON
+
+npm run dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Perintah lain: `npm test` (unit test), `npm run build` (build produksi), `npx prisma studio` (GUI database).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Akun demo:** daftar akun baru langsung dari halaman register — kamu akan melewati onboarding pemilihan tingkat (pilih Pemula untuk mulai cepat, atau tingkat lain untuk mencoba placement test).
 
 ## Deploy ke Vercel
 
-1. **Push repo ini ke GitHub** (pastikan `.env` tidak ikut — sudah di-gitignore; `.env.example` yang jadi acuan).
-2. Di [vercel.com](https://vercel.com) → **Add New Project** → import repo ini. Framework terdeteksi otomatis (Next.js); build command default `next build` sudah benar — `prisma generate` jalan otomatis lewat script `postinstall`.
-3. Di **Settings → Environment Variables**, isi tiga variabel (lihat `.env.example`):
-   - `DATABASE_URL` — connection string Neon (yang sama dengan lokal, atau branch produksi terpisah di Neon).
-   - `BETTER_AUTH_SECRET` — string acak baru untuk produksi: `openssl rand -hex 32`. Jangan pakai secret dev.
-   - `BETTER_AUTH_URL` — URL produksi, mis. `https://nama-app.vercel.app`. (Deploy pertama: biarkan dulu, lihat URL yang diberikan Vercel, isi variabel ini, lalu redeploy.)
-4. **Deploy**, lalu uji di URL produksi: register akun baru → login → mainkan 1 lesson → cek XP/progress tersimpan.
+1. Push repo ke GitHub (`.env` ter-gitignore; `.env.example` jadi acuan).
+2. Import repo di Vercel — preset Next.js default sudah benar, `prisma generate` jalan otomatis via `postinstall`.
+3. Isi environment variables: `DATABASE_URL` (Neon), `BETTER_AUTH_SECRET` (baru, `openssl rand -hex 32`), `BETTER_AUTH_URL` (URL produksi, mis. `https://lexorapp.vercel.app`).
+4. Deploy, lalu uji register/login di URL produksi.
 
-Catatan:
-- Migrasi database dijalankan dari mesin dev (`npx prisma migrate dev`) atau CI — build Vercel tidak memigrasi DB.
-- Kalau register/login gagal dengan error origin/CSRF, hampir pasti `BETTER_AUTH_URL` belum cocok dengan domain yang diakses.
+Catatan: migrasi database dijalankan dari mesin dev (`npx prisma migrate dev`), bukan oleh build Vercel. Error origin/CSRF saat login hampir pasti berarti `BETTER_AUTH_URL` tidak cocok dengan domain.
+
+## Laravel vs Next.js — Catatan Perbandingan
+
+_Draft perbandingan membangun aplikasi serupa di dua stack (akan dilengkapi dengan pengalaman pribadi):_
+
+| Konsep | Laravel | Next.js (proyek ini) |
+|---|---|---|
+| Templating | Blade — HTML dirender server, interaktivitas butuh Alpine/Livewire | React Server + Client Components — satu bahasa untuk render server dan interaksi client |
+| Endpoint mutasi | Controller + Route + FormRequest | Server Action — fungsi yang dipanggil langsung dari komponen, tanpa mendefinisikan route |
+| ORM | Eloquent (Active Record: `$user->save()`) | Prisma (client ter-generate dari schema, fully typed: `prisma.user.update()`) |
+| Proteksi halaman | Middleware `auth` di route group | Cek session di tiap server component (`getSessionUser()` + `redirect`) |
+| Validasi | FormRequest / `$request->validate()` | Manual di awal server action (tipe + rentang + kepemilikan) |
+| Migrasi | `php artisan migrate` | `npx prisma migrate dev` |
+| Auth bawaan | Breeze/Jetstream/Fortify | Pilih library — di sini Better Auth (schema di-generate ke Prisma) |
+
+Perbedaan paling terasa: di Laravel batas request/response selalu eksplisit (route → controller → view), sedangkan di Next.js batas server/client ada **di dalam pohon komponen** — mudah membuat data fetching kolokasi dengan UI, tapi menuntut disiplin soal apa yang boleh bocor ke client.
+
+---
+
+Dibangun sebagai proyek pembelajaran full-stack. Ide lanjutan: leaderboard mingguan (league), streak per-timezone, verifikasi email, CMS kosakata, tipe soal baru (pilihan ganda, listening), dan achievement.

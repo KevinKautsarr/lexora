@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Play, BookOpen } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
-import { computeUnlockedLessonIds } from '@/lib/progress'
+import { findNextLessonRef } from '@/lib/progress'
 
 export default async function NextLessonCard() {
   const sessionUser = await getSessionUser()
@@ -10,8 +10,8 @@ export default async function NextLessonCard() {
 
   const [units, user] = await Promise.all([
     prisma.unit.findMany({
-      orderBy: { order: 'asc' },
-      include: { lessons: { orderBy: { order: 'asc' } } },
+      orderBy: [{ level: { order: 'asc' } }, { order: 'asc' }],
+      include: { level: true, lessons: { orderBy: { order: 'asc' } } },
     }),
     prisma.user.findUnique({
       where: { id: sessionUser.id },
@@ -25,16 +25,16 @@ export default async function NextLessonCard() {
       id: lesson.id,
       order: lesson.order,
       unitOrder: unit.order,
+      levelOrder: unit.level.order,
     })),
   )
-  const unlockedIds = computeUnlockedLessonIds(lessonRefs, completedIds)
 
-  // Temukan lesson unlocked pertama yang belum completed
+  // Lesson berikutnya pada rantai wajib (level >= startLevelOrder user)
+  const nextRef = findNextLessonRef(lessonRefs, completedIds, user?.startLevelOrder ?? 1)
   let nextLesson: { id: string; title: string; unitTitle: string } | null = null
-
   outer: for (const unit of units) {
     for (const lesson of unit.lessons) {
-      if (unlockedIds.has(lesson.id) && !completedIds.has(lesson.id)) {
+      if (lesson.id === nextRef?.id) {
         nextLesson = { id: lesson.id, title: lesson.title, unitTitle: unit.title }
         break outer
       }

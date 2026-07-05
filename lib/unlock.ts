@@ -3,9 +3,18 @@ import { computeUnlockedLessonIds, type LessonOrderRef } from './progress'
 
 export async function fetchLessonOrderRefs(): Promise<LessonOrderRef[]> {
   const lessons = await prisma.lesson.findMany({
-    select: { id: true, order: true, unit: { select: { order: true } } },
+    select: {
+      id: true,
+      order: true,
+      unit: { select: { order: true, level: { select: { order: true } } } },
+    },
   })
-  return lessons.map((l) => ({ id: l.id, order: l.order, unitOrder: l.unit.order }))
+  return lessons.map((l) => ({
+    id: l.id,
+    order: l.order,
+    unitOrder: l.unit.order,
+    levelOrder: l.unit.level.order,
+  }))
 }
 
 export async function fetchCompletedLessonIds(userId: string | null): Promise<Set<string>> {
@@ -21,9 +30,12 @@ export async function isLessonUnlockedForUser(
   userId: string | null,
   lessonId: string,
 ): Promise<boolean> {
-  const [lessons, completed] = await Promise.all([
+  const [lessons, completed, user] = await Promise.all([
     fetchLessonOrderRefs(),
     fetchCompletedLessonIds(userId),
+    userId
+      ? prisma.user.findUnique({ where: { id: userId }, select: { startLevelOrder: true } })
+      : Promise.resolve(null),
   ])
-  return computeUnlockedLessonIds(lessons, completed).has(lessonId)
+  return computeUnlockedLessonIds(lessons, completed, user?.startLevelOrder ?? 1).has(lessonId)
 }

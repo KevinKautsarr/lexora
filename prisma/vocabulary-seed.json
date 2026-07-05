@@ -1,0 +1,769 @@
+{
+  "meta": {
+    "description": "Dataset kosakata LEXORA berjenjang CEFR. 5 level x 3 unit x 3 lesson x 8 kata = 360 kata.",
+    "note": "Disusun mengacu pada penjenjangan CEFR (A1-C1). Disarankan spot-check terjemahan sebelum produksi.",
+    "direction": "indonesian -> english (kolom kiri Indonesia, kanan English)"
+  },
+  "levels": [
+    {
+      "code": "A1",
+      "name": "Pemula",
+      "order": 1,
+      "description": "Kata-kata paling dasar untuk memulai: sapaan, angka, keluarga, dan benda sehari-hari.",
+      "units": [
+        {
+          "title": "Perkenalan",
+          "order": 1,
+          "lessons": [
+            {
+              "title": "Salam & Sapaan",
+              "order": 1,
+              "words": [
+                { "english": "hello", "indonesian": "halo" },
+                { "english": "good morning", "indonesian": "selamat pagi" },
+                { "english": "good night", "indonesian": "selamat malam" },
+                { "english": "goodbye", "indonesian": "selamat tinggal" },
+                { "english": "please", "indonesian": "tolong" },
+                { "english": "thank you", "indonesian": "terima kasih" },
+                { "english": "sorry", "indonesian": "maaf" },
+                { "english": "welcome", "indonesian": "selamat datang" }
+              ]
+            },
+            {
+              "title": "Angka & Waktu",
+              "order": 2,
+              "words": [
+                { "english": "one", "indonesian": "satu" },
+                { "english": "two", "indonesian": "dua" },
+                { "english": "three", "indonesian": "tiga" },
+                { "english": "ten", "indonesian": "sepuluh" },
+                { "english": "today", "indonesian": "hari ini" },
+                { "english": "tomorrow", "indonesian": "besok" },
+                { "english": "yesterday", "indonesian": "kemarin" },
+                { "english": "now", "indonesian": "sekarang" }
+              ]
+            },
+            {
+              "title": "Warna",
+              "order": 3,
+              "words": [
+                { "english": "red", "indonesian": "merah" },
+                { "english": "blue", "indonesian": "biru" },
+                { "english": "green", "indonesian": "hijau" },
+                { "english": "yellow", "indonesian": "kuning" },
+                { "english": "black", "indonesian": "hitam" },
+                { "english": "white", "indonesian": "putih" },
+                { "english": "brown", "indonesian": "cokelat" },
+                { "english": "purple", "indonesian": "ungu" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Keluarga & Tubuh",
+          "order": 2,
+          "lessons": [
+            {
+              "title": "Keluarga Inti",
+              "order": 1,
+              "words": [
+                { "english": "mother", "indonesian": "ibu" },
+                { "english": "father", "indonesian": "ayah" },
+                { "english": "sister", "indonesian": "saudara perempuan" },
+                { "english": "brother", "indonesian": "saudara laki-laki" },
+                { "english": "child", "indonesian": "anak" },
+                { "english": "parents", "indonesian": "orang tua" },
+                { "english": "grandmother", "indonesian": "nenek" },
+                { "english": "grandfather", "indonesian": "kakek" }
+              ]
+            },
+            {
+              "title": "Orang di Sekitar",
+              "order": 2,
+              "words": [
+                { "english": "man", "indonesian": "laki-laki" },
+                { "english": "woman", "indonesian": "perempuan" },
+                { "english": "friend", "indonesian": "teman" },
+                { "english": "baby", "indonesian": "bayi" },
+                { "english": "boy", "indonesian": "anak laki-laki" },
+                { "english": "girl", "indonesian": "anak perempuan" },
+                { "english": "people", "indonesian": "orang-orang" },
+                { "english": "name", "indonesian": "nama" }
+              ]
+            },
+            {
+              "title": "Anggota Tubuh",
+              "order": 3,
+              "words": [
+                { "english": "head", "indonesian": "kepala" },
+                { "english": "eye", "indonesian": "mata" },
+                { "english": "hand", "indonesian": "tangan" },
+                { "english": "foot", "indonesian": "kaki" },
+                { "english": "hair", "indonesian": "rambut" },
+                { "english": "mouth", "indonesian": "mulut" },
+                { "english": "ear", "indonesian": "telinga" },
+                { "english": "nose", "indonesian": "hidung" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Kehidupan Sehari-hari",
+          "order": 3,
+          "lessons": [
+            {
+              "title": "Makanan & Minuman",
+              "order": 1,
+              "words": [
+                { "english": "rice", "indonesian": "nasi" },
+                { "english": "water", "indonesian": "air" },
+                { "english": "bread", "indonesian": "roti" },
+                { "english": "egg", "indonesian": "telur" },
+                { "english": "milk", "indonesian": "susu" },
+                { "english": "fruit", "indonesian": "buah" },
+                { "english": "vegetable", "indonesian": "sayur" },
+                { "english": "chicken", "indonesian": "ayam" }
+              ]
+            },
+            {
+              "title": "Di Dalam Rumah",
+              "order": 2,
+              "words": [
+                { "english": "house", "indonesian": "rumah" },
+                { "english": "door", "indonesian": "pintu" },
+                { "english": "window", "indonesian": "jendela" },
+                { "english": "table", "indonesian": "meja" },
+                { "english": "chair", "indonesian": "kursi" },
+                { "english": "bed", "indonesian": "tempat tidur" },
+                { "english": "kitchen", "indonesian": "dapur" },
+                { "english": "bathroom", "indonesian": "kamar mandi" }
+              ]
+            },
+            {
+              "title": "Kata Kerja Dasar",
+              "order": 3,
+              "words": [
+                { "english": "eat", "indonesian": "makan" },
+                { "english": "drink", "indonesian": "minum" },
+                { "english": "sleep", "indonesian": "tidur" },
+                { "english": "go", "indonesian": "pergi" },
+                { "english": "come", "indonesian": "datang" },
+                { "english": "see", "indonesian": "melihat" },
+                { "english": "speak", "indonesian": "berbicara" },
+                { "english": "read", "indonesian": "membaca" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "A2",
+      "name": "Dasar",
+      "order": 2,
+      "description": "Kosakata untuk aktivitas rutin, bepergian, belanja, dan mengungkapkan perasaan.",
+      "units": [
+        {
+          "title": "Aktivitas & Hobi",
+          "order": 1,
+          "lessons": [
+            {
+              "title": "Kegiatan Harian",
+              "order": 1,
+              "words": [
+                { "english": "wake up", "indonesian": "bangun tidur" },
+                { "english": "take a shower", "indonesian": "mandi" },
+                { "english": "cook", "indonesian": "memasak" },
+                { "english": "work", "indonesian": "bekerja" },
+                { "english": "study", "indonesian": "belajar" },
+                { "english": "clean", "indonesian": "membersihkan" },
+                { "english": "wash", "indonesian": "mencuci" },
+                { "english": "rest", "indonesian": "beristirahat" }
+              ]
+            },
+            {
+              "title": "Hobi",
+              "order": 2,
+              "words": [
+                { "english": "swim", "indonesian": "berenang" },
+                { "english": "sing", "indonesian": "menyanyi" },
+                { "english": "dance", "indonesian": "menari" },
+                { "english": "draw", "indonesian": "menggambar" },
+                { "english": "travel", "indonesian": "bepergian" },
+                { "english": "exercise", "indonesian": "berolahraga" },
+                { "english": "paint", "indonesian": "melukis" },
+                { "english": "fishing", "indonesian": "memancing" }
+              ]
+            },
+            {
+              "title": "Olahraga & Permainan",
+              "order": 3,
+              "words": [
+                { "english": "run", "indonesian": "berlari" },
+                { "english": "jump", "indonesian": "melompat" },
+                { "english": "throw", "indonesian": "melempar" },
+                { "english": "catch", "indonesian": "menangkap" },
+                { "english": "win", "indonesian": "menang" },
+                { "english": "lose", "indonesian": "kalah" },
+                { "english": "team", "indonesian": "tim" },
+                { "english": "match", "indonesian": "pertandingan" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Bepergian & Kota",
+          "order": 2,
+          "lessons": [
+            {
+              "title": "Transportasi",
+              "order": 1,
+              "words": [
+                { "english": "car", "indonesian": "mobil" },
+                { "english": "train", "indonesian": "kereta" },
+                { "english": "bus", "indonesian": "bus" },
+                { "english": "airplane", "indonesian": "pesawat terbang" },
+                { "english": "bicycle", "indonesian": "sepeda" },
+                { "english": "station", "indonesian": "stasiun" },
+                { "english": "ticket", "indonesian": "tiket" },
+                { "english": "airport", "indonesian": "bandara" }
+              ]
+            },
+            {
+              "title": "Arah & Tempat",
+              "order": 2,
+              "words": [
+                { "english": "left", "indonesian": "kiri" },
+                { "english": "right", "indonesian": "kanan" },
+                { "english": "straight", "indonesian": "lurus" },
+                { "english": "near", "indonesian": "dekat" },
+                { "english": "far", "indonesian": "jauh" },
+                { "english": "map", "indonesian": "peta" },
+                { "english": "street", "indonesian": "jalan" },
+                { "english": "corner", "indonesian": "sudut" }
+              ]
+            },
+            {
+              "title": "Belanja",
+              "order": 3,
+              "words": [
+                { "english": "buy", "indonesian": "membeli" },
+                { "english": "sell", "indonesian": "menjual" },
+                { "english": "price", "indonesian": "harga" },
+                { "english": "cheap", "indonesian": "murah" },
+                { "english": "expensive", "indonesian": "mahal" },
+                { "english": "money", "indonesian": "uang" },
+                { "english": "market", "indonesian": "pasar" },
+                { "english": "change", "indonesian": "uang kembalian" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Perasaan & Kondisi",
+          "order": 3,
+          "lessons": [
+            {
+              "title": "Perasaan",
+              "order": 1,
+              "words": [
+                { "english": "happy", "indonesian": "senang" },
+                { "english": "sad", "indonesian": "sedih" },
+                { "english": "angry", "indonesian": "marah" },
+                { "english": "tired", "indonesian": "lelah" },
+                { "english": "scared", "indonesian": "takut" },
+                { "english": "surprised", "indonesian": "terkejut" },
+                { "english": "bored", "indonesian": "bosan" },
+                { "english": "proud", "indonesian": "bangga" }
+              ]
+            },
+            {
+              "title": "Cuaca & Alam",
+              "order": 2,
+              "words": [
+                { "english": "rain", "indonesian": "hujan" },
+                { "english": "sunny", "indonesian": "cerah" },
+                { "english": "cloudy", "indonesian": "berawan" },
+                { "english": "wind", "indonesian": "angin" },
+                { "english": "storm", "indonesian": "badai" },
+                { "english": "hot", "indonesian": "panas" },
+                { "english": "cold", "indonesian": "dingin" },
+                { "english": "humid", "indonesian": "lembap" }
+              ]
+            },
+            {
+              "title": "Kesehatan Dasar",
+              "order": 3,
+              "words": [
+                { "english": "sick", "indonesian": "sakit" },
+                { "english": "medicine", "indonesian": "obat" },
+                { "english": "doctor", "indonesian": "dokter" },
+                { "english": "hospital", "indonesian": "rumah sakit" },
+                { "english": "fever", "indonesian": "demam" },
+                { "english": "headache", "indonesian": "sakit kepala" },
+                { "english": "healthy", "indonesian": "sehat" },
+                { "english": "wound", "indonesian": "luka" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "B1",
+      "name": "Menengah",
+      "order": 3,
+      "description": "Kosakata untuk sekolah, dunia kerja, media, dan menyampaikan pendapat.",
+      "units": [
+        {
+          "title": "Sekolah & Pekerjaan",
+          "order": 1,
+          "lessons": [
+            {
+              "title": "Pendidikan",
+              "order": 1,
+              "words": [
+                { "english": "knowledge", "indonesian": "pengetahuan" },
+                { "english": "exam", "indonesian": "ujian" },
+                { "english": "subject", "indonesian": "mata pelajaran" },
+                { "english": "grade", "indonesian": "nilai" },
+                { "english": "homework", "indonesian": "pekerjaan rumah" },
+                { "english": "library", "indonesian": "perpustakaan" },
+                { "english": "degree", "indonesian": "gelar" },
+                { "english": "scholarship", "indonesian": "beasiswa" }
+              ]
+            },
+            {
+              "title": "Dunia Kerja",
+              "order": 2,
+              "words": [
+                { "english": "salary", "indonesian": "gaji" },
+                { "english": "meeting", "indonesian": "rapat" },
+                { "english": "deadline", "indonesian": "tenggat waktu" },
+                { "english": "employee", "indonesian": "karyawan" },
+                { "english": "boss", "indonesian": "atasan" },
+                { "english": "interview", "indonesian": "wawancara" },
+                { "english": "experience", "indonesian": "pengalaman" },
+                { "english": "skill", "indonesian": "keterampilan" }
+              ]
+            },
+            {
+              "title": "Teknologi",
+              "order": 3,
+              "words": [
+                { "english": "device", "indonesian": "perangkat" },
+                { "english": "screen", "indonesian": "layar" },
+                { "english": "download", "indonesian": "mengunduh" },
+                { "english": "upload", "indonesian": "mengunggah" },
+                { "english": "password", "indonesian": "kata sandi" },
+                { "english": "network", "indonesian": "jaringan" },
+                { "english": "software", "indonesian": "perangkat lunak" },
+                { "english": "update", "indonesian": "pembaruan" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Masyarakat & Media",
+          "order": 2,
+          "lessons": [
+            {
+              "title": "Berita & Media",
+              "order": 1,
+              "words": [
+                { "english": "news", "indonesian": "berita" },
+                { "english": "newspaper", "indonesian": "koran" },
+                { "english": "headline", "indonesian": "judul berita" },
+                { "english": "journalist", "indonesian": "wartawan" },
+                { "english": "report", "indonesian": "laporan" },
+                { "english": "advertisement", "indonesian": "iklan" },
+                { "english": "audience", "indonesian": "penonton" },
+                { "english": "broadcast", "indonesian": "siaran" }
+              ]
+            },
+            {
+              "title": "Lingkungan",
+              "order": 2,
+              "words": [
+                { "english": "pollution", "indonesian": "pencemaran" },
+                { "english": "waste", "indonesian": "limbah" },
+                { "english": "recycle", "indonesian": "mendaur ulang" },
+                { "english": "forest", "indonesian": "hutan" },
+                { "english": "flood", "indonesian": "banjir" },
+                { "english": "drought", "indonesian": "kekeringan" },
+                { "english": "climate", "indonesian": "iklim" },
+                { "english": "environment", "indonesian": "lingkungan" }
+              ]
+            },
+            {
+              "title": "Warga & Aturan",
+              "order": 3,
+              "words": [
+                { "english": "government", "indonesian": "pemerintah" },
+                { "english": "citizen", "indonesian": "warga negara" },
+                { "english": "law", "indonesian": "hukum" },
+                { "english": "rule", "indonesian": "peraturan" },
+                { "english": "community", "indonesian": "komunitas" },
+                { "english": "crowd", "indonesian": "kerumunan" },
+                { "english": "tradition", "indonesian": "tradisi" },
+                { "english": "culture", "indonesian": "budaya" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Opini & Karakter",
+          "order": 3,
+          "lessons": [
+            {
+              "title": "Menyatakan Pendapat",
+              "order": 1,
+              "words": [
+                { "english": "opinion", "indonesian": "pendapat" },
+                { "english": "agree", "indonesian": "setuju" },
+                { "english": "disagree", "indonesian": "tidak setuju" },
+                { "english": "reason", "indonesian": "alasan" },
+                { "english": "argument", "indonesian": "argumen" },
+                { "english": "suggest", "indonesian": "menyarankan" },
+                { "english": "decide", "indonesian": "memutuskan" },
+                { "english": "discuss", "indonesian": "membahas" }
+              ]
+            },
+            {
+              "title": "Sifat & Karakter",
+              "order": 2,
+              "words": [
+                { "english": "honest", "indonesian": "jujur" },
+                { "english": "patient", "indonesian": "sabar" },
+                { "english": "brave", "indonesian": "berani" },
+                { "english": "lazy", "indonesian": "malas" },
+                { "english": "diligent", "indonesian": "rajin" },
+                { "english": "generous", "indonesian": "murah hati" },
+                { "english": "stubborn", "indonesian": "keras kepala" },
+                { "english": "humble", "indonesian": "rendah hati" }
+              ]
+            },
+            {
+              "title": "Hubungan Antarmanusia",
+              "order": 3,
+              "words": [
+                { "english": "trust", "indonesian": "kepercayaan" },
+                { "english": "promise", "indonesian": "janji" },
+                { "english": "argue", "indonesian": "bertengkar" },
+                { "english": "forgive", "indonesian": "memaafkan" },
+                { "english": "support", "indonesian": "mendukung" },
+                { "english": "respect", "indonesian": "menghormati" },
+                { "english": "relationship", "indonesian": "hubungan" },
+                { "english": "marriage", "indonesian": "pernikahan" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "B2",
+      "name": "Menengah Atas",
+      "order": 4,
+      "description": "Kosakata ekonomi, sains, dan konsep abstrak untuk percakapan yang lebih dalam.",
+      "units": [
+        {
+          "title": "Ekonomi & Bisnis",
+          "order": 1,
+          "lessons": [
+            {
+              "title": "Dasar Ekonomi",
+              "order": 1,
+              "words": [
+                { "english": "profit", "indonesian": "keuntungan" },
+                { "english": "loss", "indonesian": "kerugian" },
+                { "english": "investment", "indonesian": "investasi" },
+                { "english": "budget", "indonesian": "anggaran" },
+                { "english": "debt", "indonesian": "utang" },
+                { "english": "income", "indonesian": "pendapatan" },
+                { "english": "expense", "indonesian": "pengeluaran" },
+                { "english": "growth", "indonesian": "pertumbuhan" }
+              ]
+            },
+            {
+              "title": "Dunia Bisnis",
+              "order": 2,
+              "words": [
+                { "english": "negotiation", "indonesian": "negosiasi" },
+                { "english": "contract", "indonesian": "kontrak" },
+                { "english": "agreement", "indonesian": "kesepakatan" },
+                { "english": "competitor", "indonesian": "pesaing" },
+                { "english": "customer", "indonesian": "pelanggan" },
+                { "english": "supply", "indonesian": "pasokan" },
+                { "english": "demand", "indonesian": "permintaan" },
+                { "english": "brand", "indonesian": "merek" }
+              ]
+            },
+            {
+              "title": "Keuangan Pribadi",
+              "order": 3,
+              "words": [
+                { "english": "tax", "indonesian": "pajak" },
+                { "english": "insurance", "indonesian": "asuransi" },
+                { "english": "loan", "indonesian": "pinjaman" },
+                { "english": "savings", "indonesian": "tabungan" },
+                { "english": "interest", "indonesian": "bunga" },
+                { "english": "currency", "indonesian": "mata uang" },
+                { "english": "wealth", "indonesian": "kekayaan" },
+                { "english": "retirement", "indonesian": "masa pensiun" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sains & Kesehatan",
+          "order": 2,
+          "lessons": [
+            {
+              "title": "Metode Ilmiah",
+              "order": 1,
+              "words": [
+                { "english": "research", "indonesian": "penelitian" },
+                { "english": "experiment", "indonesian": "percobaan" },
+                { "english": "evidence", "indonesian": "bukti" },
+                { "english": "theory", "indonesian": "teori" },
+                { "english": "discovery", "indonesian": "penemuan" },
+                { "english": "hypothesis", "indonesian": "hipotesis" },
+                { "english": "measurement", "indonesian": "pengukuran" },
+                { "english": "analysis", "indonesian": "analisis" }
+              ]
+            },
+            {
+              "title": "Kesehatan Lanjutan",
+              "order": 2,
+              "words": [
+                { "english": "treatment", "indonesian": "pengobatan" },
+                { "english": "surgery", "indonesian": "operasi" },
+                { "english": "symptom", "indonesian": "gejala" },
+                { "english": "diagnosis", "indonesian": "diagnosis" },
+                { "english": "prevention", "indonesian": "pencegahan" },
+                { "english": "vaccine", "indonesian": "vaksin" },
+                { "english": "recovery", "indonesian": "pemulihan" },
+                { "english": "nutrition", "indonesian": "gizi" }
+              ]
+            },
+            {
+              "title": "Pikiran & Perilaku",
+              "order": 3,
+              "words": [
+                { "english": "behavior", "indonesian": "perilaku" },
+                { "english": "memory", "indonesian": "ingatan" },
+                { "english": "awareness", "indonesian": "kesadaran" },
+                { "english": "anxiety", "indonesian": "kecemasan" },
+                { "english": "habit", "indonesian": "kebiasaan" },
+                { "english": "confidence", "indonesian": "kepercayaan diri" },
+                { "english": "personality", "indonesian": "kepribadian" },
+                { "english": "mindset", "indonesian": "pola pikir" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Gagasan Abstrak",
+          "order": 3,
+          "lessons": [
+            {
+              "title": "Konsep Abstrak",
+              "order": 1,
+              "words": [
+                { "english": "freedom", "indonesian": "kebebasan" },
+                { "english": "justice", "indonesian": "keadilan" },
+                { "english": "responsibility", "indonesian": "tanggung jawab" },
+                { "english": "opportunity", "indonesian": "kesempatan" },
+                { "english": "challenge", "indonesian": "tantangan" },
+                { "english": "achievement", "indonesian": "pencapaian" },
+                { "english": "failure", "indonesian": "kegagalan" },
+                { "english": "purpose", "indonesian": "tujuan" }
+              ]
+            },
+            {
+              "title": "Kata Kerja Formal",
+              "order": 2,
+              "words": [
+                { "english": "achieve", "indonesian": "mencapai" },
+                { "english": "maintain", "indonesian": "mempertahankan" },
+                { "english": "require", "indonesian": "membutuhkan" },
+                { "english": "provide", "indonesian": "menyediakan" },
+                { "english": "ensure", "indonesian": "memastikan" },
+                { "english": "improve", "indonesian": "meningkatkan" },
+                { "english": "reduce", "indonesian": "mengurangi" },
+                { "english": "avoid", "indonesian": "menghindari" }
+              ]
+            },
+            {
+              "title": "Penghubung Gagasan",
+              "order": 3,
+              "words": [
+                { "english": "therefore", "indonesian": "oleh karena itu" },
+                { "english": "however", "indonesian": "namun" },
+                { "english": "moreover", "indonesian": "selain itu" },
+                { "english": "whereas", "indonesian": "sedangkan" },
+                { "english": "nevertheless", "indonesian": "meskipun demikian" },
+                { "english": "consequently", "indonesian": "akibatnya" },
+                { "english": "meanwhile", "indonesian": "sementara itu" },
+                { "english": "otherwise", "indonesian": "jika tidak" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "C1",
+      "name": "Mahir",
+      "order": 5,
+      "description": "Kosakata akademik, idiom, dan istilah profesional untuk penguasaan tingkat lanjut.",
+      "units": [
+        {
+          "title": "Akademik & Formal",
+          "order": 1,
+          "lessons": [
+            {
+              "title": "Sifat Akademik",
+              "order": 1,
+              "words": [
+                { "english": "comprehensive", "indonesian": "menyeluruh" },
+                { "english": "significant", "indonesian": "signifikan" },
+                { "english": "adequate", "indonesian": "memadai" },
+                { "english": "explicit", "indonesian": "gamblang" },
+                { "english": "coherent", "indonesian": "runtut" },
+                { "english": "ambiguous", "indonesian": "bermakna ganda" },
+                { "english": "plausible", "indonesian": "masuk akal" },
+                { "english": "rigorous", "indonesian": "ketat" }
+              ]
+            },
+            {
+              "title": "Kata Kerja Akademik",
+              "order": 2,
+              "words": [
+                { "english": "advocate", "indonesian": "menganjurkan" },
+                { "english": "undermine", "indonesian": "melemahkan" },
+                { "english": "facilitate", "indonesian": "memperlancar" },
+                { "english": "mitigate", "indonesian": "meredakan" },
+                { "english": "exacerbate", "indonesian": "memperburuk" },
+                { "english": "scrutinize", "indonesian": "meneliti secara cermat" },
+                { "english": "consolidate", "indonesian": "memperkukuh" },
+                { "english": "articulate", "indonesian": "mengutarakan dengan jelas" }
+              ]
+            },
+            {
+              "title": "Nomina Abstrak Lanjut",
+              "order": 3,
+              "words": [
+                { "english": "notion", "indonesian": "gagasan" },
+                { "english": "paradigm", "indonesian": "paradigma" },
+                { "english": "discourse", "indonesian": "wacana" },
+                { "english": "consensus", "indonesian": "kesepakatan bersama" },
+                { "english": "discrepancy", "indonesian": "ketidaksesuaian" },
+                { "english": "premise", "indonesian": "dasar pemikiran" },
+                { "english": "implication", "indonesian": "implikasi" },
+                { "english": "constraint", "indonesian": "kendala" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Nuansa & Idiom",
+          "order": 2,
+          "lessons": [
+            {
+              "title": "Sifat Bernuansa",
+              "order": 1,
+              "words": [
+                { "english": "meticulous", "indonesian": "sangat teliti" },
+                { "english": "tenacious", "indonesian": "gigih" },
+                { "english": "pragmatic", "indonesian": "pragmatis" },
+                { "english": "eloquent", "indonesian": "fasih" },
+                { "english": "indifferent", "indonesian": "acuh tak acuh" },
+                { "english": "resilient", "indonesian": "tangguh" },
+                { "english": "prudent", "indonesian": "berhati-hati" },
+                { "english": "candid", "indonesian": "terus terang" }
+              ]
+            },
+            {
+              "title": "Emosi Halus",
+              "order": 2,
+              "words": [
+                { "english": "resentment", "indonesian": "rasa dendam" },
+                { "english": "awe", "indonesian": "kekaguman mendalam" },
+                { "english": "remorse", "indonesian": "penyesalan mendalam" },
+                { "english": "contempt", "indonesian": "penghinaan" },
+                { "english": "nostalgia", "indonesian": "kerinduan masa lalu" },
+                { "english": "apprehension", "indonesian": "kekhawatiran" },
+                { "english": "elation", "indonesian": "kegembiraan luar biasa" },
+                { "english": "gratitude", "indonesian": "rasa syukur" }
+              ]
+            },
+            {
+              "title": "Idiom Populer",
+              "order": 3,
+              "words": [
+                { "english": "piece of cake", "indonesian": "sangat mudah" },
+                { "english": "break the ice", "indonesian": "mencairkan suasana" },
+                { "english": "hit the books", "indonesian": "belajar giat" },
+                { "english": "under the weather", "indonesian": "kurang sehat" },
+                { "english": "once in a blue moon", "indonesian": "sangat jarang" },
+                { "english": "cost an arm and a leg", "indonesian": "sangat mahal" },
+                { "english": "spill the beans", "indonesian": "membocorkan rahasia" },
+                { "english": "call it a day", "indonesian": "menyudahi pekerjaan" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Dunia Profesional",
+          "order": 3,
+          "lessons": [
+            {
+              "title": "Hukum & Politik",
+              "order": 1,
+              "words": [
+                { "english": "legislation", "indonesian": "perundang-undangan" },
+                { "english": "sovereignty", "indonesian": "kedaulatan" },
+                { "english": "jurisdiction", "indonesian": "wilayah hukum" },
+                { "english": "amendment", "indonesian": "amendemen" },
+                { "english": "verdict", "indonesian": "putusan hakim" },
+                { "english": "advocacy", "indonesian": "pembelaan" },
+                { "english": "diplomacy", "indonesian": "diplomasi" },
+                { "english": "treaty", "indonesian": "perjanjian internasional" }
+              ]
+            },
+            {
+              "title": "Ekonomi Global",
+              "order": 2,
+              "words": [
+                { "english": "scarcity", "indonesian": "kelangkaan" },
+                { "english": "surplus", "indonesian": "kelebihan" },
+                { "english": "downturn", "indonesian": "kemerosotan" },
+                { "english": "stakeholder", "indonesian": "pemangku kepentingan" },
+                { "english": "leverage", "indonesian": "daya ungkit" },
+                { "english": "volatility", "indonesian": "gejolak" },
+                { "english": "procurement", "indonesian": "pengadaan" },
+                { "english": "austerity", "indonesian": "penghematan ketat" }
+              ]
+            },
+            {
+              "title": "Retorika & Debat",
+              "order": 3,
+              "words": [
+                { "english": "rebuttal", "indonesian": "bantahan" },
+                { "english": "fallacy", "indonesian": "sesat pikir" },
+                { "english": "connotation", "indonesian": "makna tersirat" },
+                { "english": "assertion", "indonesian": "pernyataan tegas" },
+                { "english": "counterargument", "indonesian": "argumen tandingan" },
+                { "english": "credibility", "indonesian": "kredibilitas" },
+                { "english": "skepticism", "indonesian": "keraguan" },
+                { "english": "persuasion", "indonesian": "bujukan" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

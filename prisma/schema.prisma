@@ -17,24 +17,41 @@ model User {
   streak           Int       @default(0)
   longestStreak    Int       @default(0)
   lastActivityDate DateTime?
+  onboarded        Boolean   @default(false)
+  startLevelOrder  Int       @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lessonProgress LessonProgress[]
-  emailVerified  Boolean          @default(false)
-  image          String?
-  sessions       Session[]
-  accounts       Account[]
+  lessonProgress    LessonProgress[]
+  placementSessions PlacementSession[]
+  emailVerified     Boolean            @default(false)
+  image             String?
+  sessions          Session[]
+  accounts          Account[]
 
   @@map("user")
 }
 
+model Level {
+  id          String @id @default(cuid())
+  code        String @unique
+  name        String
+  order       Int    @unique
+  description String
+
+  units Unit[]
+}
+
 model Unit {
-  id    String @id @default(cuid())
-  title String
-  order Int
+  id      String @id @default(cuid())
+  title   String
+  order   Int
+  levelId String
+  level   Level  @relation(fields: [levelId], references: [id], onDelete: Cascade)
 
   lessons Lesson[]
+
+  @@unique([levelId, order])
 }
 
 model Lesson {
@@ -46,6 +63,8 @@ model Lesson {
 
   words          Word[]
   lessonProgress LessonProgress[]
+
+  @@unique([unitId, order])
 }
 
 model Word {
@@ -54,6 +73,8 @@ model Word {
   translation String
   lessonId    String
   lesson      Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, term])
 }
 
 model LessonProgress {
@@ -69,6 +90,21 @@ model LessonProgress {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
+}
+
+model PlacementSession {
+  id               String    @id @default(cuid())
+  userId           String
+  targetLevelOrder Int
+  questionWordIds  Json
+  answeredAt       DateTime?
+  score            Int?
+  passed           Boolean?
+  createdAt        DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {

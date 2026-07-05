@@ -1,9 +1,10 @@
 import { ArrowRight, CheckCircle2, Flame, PartyPopper, Target } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getCurrentCefrLevel } from '@/lib/cefr'
 import { levelProgress, xpForNextLevel } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
-import { computeUnlockedLessonIds } from '@/lib/progress'
+import { findNextLessonRef } from '@/lib/progress'
 import { getSessionUser } from '@/lib/session'
 import { isGoalMetToday } from '@/lib/streak'
 
@@ -14,11 +15,18 @@ export default async function DashboardPage() {
   const [user, units, progress] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: sessionUser.id },
-      select: { name: true, email: true, xp: true, streak: true, lastActivityDate: true },
+      select: {
+        name: true,
+        email: true,
+        xp: true,
+        streak: true,
+        lastActivityDate: true,
+        startLevelOrder: true,
+      },
     }),
     prisma.unit.findMany({
-      orderBy: { order: 'asc' },
-      include: { lessons: { orderBy: { order: 'asc' } } },
+      orderBy: [{ level: { order: 'asc' } }, { order: 'asc' }],
+      include: { level: true, lessons: { orderBy: { order: 'asc' } } },
     }),
     prisma.lessonProgress.findMany({
       where: { userId: sessionUser.id },
@@ -35,13 +43,12 @@ export default async function DashboardPage() {
       unitTitle: unit.title,
       order: lesson.order,
       unitOrder: unit.order,
+      levelOrder: unit.level.order,
     })),
   )
   const completedIds = new Set(progress.filter((p) => p.completed).map((p) => p.lessonId))
-  const unlockedIds = computeUnlockedLessonIds(orderedLessons, completedIds)
-  const nextLesson = orderedLessons.find(
-    (lesson) => unlockedIds.has(lesson.id) && !completedIds.has(lesson.id),
-  )
+  const nextRef = findNextLessonRef(orderedLessons, completedIds, user.startLevelOrder)
+  const nextLesson = orderedLessons.find((lesson) => lesson.id === nextRef?.id)
 
   const accuracies = progress
     .map((p) => p.accuracy)
@@ -52,6 +59,7 @@ export default async function DashboardPage() {
       : null
 
   const goalMet = isGoalMetToday(user.lastActivityDate, new Date())
+  const cefr = await getCurrentCefrLevel(sessionUser.id, user.startLevelOrder)
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
@@ -64,9 +72,22 @@ export default async function DashboardPage() {
             <p className="text-lg font-bold">{user.name ?? user.email}</p>
             <p className="text-sm text-zinc-400">{user.xp} XP total</p>
           </div>
-          <span className="rounded-full bg-emerald-500/15 px-4 py-2 text-lg font-bold text-emerald-400">
-            Level {level}
-          </span>
+          <div className="flex items-center gap-2">
+            {cefr && (
+              <span
+                className="rounded-full bg-zinc-700 px-3 py-2 text-sm font-bold text-zinc-200"
+                title="Tingkat kemampuan CEFR"
+              >
+                Tingkat: {cefr.name} ({cefr.code})
+              </span>
+            )}
+            <span
+              className="rounded-full bg-emerald-500/15 px-4 py-2 text-lg font-bold text-emerald-400"
+              title="Level dari XP"
+            >
+              Level {level}
+            </span>
+          </div>
         </div>
         <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-700">
           <div

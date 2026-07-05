@@ -241,7 +241,7 @@ export default function MatchMadness({
               onClick={() => handleLeftClick(pair.id)}
               className={buttonClass(pair.id, 'left')}
             >
-              {pair.english}
+              {pair.indonesian}
             </button>
           ))}
         </div>
@@ -253,7 +253,7 @@ export default function MatchMadness({
               onClick={() => handleRightClick(pair.id)}
               className={buttonClass(pair.id, 'right')}
             >
-              {pair.indonesian}
+              {pair.english}
             </button>
           ))}
         </div>

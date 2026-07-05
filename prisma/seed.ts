@@ -1,4 +1,11 @@
+// Seed konten LEXORA dari prisma/vocabulary-seed.json.
+// Idempotent: upsert berdasarkan kunci alami (level.code; unit levelId+order;
+// lesson unitId+order; word lessonId+term) — aman dijalankan berulang tanpa
+// duplikasi dan tanpa menghapus progress user. Kata yang dihapus dari JSON
+// ikut dihapus dari lesson terkait agar DB selalu mencerminkan JSON.
 import 'dotenv/config'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { PrismaClient } from '@prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
@@ -8,218 +15,151 @@ const prisma = new PrismaClient({ adapter })
 type WordSeed = { english: string; indonesian: string }
 type LessonSeed = { title: string; order: number; words: WordSeed[] }
 type UnitSeed = { title: string; order: number; lessons: LessonSeed[] }
+type LevelSeed = {
+  code: string
+  name: string
+  order: number
+  description: string
+  units: UnitSeed[]
+}
+type SeedFile = { levels: LevelSeed[] }
 
-const units: UnitSeed[] = [
-  {
-    title: 'Basics',
-    order: 1,
-    lessons: [
-      {
-        title: 'Greetings',
-        order: 1,
-        words: [
-          { english: 'hello', indonesian: 'halo' },
-          { english: 'goodbye', indonesian: 'selamat tinggal' },
-          { english: 'please', indonesian: 'tolong' },
-          { english: 'thank you', indonesian: 'terima kasih' },
-          { english: 'sorry', indonesian: 'maaf' },
-          { english: 'yes', indonesian: 'ya' },
-          { english: 'no', indonesian: 'tidak' },
-        ],
-      },
-      {
-        title: 'Numbers',
-        order: 2,
-        words: [
-          { english: 'one', indonesian: 'satu' },
-          { english: 'two', indonesian: 'dua' },
-          { english: 'three', indonesian: 'tiga' },
-          { english: 'four', indonesian: 'empat' },
-          { english: 'five', indonesian: 'lima' },
-          { english: 'ten', indonesian: 'sepuluh' },
-        ],
-      },
-      {
-        title: 'Colors',
-        order: 3,
-        words: [
-          { english: 'red', indonesian: 'merah' },
-          { english: 'blue', indonesian: 'biru' },
-          { english: 'green', indonesian: 'hijau' },
-          { english: 'yellow', indonesian: 'kuning' },
-          { english: 'black', indonesian: 'hitam' },
-          { english: 'white', indonesian: 'putih' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'Daily Life',
-    order: 2,
-    lessons: [
-      {
-        title: 'Food & Drink',
-        order: 1,
-        words: [
-          { english: 'water', indonesian: 'air' },
-          { english: 'rice', indonesian: 'nasi' },
-          { english: 'bread', indonesian: 'roti' },
-          { english: 'coffee', indonesian: 'kopi' },
-          { english: 'tea', indonesian: 'teh' },
-          { english: 'egg', indonesian: 'telur' },
-          { english: 'fruit', indonesian: 'buah' },
-          { english: 'vegetable', indonesian: 'sayur' },
-        ],
-      },
-      {
-        title: 'Family',
-        order: 2,
-        words: [
-          { english: 'mother', indonesian: 'ibu' },
-          { english: 'father', indonesian: 'ayah' },
-          { english: 'brother', indonesian: 'saudara laki-laki' },
-          { english: 'sister', indonesian: 'saudara perempuan' },
-          { english: 'child', indonesian: 'anak' },
-          { english: 'friend', indonesian: 'teman' },
-        ],
-      },
-      {
-        title: 'Around the House',
-        order: 3,
-        words: [
-          { english: 'house', indonesian: 'rumah' },
-          { english: 'room', indonesian: 'kamar' },
-          { english: 'door', indonesian: 'pintu' },
-          { english: 'window', indonesian: 'jendela' },
-          { english: 'table', indonesian: 'meja' },
-          { english: 'chair', indonesian: 'kursi' },
-          { english: 'kitchen', indonesian: 'dapur' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'School & Work',
-    order: 3,
-    lessons: [
-      {
-        title: 'In the Classroom',
-        order: 1,
-        words: [
-          { english: 'teacher', indonesian: 'guru' },
-          { english: 'student', indonesian: 'siswa' },
-          { english: 'pencil', indonesian: 'pensil' },
-          { english: 'paper', indonesian: 'kertas' },
-          { english: 'question', indonesian: 'pertanyaan' },
-          { english: 'answer', indonesian: 'jawaban' },
-          { english: 'lesson', indonesian: 'pelajaran' },
-        ],
-      },
-      {
-        title: 'Learning Verbs',
-        order: 2,
-        words: [
-          { english: 'to read', indonesian: 'membaca' },
-          { english: 'to write', indonesian: 'menulis' },
-          { english: 'to learn', indonesian: 'belajar' },
-          { english: 'to teach', indonesian: 'mengajar' },
-          { english: 'to ask', indonesian: 'bertanya' },
-          { english: 'to understand', indonesian: 'mengerti' },
-        ],
-      },
-      {
-        title: 'At Work',
-        order: 3,
-        words: [
-          { english: 'office', indonesian: 'kantor' },
-          { english: 'meeting', indonesian: 'rapat' },
-          { english: 'boss', indonesian: 'atasan' },
-          { english: 'salary', indonesian: 'gaji' },
-          { english: 'job', indonesian: 'pekerjaan' },
-          { english: 'busy', indonesian: 'sibuk' },
-          { english: 'schedule', indonesian: 'jadwal' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'Travel',
-    order: 4,
-    lessons: [
-      {
-        title: 'Getting Around',
-        order: 1,
-        words: [
-          { english: 'airport', indonesian: 'bandara' },
-          { english: 'train', indonesian: 'kereta' },
-          { english: 'station', indonesian: 'stasiun' },
-          { english: 'ticket', indonesian: 'tiket' },
-          { english: 'map', indonesian: 'peta' },
-          { english: 'street', indonesian: 'jalan' },
-          { english: 'car', indonesian: 'mobil' },
-        ],
-      },
-      {
-        title: 'At the Hotel',
-        order: 2,
-        words: [
-          { english: 'luggage', indonesian: 'koper' },
-          { english: 'guest', indonesian: 'tamu' },
-          { english: 'key', indonesian: 'kunci' },
-          { english: 'floor', indonesian: 'lantai' },
-          { english: 'towel', indonesian: 'handuk' },
-          { english: 'blanket', indonesian: 'selimut' },
-        ],
-      },
-      {
-        title: 'Directions & Places',
-        order: 3,
-        words: [
-          { english: 'left', indonesian: 'kiri' },
-          { english: 'right', indonesian: 'kanan' },
-          { english: 'straight', indonesian: 'lurus' },
-          { english: 'near', indonesian: 'dekat' },
-          { english: 'far', indonesian: 'jauh' },
-          { english: 'market', indonesian: 'pasar' },
-          { english: 'beach', indonesian: 'pantai' },
-          { english: 'mountain', indonesian: 'gunung' },
-        ],
-      },
-    ],
-  },
-]
+const MIN_WORDS_PER_LESSON = 4
 
-async function main() {
-  for (const unit of units) {
-    const createdUnit = await prisma.unit.upsert({
-      where: { id: `seed-unit-${unit.order}` },
-      update: { title: unit.title, order: unit.order },
-      create: { id: `seed-unit-${unit.order}`, title: unit.title, order: unit.order },
-    })
+function fail(message: string): never {
+  throw new Error(`vocabulary-seed.json tidak valid: ${message}`)
+}
 
-    for (const lesson of unit.lessons) {
-      const lessonId = `seed-lesson-${unit.order}-${lesson.order}`
-      await prisma.lesson.upsert({
-        where: { id: lessonId },
-        update: { title: lesson.title, order: lesson.order, unitId: createdUnit.id },
-        create: {
-          id: lessonId,
-          title: lesson.title,
-          order: lesson.order,
-          unitId: createdUnit.id,
-        },
-      })
+function nonEmpty(value: unknown, label: string): string {
+  if (typeof value !== 'string' || value.trim() === '') fail(`${label} kosong atau bukan string`)
+  return value.trim()
+}
 
-      await prisma.word.deleteMany({ where: { lessonId } })
-      await prisma.word.createMany({
-        data: lesson.words.map((word) => ({
-          term: word.english,
-          translation: word.indonesian,
-          lessonId,
-        })),
-      })
+function validate(data: SeedFile): void {
+  if (!Array.isArray(data.levels) || data.levels.length === 0) fail('levels[] kosong')
+
+  const codes = new Set<string>()
+  const orders = new Set<number>()
+  for (const level of data.levels) {
+    const where = `Level "${level.code}"`
+    nonEmpty(level.code, `${where}: code`)
+    nonEmpty(level.name, `${where}: name`)
+    nonEmpty(level.description, `${where}: description`)
+    if (!Number.isInteger(level.order)) fail(`${where}: order bukan integer`)
+    if (codes.has(level.code)) fail(`${where}: code duplikat`)
+    if (orders.has(level.order)) fail(`${where}: order ${level.order} duplikat`)
+    codes.add(level.code)
+    orders.add(level.order)
+
+    if (!Array.isArray(level.units) || level.units.length === 0) fail(`${where}: units[] kosong`)
+    const unitOrders = new Set<number>()
+    for (const unit of level.units) {
+      const uWhere = `${where} > Unit ${unit.order} "${unit.title}"`
+      nonEmpty(unit.title, `${uWhere}: title`)
+      if (!Number.isInteger(unit.order)) fail(`${uWhere}: order bukan integer`)
+      if (unitOrders.has(unit.order)) fail(`${uWhere}: order duplikat dalam level`)
+      unitOrders.add(unit.order)
+
+      if (!Array.isArray(unit.lessons) || unit.lessons.length === 0)
+        fail(`${uWhere}: lessons[] kosong`)
+      const lessonOrders = new Set<number>()
+      for (const lesson of unit.lessons) {
+        const lWhere = `${uWhere} > Lesson ${lesson.order} "${lesson.title}"`
+        nonEmpty(lesson.title, `${lWhere}: title`)
+        if (!Number.isInteger(lesson.order)) fail(`${lWhere}: order bukan integer`)
+        if (lessonOrders.has(lesson.order)) fail(`${lWhere}: order duplikat dalam unit`)
+        lessonOrders.add(lesson.order)
+
+        if (!Array.isArray(lesson.words) || lesson.words.length < MIN_WORDS_PER_LESSON)
+          fail(`${lWhere}: minimal ${MIN_WORDS_PER_LESSON} kata, dapat ${lesson.words?.length ?? 0}`)
+        const englishSeen = new Set<string>()
+        for (const word of lesson.words) {
+          const english = nonEmpty(word.english, `${lWhere}: english`)
+          nonEmpty(word.indonesian, `${lWhere}: indonesian untuk "${english}"`)
+          if (englishSeen.has(english)) fail(`${lWhere}: kata "${english}" duplikat dalam lesson`)
+          englishSeen.add(english)
+        }
+      }
     }
   }
+}
+
+async function main() {
+  const filePath = path.join(__dirname, 'vocabulary-seed.json')
+  let data: SeedFile
+  try {
+    data = JSON.parse(readFileSync(filePath, 'utf8'))
+  } catch (error) {
+    fail(`gagal membaca/parse ${filePath}: ${(error as Error).message}`)
+  }
+  validate(data)
+
+  const perLevel: Record<string, { units: number; lessons: number; words: number }> = {}
+
+  for (const level of data.levels) {
+    const createdLevel = await prisma.level.upsert({
+      where: { code: level.code },
+      update: { name: level.name, order: level.order, description: level.description },
+      create: {
+        code: level.code,
+        name: level.name,
+        order: level.order,
+        description: level.description,
+      },
+    })
+    const stats = { units: 0, lessons: 0, words: 0 }
+
+    for (const unit of level.units) {
+      const createdUnit = await prisma.unit.upsert({
+        where: { levelId_order: { levelId: createdLevel.id, order: unit.order } },
+        update: { title: unit.title },
+        create: { title: unit.title, order: unit.order, levelId: createdLevel.id },
+      })
+      stats.units++
+
+      for (const lesson of unit.lessons) {
+        const createdLesson = await prisma.lesson.upsert({
+          where: { unitId_order: { unitId: createdUnit.id, order: lesson.order } },
+          update: { title: lesson.title },
+          create: { title: lesson.title, order: lesson.order, unitId: createdUnit.id },
+        })
+        stats.lessons++
+
+        const terms = lesson.words.map((w) => w.english.trim())
+        await prisma.word.deleteMany({
+          where: { lessonId: createdLesson.id, term: { notIn: terms } },
+        })
+        await Promise.all(
+          lesson.words.map((word) =>
+            prisma.word.upsert({
+              where: {
+                lessonId_term: { lessonId: createdLesson.id, term: word.english.trim() },
+              },
+              update: { translation: word.indonesian.trim() },
+              create: {
+                term: word.english.trim(),
+                translation: word.indonesian.trim(),
+                lessonId: createdLesson.id,
+              },
+            }),
+          ),
+        )
+        stats.words += lesson.words.length
+      }
+    }
+    perLevel[`${level.code} ${level.name}`] = stats
+  }
+
+  console.table(perLevel)
+  const totals = Object.values(perLevel).reduce(
+    (acc, s) => ({
+      units: acc.units + s.units,
+      lessons: acc.lessons + s.lessons,
+      words: acc.words + s.words,
+    }),
+    { units: 0, lessons: 0, words: 0 },
+  )
+  console.log(`Total: ${Object.keys(perLevel).length} level, ${totals.units} unit, ${totals.lessons} lesson, ${totals.words} kata`)
 }
 
 main()

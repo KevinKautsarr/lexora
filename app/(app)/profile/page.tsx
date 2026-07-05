@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getCurrentCefrLevel } from '@/lib/cefr'
 import { levelForXp } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
@@ -18,8 +19,11 @@ export default async function ProfilePage() {
       xp: true,
       streak: true,
       longestStreak: true,
+      startLevelOrder: true,
     },
   })
+
+  const cefr = await getCurrentCefrLevel(sessionUser.id, user.startLevelOrder)
 
   const joinedAt = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(
     user.createdAt,
@@ -35,9 +39,21 @@ export default async function ProfilePage() {
         <p className="text-sm text-zinc-400">{user.email}</p>
         <p className="mt-1 text-sm text-zinc-400">Bergabung {joinedAt}</p>
 
-        <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {cefr && (
+          <div className="mt-4 flex items-center gap-3 rounded-xl border border-emerald-800 bg-emerald-950/40 p-3">
+            <span className="rounded-lg bg-emerald-500 px-2.5 py-1 font-mono text-sm font-black text-emerald-950">
+              {cefr.code}
+            </span>
+            <div>
+              <p className="text-xs text-zinc-400">Tingkat kemampuan (CEFR)</p>
+              <p className="font-bold text-emerald-300">{cefr.name}</p>
+            </div>
+          </div>
+        )}
+
+        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl bg-zinc-900 p-3 text-center">
-            <dt className="text-xs text-zinc-500">Level</dt>
+            <dt className="text-xs text-zinc-500">Level XP</dt>
             <dd className="text-xl font-bold text-emerald-400">{levelForXp(user.xp)}</dd>
           </div>
           <div className="rounded-xl bg-zinc-900 p-3 text-center">
