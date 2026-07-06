@@ -83,7 +83,7 @@ export default async function LearnPage({
           <h1 className="text-2xl font-black tracking-tight text-zinc-100">
             Journey
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-400 break-words">
             Halo,{' '}
             <span className="font-semibold text-zinc-200">
               {user?.name ?? sessionUser.email}
@@ -91,6 +91,12 @@ export default async function LearnPage({
             — lanjutkan petualanganmu!
           </p>
         </header>
+
+        {levels.length === 0 && (
+          <p className="rounded-2xl border border-zinc-800 bg-zinc-800/40 px-6 py-10 text-center text-sm text-zinc-400">
+            Belum ada materi tersedia. Cek lagi sebentar lagi!
+          </p>
+        )}
 
         {levels.map((level) => {
           const isActive = level.order === activeLevelOrder

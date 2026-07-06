@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,6 +15,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LEXORA",
   description: "Belajar kosakata bahasa Inggris dengan cara yang seru",
+};
+
+// App is dark-only: color-scheme fixes native scrollbars, inputs & autofill;
+// theme-color matches bg-zinc-900 so mobile browser chrome blends in.
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#18181b",
 };
 
 export default function RootLayout({

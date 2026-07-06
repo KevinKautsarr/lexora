@@ -98,17 +98,24 @@ export default async function LeaderboardPage() {
         </div>
       </header>
 
-      <ol className="flex flex-col gap-2">
-        {topUsers.map((user, index) => (
-          <Row
-            key={user.id}
-            rank={index + 1}
-            name={user.name ?? 'Pelajar'}
-            xp={user.xp}
-            isMe={user.id === me.id}
-          />
-        ))}
-      </ol>
+      {topUsers.length === 0 ? (
+        <p className="rounded-2xl border border-zinc-800 bg-zinc-800/40 px-6 py-10 text-center text-sm text-zinc-400">
+          Belum ada peringkat. Selesaikan lesson pertamamu untuk masuk papan
+          peringkat!
+        </p>
+      ) : (
+        <ol className="flex flex-col gap-2">
+          {topUsers.map((user, index) => (
+            <Row
+              key={user.id}
+              rank={index + 1}
+              name={user.name ?? 'Pelajar'}
+              xp={user.xp}
+              isMe={user.id === me.id}
+            />
+          ))}
+        </ol>
+      )}
 
       {!inTop && (
         <>

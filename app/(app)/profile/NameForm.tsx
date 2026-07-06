@@ -18,8 +18,9 @@ export default function NameForm({ currentName }: { currentName: string }) {
           name="name"
           required
           maxLength={50}
+          autoComplete="name"
           defaultValue={currentName}
-          className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500 focus:outline-none"
+          className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
         />
       </label>
 

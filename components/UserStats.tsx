@@ -18,21 +18,24 @@ export default async function UserStats() {
     <div className="flex items-center gap-2">
       <span
         title="Streak"
-        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-orange-400"
+        aria-label={`Streak: ${user.streak} hari`}
+        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-orange-400 tabular-nums"
       >
         <Flame size={16} aria-hidden />
         {user.streak}
       </span>
       <span
         title="XP"
-        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-emerald-400"
+        aria-label={`XP: ${user.xp}`}
+        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-emerald-400 tabular-nums"
       >
         <Zap size={16} aria-hidden />
         {user.xp}
       </span>
       <span
         title="Level"
-        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-zinc-100"
+        aria-label={`Level ${levelForXp(user.xp)}`}
+        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-zinc-100 tabular-nums"
       >
         <Star size={16} aria-hidden />
         Lv {levelForXp(user.xp)}

@@ -27,8 +27,13 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-16 flex-col border-r border-zinc-800 bg-zinc-950 lg:w-56">
       <div className="flex h-16 items-center justify-center lg:justify-start lg:px-5">
-        <Link href="/learn" className="text-xl font-black tracking-wide text-emerald-400">
-          <span className="lg:hidden">L</span>
+        <Link
+          href="/learn"
+          aria-label="LEXORA — beranda"
+          translate="no"
+          className="text-xl font-black tracking-wide text-emerald-400"
+        >
+          <span className="lg:hidden" aria-hidden>L</span>
           <span className="hidden lg:inline">LEXORA</span>
         </Link>
       </div>
@@ -43,6 +48,8 @@ export default function Sidebar() {
               key={href}
               href={href}
               title={label}
+              aria-label={label}
+              aria-current={active ? 'page' : undefined}
               className={`relative flex items-center justify-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-colors lg:justify-start ${
                 active
                   ? 'bg-zinc-800 text-emerald-400'
@@ -64,6 +71,7 @@ export default function Sidebar() {
           type="button"
           onClick={handleLogout}
           title="Logout"
+          aria-label="Logout"
           className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-red-400 lg:justify-start"
         >
           <LogOut size={20} aria-hidden />

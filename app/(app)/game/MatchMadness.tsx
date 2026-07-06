@@ -217,9 +217,11 @@ export default function MatchMadness({
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">Match Madness</h1>
         <div
-          className={`rounded-lg px-3 py-1 font-mono text-lg font-bold ${
+          className={`rounded-lg px-3 py-1 font-mono text-lg font-bold tabular-nums ${
             timeLeft <= 10 ? 'bg-red-950/60 text-red-400' : 'bg-zinc-800 text-zinc-300'
           }`}
+          role="timer"
+          aria-label={`Sisa waktu: ${timeLeft} detik`}
         >
           {timeLeft}s
         </div>

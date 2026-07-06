@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Check, Lock, Play, Trophy } from 'lucide-react'
-import { useState } from 'react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,7 +54,7 @@ function NodeTooltip({
 }) {
   return (
     <div
-      className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 z-50 w-max max-w-[180px] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-center shadow-xl"
+      className="w-max max-w-[180px] rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-center shadow-xl"
       role="tooltip"
     >
       <p className="text-sm font-semibold text-zinc-100">{title}</p>
@@ -82,8 +81,6 @@ function SingleNode({
   lesson: LessonNode
   offset: number
 }) {
-  const [hovered, setHovered] = useState(false)
-
   const isClickable = lesson.status !== 'locked'
 
   const nodeClasses = (() => {
@@ -129,35 +126,39 @@ function SingleNode({
     }
   })()
 
-  const Wrapper = isClickable ? Link : 'div'
-  const wrapperProps = isClickable
-    ? { href: `/game/${lesson.id}`, 'aria-label': lesson.title }
-    : { 'aria-disabled': true, 'aria-label': lesson.title }
+  // Tooltip shows on hover AND keyboard focus (group-hover/group-focus-within),
+  // so keyboard and touch users get the title, best score & locked reason too.
+  const tooltip = (
+    <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 z-50 hidden -translate-x-1/2 group-hover:block group-focus-within:block">
+      <NodeTooltip
+        title={lesson.title}
+        bestScore={lesson.bestScore}
+        status={lesson.status}
+      />
+    </div>
+  )
 
   return (
     <div
-      className="relative flex justify-center"
+      className="group relative flex justify-center"
       style={{ transform: `translateX(${offset}px)` }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {/* Pulse ring for frontmost unlocked lesson */}
       {lesson.isFrontmost && lesson.status === 'unlocked' && (
         <span className="absolute inset-0 rounded-full animate-ping bg-emerald-400/20" />
       )}
 
-      {/* @ts-expect-error — Wrapper is either Link or div */}
-      <Wrapper {...wrapperProps} className={nodeClasses}>
-        {icon}
-      </Wrapper>
-
-      {hovered && (
-        <NodeTooltip
-          title={lesson.title}
-          bestScore={lesson.bestScore}
-          status={lesson.status}
-        />
+      {isClickable ? (
+        <Link href={`/game/${lesson.id}`} aria-label={lesson.title} className={nodeClasses}>
+          {icon}
+        </Link>
+      ) : (
+        <div aria-disabled aria-label={lesson.title} className={nodeClasses}>
+          {icon}
+        </div>
       )}
+
+      {tooltip}
     </div>
   )
 }
@@ -186,10 +187,11 @@ function ConnectorLine({
 
   return (
     <svg
-      width={CONTAINER_WIDTH}
+      width="100%"
       height={CONNECTOR_HEIGHT}
       viewBox={`0 0 ${CONTAINER_WIDTH} ${CONNECTOR_HEIGHT}`}
-      className="flex-shrink-0"
+      preserveAspectRatio="xMidYMid meet"
+      className="w-full flex-shrink-0"
       aria-hidden
     >
       <line
@@ -243,13 +245,14 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
         const unitStartIndex = globalIndex
 
         return (
-          <section key={unit.id} className="flex flex-col items-center gap-0">
+          <section key={unit.id} className="flex flex-col items-center gap-0 overflow-x-hidden">
             <UnitBanner order={unit.order} title={unit.title} />
 
-            {/* Node + connector column, centered, fixed width */}
+            {/* Node + connector column, centered. w-full + max-w so it never
+                forces horizontal scroll on narrow phones; caps at 280px. */}
             <div
-              className="flex flex-col items-center pt-6"
-              style={{ width: CONTAINER_WIDTH }}
+              className="flex w-full flex-col items-center pt-6"
+              style={{ maxWidth: CONTAINER_WIDTH }}
             >
               {unit.lessons.map((lesson, lessonIdx) => {
                 const myOffset = getOffset(globalIndex)
