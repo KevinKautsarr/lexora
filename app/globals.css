@@ -1,12 +1,94 @@
 @import "tailwindcss";
 
+/* Font vars mereferensikan CSS var lain, jadi harus `inline`. */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  /* ══════════════════════════════════════════════════════════════
+     PALETTE: Sage Green / Nature / Earth  (LIGHT MODE)
+     Sumber 4 warna:
+       #EDF1D6 krem   #9DC08B sage muda   #609966 hijau   #40513B hijau tua
+     ══════════════════════════════════════════════════════════════ */
+
+  /* ── Brand (hijau sage) — logo, tombol primer, state aktif, aksen ──
+     Untuk mengganti brand nanti: ubah nilai di bawah, seluruh UI ikut.
+     500/600 = hijau utama (#609966 area), 700+ = hijau tua (#40513B). */
+  --color-brand-50: #f2f6e8;
+  --color-brand-100: #e6eed4;
+  --color-brand-200: #cfe0b4;
+  --color-brand-300: #9dc08b; /* sage muda (palette) */
+  --color-brand-400: #7fae76;
+  --color-brand-500: #609966; /* hijau utama (palette) */
+  --color-brand-600: #4f8258;
+  --color-brand-700: #40513b; /* hijau tua (palette) */
+  --color-brand-800: #384735;
+  --color-brand-900: #2f3b2d;
+  --color-brand-950: #1d2620;
+
+  /* ── XP / Achievement (golden) — DIPISAH dari streak (oranye) ──
+     Khusus indikator XP & pencapaian, biar beda kanal dari api/streak.
+     500 = emas utama (#E0B04A). Dipakai via bg-xp-*, text-xp-*. */
+  --color-xp-50: #fbf6e6;
+  --color-xp-100: #f6ecc7;
+  --color-xp-200: #eed898;
+  --color-xp-300: #e6c46a;
+  --color-xp-400: #e0b04a; /* emas utama */
+  --color-xp-500: #cf9a32;
+  --color-xp-600: #b07f28; /* teks emas di krem (kontras cukup) */
+  --color-xp-700: #8c6420;
+  --color-xp-800: #6f4f1e;
+  --color-xp-900: #5c421d;
+
+  /* ── Netral "sand" (earthy) — override skala zinc bawaan Tailwind ──
+     DIBALIK untuk light mode: zinc-50 = paling GELAP (hijau tua),
+     zinc-900/950 = paling TERANG (krem). Karena UI lama memakai
+     bg-zinc-900 (dulu gelap) sebagai permukaan & text-zinc-100 (dulu
+     terang) sebagai teks, membalik skala membuat semua otomatis jadi
+     light mode earthy tanpa menyentuh className tiap file. */
+  --color-zinc-50: #40513b;  /* teks paling kuat */
+  --color-zinc-100: #40513b; /* teks utama (dulu terang) */
+  --color-zinc-200: #4a5a44;
+  --color-zinc-300: #566350; /* teks sekunder */
+  --color-zinc-400: #6b7865; /* teks redup / placeholder */
+  --color-zinc-500: #6b7a5e; /* teks paling redup — digelapkan utk WCAG AA 4.5:1 */
+  --color-zinc-600: #b6c3a6; /* border kuat / divider */
+  --color-zinc-700: #cddcbb; /* border kartu */
+  --color-zinc-800: #dde8c8; /* permukaan kartu terangkat */
+  --color-zinc-900: #edf1d6; /* permukaan utama / background (krem) */
+  --color-zinc-950: #f5f8e6; /* background paling terang */
+}
+
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Scrollbar bernuansa sage — default browser di light mode tampil putih polos
+   dan menonjol dari background krem. Ini menyelaraskannya dengan tema.
+   Firefox: */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-zinc-600) transparent;
+}
+/* WebKit (Chrome/Edge/Safari): */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-zinc-600);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-500);
+  background-clip: padding-box;
 }
 
 /* Kill the 300ms mobile tap delay & tune the tap highlight globally. */
@@ -23,7 +105,7 @@ summary {
 /* Consistent, high-contrast keyboard focus for every interactive element.
    Uses :focus-visible so mouse clicks don't show the ring, only keyboard nav. */
 :focus-visible {
-  outline: 2px solid var(--color-emerald-400);
+  outline: 2px solid var(--color-brand-600);
   outline-offset: 2px;
   border-radius: 0.375rem;
 }

@@ -7,7 +7,7 @@ import { getSessionUser } from '@/lib/session'
 const TOP_LIMIT = 20
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <Crown size={20} className="text-amber-400" aria-label="Peringkat 1" />
+  if (rank === 1) return <Crown size={20} className="text-amber-600" aria-label="Peringkat 1" />
   if (rank === 2) return <Medal size={20} className="text-zinc-300" aria-label="Peringkat 2" />
   if (rank === 3) return <Medal size={20} className="text-amber-700" aria-label="Peringkat 3" />
   return <span className="w-5 text-center text-sm font-bold text-zinc-500">{rank}</span>
@@ -28,7 +28,7 @@ function Row({
     <li
       className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
         isMe
-          ? 'border-emerald-600 bg-emerald-950/40'
+          ? 'border-brand-600 bg-brand-100'
           : rank <= 3
             ? 'border-zinc-700 bg-zinc-800/80'
             : 'border-zinc-800 bg-zinc-800/40'
@@ -39,16 +39,16 @@ function Row({
       </span>
       <span
         className={`min-w-0 flex-1 truncate font-semibold ${
-          isMe ? 'text-emerald-300' : 'text-zinc-100'
+          isMe ? 'text-brand-700' : 'text-zinc-100'
         }`}
       >
         {name}
-        {isMe && <span className="ml-2 text-xs font-bold text-emerald-400">(kamu)</span>}
+        {isMe && <span className="ml-2 text-xs font-bold text-brand-600">(kamu)</span>}
       </span>
       <span className="shrink-0 rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-bold text-zinc-400">
         Lv {levelForXp(xp)}
       </span>
-      <span className="w-20 shrink-0 text-right text-sm font-bold tabular-nums text-zinc-200">
+      <span className="w-20 shrink-0 text-right text-sm font-bold tabular-nums text-xp-600">
         {xp.toLocaleString('id-ID')} XP
       </span>
     </li>
@@ -89,7 +89,7 @@ export default async function LeaderboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
       <header className="flex items-center gap-3">
-        <Trophy size={28} className="text-emerald-400" aria-hidden />
+        <Trophy size={28} className="text-brand-600" aria-hidden />
         <div>
           <h1 className="text-2xl font-bold">Leaderboard</h1>
           <p className="text-sm text-zinc-400">

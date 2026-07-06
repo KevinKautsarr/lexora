@@ -1,4 +1,4 @@
-import { Dumbbell } from 'lucide-react'
+import { Dumbbell, Sparkles, Target } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
@@ -44,13 +44,38 @@ export default async function PracticePage() {
     }))
 
   return (
-    <div className="flex flex-col items-center gap-2 py-8">
-      <p className="flex items-center gap-2 text-sm text-zinc-400">
-        <Dumbbell size={16} className="text-emerald-400" aria-hidden />
-        Practice — review acak dari {completedLessons.length} lesson yang sudah kamu
-        selesaikan (tidak menambah XP)
-      </p>
-      <MatchMadness pairs={pairs} />
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      {/* Hero — pola kartu besar Coddy, warna sage LEXORA */}
+      <section className="relative overflow-hidden rounded-3xl border border-brand-300 bg-gradient-to-br from-brand-100 to-brand-50 p-6 sm:p-8">
+        <div className="relative z-10 max-w-md">
+          <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-brand-700">
+            <Sparkles size={24} className="text-brand-600" aria-hidden />
+            Latihan Personal
+          </h1>
+          <p className="mt-2 text-sm text-zinc-300">
+            Review acak dari{' '}
+            <span className="font-bold text-brand-700">{completedLessons.length}</span>{' '}
+            lesson yang sudah kamu selesaikan. Asah ingatan tanpa tekanan — tidak
+            menambah XP.
+          </p>
+        </div>
+        {/* Dumbbell dekoratif di sudut, meniru hero Coddy */}
+        <Dumbbell
+          size={140}
+          strokeWidth={1.25}
+          className="pointer-events-none absolute -bottom-6 -right-4 text-brand-300/50"
+          aria-hidden
+        />
+      </section>
+
+      {/* Panel game */}
+      <section className="rounded-3xl border border-zinc-700 bg-zinc-800/50 p-5 sm:p-6">
+        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-400">
+          <Target size={16} className="text-brand-600" aria-hidden />
+          Cocokkan pasangan kata secepat mungkin
+        </div>
+        <MatchMadness pairs={pairs} />
+      </section>
     </div>
   )
 }

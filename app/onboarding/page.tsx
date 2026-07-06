@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
     <main className="flex min-h-screen items-center justify-center p-4">
       <div className="flex w-full max-w-xl flex-col gap-6">
         <header className="text-center">
-          <GraduationCap size={40} className="mx-auto mb-3 text-emerald-400" aria-hidden />
+          <GraduationCap size={40} className="mx-auto mb-3 text-brand-600" aria-hidden />
           <h1 className="text-2xl font-black tracking-tight text-zinc-100">
             Selamat datang{user.name ? `, ${user.name}` : ''}! 👋
           </h1>
@@ -38,15 +38,15 @@ export default async function OnboardingPage() {
               <form key={level.id} action={chooseLevel.bind(null, level.order)}>
                 <button
                   type="submit"
-                  className="group flex w-full items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-800/50 px-5 py-4 text-left transition-colors hover:border-emerald-500 hover:bg-zinc-800"
+                  className="group flex w-full items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-800/50 px-5 py-4 text-left transition-colors hover:border-brand-500 hover:bg-zinc-800"
                 >
-                  <span className="rounded-lg bg-zinc-700 px-2.5 py-1 font-mono text-sm font-black text-zinc-200 group-hover:bg-emerald-500 group-hover:text-emerald-950">
+                  <span className="rounded-lg bg-zinc-700 px-2.5 py-1 font-mono text-sm font-black text-zinc-200 group-hover:bg-brand-500 group-hover:text-brand-950">
                     {level.code}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-bold text-zinc-100">{level.name}</span>
                     <span className="block text-sm text-zinc-400">{level.description}</span>
-                    <span className="mt-1 flex items-center gap-1 text-xs font-semibold text-emerald-400">
+                    <span className="mt-1 flex items-center gap-1 text-xs font-semibold text-brand-600">
                       {isBeginner ? (
                         <>
                           <Rocket size={12} aria-hidden /> Langsung mulai — tanpa tes

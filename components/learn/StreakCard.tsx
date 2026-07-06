@@ -17,19 +17,19 @@ export default async function StreakCard() {
   return (
     <div className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <Flame size={18} className="text-orange-400" aria-hidden />
+        <Flame size={18} className="text-orange-600" aria-hidden />
         <h3 className="text-sm font-bold text-zinc-100">Streak</h3>
       </div>
 
       {/* Current streak — prominently displayed */}
-      <div className="mb-3 flex items-center justify-center gap-3 rounded-xl bg-gradient-to-br from-orange-950/60 to-zinc-900 py-4 border border-orange-800/30">
+      <div className="mb-3 flex items-center justify-center gap-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 py-4 border border-orange-200">
         <Flame
           size={40}
-          className={streak > 0 ? 'text-orange-400' : 'text-zinc-600'}
+          className={streak > 0 ? 'text-orange-500' : 'text-zinc-600'}
           aria-hidden
         />
         <div className="text-center">
-          <p className={`text-4xl font-black tabular-nums ${streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`}>
+          <p className={`text-4xl font-black tabular-nums ${streak > 0 ? 'text-orange-600' : 'text-zinc-600'}`}>
             {streak}
           </p>
           <p className="text-xs text-zinc-500">hari berturut-turut</p>

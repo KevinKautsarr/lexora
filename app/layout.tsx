@@ -17,11 +17,11 @@ export const metadata: Metadata = {
   description: "Belajar kosakata bahasa Inggris dengan cara yang seru",
 };
 
-// App is dark-only: color-scheme fixes native scrollbars, inputs & autofill;
-// theme-color matches bg-zinc-900 so mobile browser chrome blends in.
+// App is light (sage/earth theme): color-scheme fixes native scrollbars,
+// inputs & autofill; theme-color matches the cream surface (#EDF1D6).
 export const viewport: Viewport = {
-  colorScheme: "dark",
-  themeColor: "#18181b",
+  colorScheme: "light",
+  themeColor: "#edf1d6",
 };
 
 export default function RootLayout({

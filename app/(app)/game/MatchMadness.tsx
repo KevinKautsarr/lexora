@@ -135,12 +135,12 @@ export default function MatchMadness({
       return `${base} invisible`
     }
     if (isWrong) {
-      return `${base} border-red-500 bg-red-500/10 text-red-300`
+      return `${base} border-red-500 bg-red-500/10 text-red-700`
     }
     if (selected) {
-      return `${base} border-emerald-500 bg-emerald-500/10 text-emerald-300`
+      return `${base} border-brand-500 bg-brand-500/10 text-brand-700`
     }
-    return `${base} border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-emerald-500 hover:bg-zinc-700/60 cursor-pointer`
+    return `${base} border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-brand-500 hover:bg-zinc-700/60 cursor-pointer`
   }
 
   if (gameOver) {
@@ -151,7 +151,7 @@ export default function MatchMadness({
           {allMatched ? 'Semua cocok! 🎉' : 'Waktu habis! ⏰'}
         </h2>
         <div className="flex flex-col gap-1 text-zinc-300">
-          <p className="text-4xl font-extrabold text-emerald-400">{finalScore}</p>
+          <p className="text-4xl font-extrabold text-brand-600">{finalScore}</p>
           <p className="text-sm text-zinc-400">
             {correctCount} × {POINTS_PER_MATCH} poin
             {allMatched && ' + bonus akurasi'}
@@ -171,13 +171,13 @@ export default function MatchMadness({
               <span className="text-zinc-400">Menyimpan skor…</span>
             )}
             {submit.status === 'saved' && (
-              <span className="text-emerald-400">
+              <span className="text-brand-600">
                 Tersimpan ✓ · Total XP: {submit.result.totalXp}
                 {submit.result.completed && ' · Lesson selesai!'}
               </span>
             )}
             {submit.status === 'error' && (
-              <span className="text-red-400">{submit.message}</span>
+              <span className="text-red-600">{submit.message}</span>
             )}
           </p>
         )}
@@ -188,7 +188,7 @@ export default function MatchMadness({
             <button
               type="button"
               onClick={() => router.push(`/game/${nextLessonId}`)}
-              className="w-full rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
+              className="w-full rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500"
             >
               Lesson Berikutnya →
             </button>
@@ -218,7 +218,7 @@ export default function MatchMadness({
         <h1 className="text-xl font-bold">Match Madness</h1>
         <div
           className={`rounded-lg px-3 py-1 font-mono text-lg font-bold tabular-nums ${
-            timeLeft <= 10 ? 'bg-red-950/60 text-red-400' : 'bg-zinc-800 text-zinc-300'
+            timeLeft <= 10 ? 'bg-red-100 text-red-600' : 'bg-zinc-800 text-zinc-300'
           }`}
           role="timer"
           aria-label={`Sisa waktu: ${timeLeft} detik`}
@@ -229,7 +229,7 @@ export default function MatchMadness({
 
       <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-zinc-700">
         <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-1000 ease-linear"
+          className="h-full rounded-full bg-brand-500 transition-all duration-1000 ease-linear"
           style={{ width: `${(timeLeft / GAME_DURATION) * 100}%` }}
         />
       </div>

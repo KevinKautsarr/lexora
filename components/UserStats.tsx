@@ -19,7 +19,7 @@ export default async function UserStats() {
       <span
         title="Streak"
         aria-label={`Streak: ${user.streak} hari`}
-        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-orange-400 tabular-nums"
+        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-orange-600 tabular-nums"
       >
         <Flame size={16} aria-hidden />
         {user.streak}
@@ -27,7 +27,7 @@ export default async function UserStats() {
       <span
         title="XP"
         aria-label={`XP: ${user.xp}`}
-        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-emerald-400 tabular-nums"
+        className="flex items-center gap-1.5 rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-bold text-xp-600 tabular-nums"
       >
         <Zap size={16} aria-hidden />
         {user.xp}

@@ -1,5 +1,7 @@
+import { Lock } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import { getLevelsWithUnits } from '@/lib/catalog'
 import { prisma } from '@/lib/prisma'
 import {
   computeUnlockedLessonIds,
@@ -8,6 +10,7 @@ import {
 } from '@/lib/progress'
 import { getSessionUser } from '@/lib/session'
 import JourneyPath, { type UnitSection } from '@/components/JourneyPath'
+import ScrollToActiveLesson from '@/components/ScrollToActiveLesson'
 import DailyGoalsCard from '@/components/learn/DailyGoalsCard'
 import StreakCard from '@/components/learn/StreakCard'
 import NextLessonCard from '@/components/learn/NextLessonCard'
@@ -23,15 +26,7 @@ export default async function LearnPage({
   const { notice } = await searchParams
 
   const [levels, user] = await Promise.all([
-    prisma.level.findMany({
-      orderBy: { order: 'asc' },
-      include: {
-        units: {
-          orderBy: { order: 'asc' },
-          include: { lessons: { orderBy: { order: 'asc' } } },
-        },
-      },
-    }),
+    getLevelsWithUnits(),
     prisma.user.findUnique({
       where: { id: sessionUser.id },
       include: {
@@ -71,10 +66,12 @@ export default async function LearnPage({
 
   return (
     <div className="flex gap-6 lg:gap-8">
+      {/* Auto-scroll ke lesson yang sedang dikerjakan saat halaman dibuka. */}
+      <ScrollToActiveLesson />
       {/* ─── Main: Journey Path per Level ─── */}
       <div className="flex min-w-0 flex-1 flex-col gap-8">
         {notice === 'practice-empty' && (
-          <p className="rounded-xl border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm font-medium text-amber-300">
+          <p className="rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-medium text-amber-700">
             Mode Practice terbuka setelah kamu menyelesaikan minimal 1 lesson —
             mulai dari lesson pertama di bawah!
           </p>
@@ -101,6 +98,11 @@ export default async function LearnPage({
         {levels.map((level) => {
           const isActive = level.order === activeLevelOrder
           const isFreelyOpen = level.order < startLevelOrder
+          // Terkunci = belum ada satu pun lesson di level ini yang terbuka.
+          // Level aktif & "terbuka bebas" selalu punya lesson unlocked → tidak locked.
+          const isLocked = level.units.every((unit) =>
+            unit.lessons.every((lesson) => !unlockedIds.has(lesson.id)),
+          )
 
           const unitSections: UnitSection[] = level.units.map((unit) => ({
             id: unit.id,
@@ -122,27 +124,39 @@ export default async function LearnPage({
           }))
 
           return (
-            <section key={level.id}>
+            <section key={level.id} aria-label={`Tingkat ${level.code} — ${level.name}`}>
               <header
+                aria-disabled={isLocked ? 'true' : undefined}
                 className={`mb-4 rounded-2xl border px-5 py-4 ${
                   isActive
-                    ? 'border-emerald-600 bg-emerald-950/40'
-                    : 'border-zinc-800 bg-zinc-800/40'
+                    ? 'border-brand-600 bg-brand-100'
+                    : isLocked
+                      ? 'border-zinc-700 bg-zinc-800/30'
+                      : 'border-zinc-800 bg-zinc-800/40'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <span
-                    className={`rounded-lg px-2.5 py-1 font-mono text-sm font-black ${
+                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-mono text-sm font-black ${
                       isActive
-                        ? 'bg-emerald-500 text-emerald-950'
-                        : 'bg-zinc-700 text-zinc-200'
+                        ? 'bg-brand-500 text-brand-950'
+                        : isLocked
+                          ? 'bg-zinc-700/60 text-zinc-400'
+                          : 'bg-zinc-700 text-zinc-200'
                     }`}
                   >
+                    {isLocked && <Lock size={13} aria-hidden />}
                     {level.code}
                   </span>
-                  <h2 className="text-lg font-bold text-zinc-100">{level.name}</h2>
+                  <h2
+                    className={`text-lg font-bold ${
+                      isLocked ? 'text-zinc-400' : 'text-zinc-100'
+                    }`}
+                  >
+                    {level.name}
+                  </h2>
                   {isActive && (
-                    <span className="ml-auto rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-400">
+                    <span className="ml-auto rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-600">
                       Sedang ditempuh
                     </span>
                   )}
@@ -151,11 +165,29 @@ export default async function LearnPage({
                       Terbuka bebas
                     </span>
                   )}
+                  {isLocked && (
+                    <span className="ml-auto flex items-center gap-1 rounded-full bg-zinc-700/40 px-3 py-1 text-xs font-semibold text-zinc-500">
+                      <Lock size={11} aria-hidden />
+                      Terkunci
+                    </span>
+                  )}
                 </div>
-                <p className="mt-1 text-sm text-zinc-400">{level.description}</p>
+                <p
+                  className={`mt-1 text-sm ${isLocked ? 'text-zinc-500' : 'text-zinc-400'}`}
+                >
+                  {level.description}
+                </p>
+                {isLocked && (
+                  <p className="mt-2 text-xs font-medium text-zinc-500">
+                    Selesaikan tingkat sebelumnya untuk membuka {level.code}.
+                  </p>
+                )}
               </header>
 
-              <JourneyPath units={unitSections} />
+              {/* Journey diredupkan saat level terkunci — semua node-nya locked. */}
+              <div className={isLocked ? 'opacity-60' : undefined}>
+                <JourneyPath units={unitSections} />
+              </div>
             </section>
           )
         })}

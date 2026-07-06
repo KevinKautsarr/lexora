@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { getUnitsWithLessons } from '@/lib/catalog'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { isLessonUnlockedForUser } from '@/lib/unlock'
@@ -33,10 +34,7 @@ export default async function LessonGamePage({
   // Cari lesson berikutnya pada rantai wajib dengan simulasi lesson ini
   // sudah selesai — untuk tombol "Lesson Berikutnya" di layar hasil.
   const [allUnits, userProgress, dbUser] = await Promise.all([
-    prisma.unit.findMany({
-      orderBy: [{ level: { order: 'asc' } }, { order: 'asc' }],
-      include: { level: true, lessons: { orderBy: { order: 'asc' } } },
-    }),
+    getUnitsWithLessons(),
     prisma.lessonProgress.findMany({
       where: { userId: sessionUser.id, completed: true },
       select: { lessonId: true },

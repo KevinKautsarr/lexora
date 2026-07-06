@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Play, BookOpen } from 'lucide-react'
+import { getUnitsWithLessons } from '@/lib/catalog'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { findNextLessonRef } from '@/lib/progress'
@@ -9,10 +10,7 @@ export default async function NextLessonCard() {
   if (!sessionUser) return null
 
   const [units, user] = await Promise.all([
-    prisma.unit.findMany({
-      orderBy: [{ level: { order: 'asc' } }, { order: 'asc' }],
-      include: { level: true, lessons: { orderBy: { order: 'asc' } } },
-    }),
+    getUnitsWithLessons(),
     prisma.user.findUnique({
       where: { id: sessionUser.id },
       include: { lessonProgress: { where: { completed: true } } },
@@ -31,20 +29,18 @@ export default async function NextLessonCard() {
 
   // Lesson berikutnya pada rantai wajib (level >= startLevelOrder user)
   const nextRef = findNextLessonRef(lessonRefs, completedIds, user?.startLevelOrder ?? 1)
-  let nextLesson: { id: string; title: string; unitTitle: string } | null = null
-  outer: for (const unit of units) {
-    for (const lesson of unit.lessons) {
-      if (lesson.id === nextRef?.id) {
-        nextLesson = { id: lesson.id, title: lesson.title, unitTitle: unit.title }
-        break outer
-      }
-    }
-  }
+  const nextUnit = nextRef
+    ? units.find((u) => u.lessons.some((l) => l.id === nextRef.id))
+    : undefined
+  const nextLessonData = nextUnit?.lessons.find((l) => l.id === nextRef?.id)
+  const nextLesson = nextLessonData
+    ? { id: nextLessonData.id, title: nextLessonData.title, unitTitle: nextUnit!.title }
+    : null
 
   return (
     <div className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <BookOpen size={18} className="text-emerald-400" aria-hidden />
+        <BookOpen size={18} className="text-brand-600" aria-hidden />
         <h3 className="text-sm font-bold text-zinc-100">Lanjut Belajar</h3>
       </div>
 
@@ -55,7 +51,7 @@ export default async function NextLessonCard() {
           <Link
             href={`/game/${nextLesson.id}`}
             id="next-lesson-play-btn"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-400 active:bg-emerald-600"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-700 active:bg-brand-700"
           >
             <Play size={16} strokeWidth={2.5} aria-hidden />
             Main Sekarang

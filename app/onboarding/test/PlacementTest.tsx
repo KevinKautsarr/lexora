@@ -70,7 +70,7 @@ export default function PlacementTest({
   if (phase.name === 'intro' || phase.name === 'loading') {
     return (
       <Card>
-        <FlaskConical size={40} className="text-emerald-400" aria-hidden />
+        <FlaskConical size={40} className="text-brand-600" aria-hidden />
         <h1 className="text-xl font-bold text-zinc-100">Tes Penempatan — {levelLabel}</h1>
         <p className="text-sm text-zinc-400">
           12 soal pilihan ganda, tanpa batas waktu. Benar minimal 9 untuk mulai
@@ -81,7 +81,7 @@ export default function PlacementTest({
           type="button"
           disabled={phase.name === 'loading'}
           onClick={begin}
-          className="mt-2 rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+          className="mt-2 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
         >
           {phase.name === 'loading' ? 'Menyiapkan soal…' : 'Mulai Tes'}
         </button>
@@ -95,8 +95,8 @@ export default function PlacementTest({
   if (phase.name === 'error') {
     return (
       <Card>
-        <XCircle size={40} className="text-red-400" aria-hidden />
-        <p className="text-sm text-red-300">{phase.message}</p>
+        <XCircle size={40} className="text-red-600" aria-hidden />
+        <p className="text-sm text-red-700">{phase.message}</p>
         <Link
           href="/onboarding"
           className="mt-2 rounded-xl border border-zinc-600 px-5 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-800"
@@ -123,7 +123,7 @@ export default function PlacementTest({
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-700">
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all"
+            className="h-full rounded-full bg-brand-500 transition-all"
             style={{ width: `${((current + 1) / questions.length) * 100}%` }}
           />
         </div>
@@ -141,8 +141,8 @@ export default function PlacementTest({
               }
               className={`rounded-xl border-2 px-4 py-3 text-left font-medium transition-colors ${
                 answers[current] === option
-                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
-                  : 'border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-emerald-500'
+                  ? 'border-brand-500 bg-brand-500/10 text-brand-700'
+                  : 'border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-brand-500'
               }`}
             >
               {option}
@@ -164,7 +164,7 @@ export default function PlacementTest({
               type="button"
               disabled={!allAnswered || busy}
               onClick={() => submit(sessionId)}
-              className="rounded-xl bg-emerald-600 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+              className="rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
             >
               {busy ? 'Menilai…' : 'Kirim Jawaban'}
             </button>
@@ -188,9 +188,9 @@ export default function PlacementTest({
   return (
     <Card>
       {result.passed ? (
-        <CheckCircle2 size={40} className="text-emerald-400" aria-hidden />
+        <CheckCircle2 size={40} className="text-brand-600" aria-hidden />
       ) : (
-        <XCircle size={40} className="text-amber-400" aria-hidden />
+        <XCircle size={40} className="text-amber-600" aria-hidden />
       )}
       <h1 className="text-xl font-bold text-zinc-100">
         {result.passed ? 'Lulus! 🎉' : 'Belum lulus'}
@@ -212,7 +212,7 @@ export default function PlacementTest({
               router.push('/learn')
               router.refresh()
             }}
-            className="mt-2 rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
+            className="mt-2 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500"
           >
             Mulai Belajar →
           </button>
@@ -230,7 +230,7 @@ export default function PlacementTest({
                 type="button"
                 disabled={busy}
                 onClick={() => accept(sessionId)}
-                className="w-full rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+                className="w-full rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
               >
                 Mulai dari {result.recommendation.label}
               </button>

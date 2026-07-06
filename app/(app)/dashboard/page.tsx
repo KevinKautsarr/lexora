@@ -2,6 +2,7 @@ import { ArrowRight, CheckCircle2, Flame, PartyPopper, Target } from 'lucide-rea
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getCurrentCefrLevel } from '@/lib/cefr'
+import { getUnitsWithLessons } from '@/lib/catalog'
 import { levelProgress, xpForNextLevel } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
 import { findNextLessonRef } from '@/lib/progress'
@@ -24,10 +25,7 @@ export default async function DashboardPage() {
         startLevelOrder: true,
       },
     }),
-    prisma.unit.findMany({
-      orderBy: [{ level: { order: 'asc' } }, { order: 'asc' }],
-      include: { level: true, lessons: { orderBy: { order: 'asc' } } },
-    }),
+    getUnitsWithLessons(),
     prisma.lessonProgress.findMany({
       where: { userId: sessionUser.id },
       select: { lessonId: true, completed: true, accuracy: true },
@@ -70,7 +68,9 @@ export default async function DashboardPage() {
         <div className="mb-3 flex items-center justify-between">
           <div>
             <p className="text-lg font-bold">{user.name ?? user.email}</p>
-            <p className="text-sm text-zinc-400">{user.xp} XP total</p>
+            <p className="text-sm text-zinc-400">
+              <span className="font-bold text-xp-600 tabular-nums">{user.xp}</span> XP total
+            </p>
           </div>
           <div className="flex items-center gap-2">
             {cefr && (
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
               </span>
             )}
             <span
-              className="rounded-full bg-emerald-500/15 px-4 py-2 text-lg font-bold text-emerald-400"
+              className="rounded-full bg-brand-500/15 px-4 py-2 text-lg font-bold text-brand-600"
               title="Level dari XP"
             >
               Level {level}
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
         </div>
         <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-700">
           <div
-            className="h-full rounded-full bg-emerald-500"
+            className="h-full rounded-full bg-brand-500"
             style={{ width: `${Math.round(fraction * 100)}%` }}
           />
         </div>
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-800/50 p-5 text-center">
           <p className="flex items-center justify-center gap-1 text-3xl font-extrabold">
-            <Flame size={28} className="text-orange-400" aria-hidden />
+            <Flame size={28} className="text-orange-600" aria-hidden />
             {user.streak}
           </p>
           <p className="mt-1 text-sm text-zinc-400">Streak hari</p>
@@ -130,16 +130,16 @@ export default async function DashboardPage() {
       <section
         className={`flex items-center gap-3 rounded-2xl border p-5 ${
           goalMet
-            ? 'border-emerald-800 bg-emerald-950/40'
-            : 'border-amber-800 bg-amber-950/30'
+            ? 'border-brand-800 bg-brand-100'
+            : 'border-amber-300 bg-amber-100'
         }`}
       >
         {goalMet ? (
-          <CheckCircle2 size={20} className="shrink-0 text-emerald-400" aria-hidden />
+          <CheckCircle2 size={20} className="shrink-0 text-brand-600" aria-hidden />
         ) : (
-          <Target size={20} className="shrink-0 text-amber-400" aria-hidden />
+          <Target size={20} className="shrink-0 text-amber-600" aria-hidden />
         )}
-        <p className={`font-semibold ${goalMet ? 'text-emerald-300' : 'text-amber-300'}`}>
+        <p className={`font-semibold ${goalMet ? 'text-brand-700' : 'text-amber-700'}`}>
           {goalMet
             ? 'Goal hari ini tercapai — 1 lesson selesai!'
             : 'Goal hari ini: selesaikan 1 lesson untuk menjaga streak'}
@@ -150,18 +150,18 @@ export default async function DashboardPage() {
       {nextLesson ? (
         <Link
           href={`/game/${nextLesson.id}`}
-          className="group rounded-2xl bg-emerald-600 px-6 py-4 text-center transition-colors hover:bg-emerald-500"
+          className="group rounded-2xl bg-brand-600 px-6 py-4 text-center transition-colors hover:bg-brand-500"
         >
           <span className="flex items-center justify-center gap-2 text-lg font-bold text-white">
             Lanjut belajar
             <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" aria-hidden />
           </span>
-          <span className="block text-sm text-emerald-100">
+          <span className="block text-sm text-brand-100">
             {nextLesson.unitTitle} · {nextLesson.title}
           </span>
         </Link>
       ) : (
-        <p className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-800 bg-emerald-950/40 px-6 py-4 text-center font-semibold text-emerald-300">
+        <p className="flex items-center justify-center gap-2 rounded-2xl border border-brand-800 bg-brand-100 px-6 py-4 text-center font-semibold text-brand-700">
           <PartyPopper size={20} aria-hidden />
           Semua lesson sudah selesai!
         </p>

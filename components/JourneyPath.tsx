@@ -54,18 +54,18 @@ function NodeTooltip({
 }) {
   return (
     <div
-      className="w-max max-w-[180px] rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-center shadow-xl"
+      className="w-max max-w-[180px] rounded-xl border border-brand-800 bg-brand-700 px-3 py-2 text-center shadow-xl"
       role="tooltip"
     >
-      <p className="text-sm font-semibold text-zinc-100">{title}</p>
+      <p className="text-sm font-semibold text-brand-50">{title}</p>
       {bestScore !== null && status !== 'locked' && (
-        <p className="mt-0.5 text-xs text-emerald-400">Skor terbaik: {bestScore}</p>
+        <p className="mt-0.5 text-xs text-brand-200">Skor terbaik: {bestScore}</p>
       )}
       {status === 'locked' && (
-        <p className="mt-0.5 text-xs text-zinc-500">Selesaikan lesson sebelumnya</p>
+        <p className="mt-0.5 text-xs text-brand-300">Selesaikan lesson sebelumnya</p>
       )}
       {/* Arrow */}
-      <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-700" />
+      <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-brand-700" />
     </div>
   )
 }
@@ -89,10 +89,10 @@ function SingleNode({
 
     switch (lesson.status) {
       case 'completed':
-        return `${base} border-emerald-500 bg-emerald-500 text-white hover:scale-110`
+        return `${base} border-brand-500 bg-brand-500 text-white hover:scale-110`
       case 'unlocked':
-        return `${base} border-emerald-400 bg-zinc-950 text-emerald-400 ${
-          lesson.isFrontmost ? 'shadow-[0_0_20px_4px_rgba(52,211,153,0.35)]' : ''
+        return `${base} border-brand-500 bg-zinc-950 text-brand-600 ${
+          lesson.isFrontmost ? 'shadow-[0_0_20px_4px_color-mix(in_oklch,var(--color-brand-500)_45%,transparent)]' : ''
         } hover:scale-110 cursor-pointer`
       case 'locked':
       default:
@@ -108,9 +108,9 @@ function SingleNode({
           strokeWidth={2}
           className={
             lesson.status === 'completed'
-              ? 'text-yellow-300'
+              ? 'text-yellow-600'
               : lesson.status === 'unlocked'
-                ? 'text-emerald-400'
+                ? 'text-brand-600'
                 : 'text-zinc-600'
           }
         />
@@ -138,14 +138,18 @@ function SingleNode({
     </div>
   )
 
+  // Node yang sedang dikerjakan diberi anchor supaya bisa di-scroll otomatis.
+  const isActiveLesson = lesson.isFrontmost && lesson.status === 'unlocked'
+
   return (
     <div
-      className="group relative flex justify-center"
+      id={isActiveLesson ? 'active-lesson' : undefined}
+      className="group relative flex justify-center scroll-mt-24"
       style={{ transform: `translateX(${offset}px)` }}
     >
       {/* Pulse ring for frontmost unlocked lesson */}
-      {lesson.isFrontmost && lesson.status === 'unlocked' && (
-        <span className="absolute inset-0 rounded-full animate-ping bg-emerald-400/20" />
+      {isActiveLesson && (
+        <span className="absolute inset-0 rounded-full animate-ping bg-brand-400/20" />
       )}
 
       {isClickable ? (
@@ -199,7 +203,7 @@ function ConnectorLine({
         y1={y1}
         x2={x2}
         y2={y2}
-        stroke={completed ? '#10b981' : '#3f3f46'}
+        stroke={completed ? 'var(--color-brand-500)' : 'var(--color-zinc-600)'}
         strokeWidth={3}
         strokeDasharray={completed ? '0' : '6 4'}
         strokeLinecap="round"
@@ -214,18 +218,18 @@ function ConnectorLine({
 
 function UnitBanner({ order, title }: { order: number; title: string }) {
   return (
-    <div className="relative mb-2 flex w-full items-center justify-center overflow-hidden rounded-2xl border border-emerald-800/60 bg-gradient-to-r from-emerald-950/80 via-zinc-900/90 to-emerald-950/80 px-6 py-4 text-center">
-      <div className="absolute inset-0 opacity-10"
+    <div className="relative mb-2 flex w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-4 text-center shadow-sm">
+      <div className="absolute inset-0 opacity-15"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 20% 50%, #10b981 0%, transparent 60%), radial-gradient(circle at 80% 50%, #059669 0%, transparent 60%)',
+            'radial-gradient(circle at 20% 50%, #fff 0%, transparent 55%), radial-gradient(circle at 80% 50%, #fff 0%, transparent 55%)',
         }}
       />
       <div className="relative">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-500">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-100">
           Section {order}
         </p>
-        <h2 className="mt-0.5 text-lg font-extrabold text-zinc-100">{title}</h2>
+        <h2 className="mt-0.5 text-lg font-extrabold text-white">{title}</h2>
       </div>
     </div>
   )
@@ -240,7 +244,7 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
   let globalIndex = 0
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-12">
       {units.map((unit) => {
         const unitStartIndex = globalIndex
 
@@ -249,9 +253,10 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
             <UnitBanner order={unit.order} title={unit.title} />
 
             {/* Node + connector column, centered. w-full + max-w so it never
-                forces horizontal scroll on narrow phones; caps at 280px. */}
+                forces horizontal scroll on narrow phones; caps at 280px.
+                pb memberi napas setelah node terakhir sebelum section berikutnya. */}
             <div
-              className="flex w-full flex-col items-center pt-6"
+              className="flex w-full flex-col items-center pt-6 pb-4"
               style={{ maxWidth: CONTAINER_WIDTH }}
             >
               {unit.lessons.map((lesson, lessonIdx) => {

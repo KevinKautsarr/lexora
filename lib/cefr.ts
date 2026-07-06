@@ -1,3 +1,4 @@
+import 'server-only'
 import { prisma } from './prisma'
 
 export type CefrLevel = { code: string; name: string; order: number }

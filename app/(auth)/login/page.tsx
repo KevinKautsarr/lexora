@@ -46,7 +46,7 @@ export default function LoginPage() {
           <p
             ref={errorRef}
             tabIndex={-1}
-            className="rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300"
+            className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
             role="alert"
           >
             {error}
@@ -63,7 +63,7 @@ export default function LoginPage() {
             inputMode="email"
             spellCheck={false}
             placeholder="nama@contoh.com"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
           />
         </label>
 
@@ -74,14 +74,14 @@ export default function LoginPage() {
             name="password"
             required
             autoComplete="current-password"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
           />
         </label>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
         >
           {loading && (
             <span
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-zinc-400">
           Belum punya akun?{' '}
-          <Link href="/register" className="font-semibold text-emerald-400 hover:underline">
+          <Link href="/register" className="font-semibold text-brand-600 hover:underline">
             Daftar
           </Link>
         </p>

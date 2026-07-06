@@ -45,7 +45,7 @@ export default function RegisterPage() {
           <p
             ref={errorRef}
             tabIndex={-1}
-            className="rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300"
+            className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
             role="alert"
           >
             {error}
@@ -61,7 +61,7 @@ export default function RegisterPage() {
             autoComplete="name"
             maxLength={50}
             placeholder="Nama kamu"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
           />
         </label>
 
@@ -75,7 +75,7 @@ export default function RegisterPage() {
             inputMode="email"
             spellCheck={false}
             placeholder="nama@contoh.com"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
           />
         </label>
 
@@ -88,14 +88,14 @@ export default function RegisterPage() {
             minLength={8}
             autoComplete="new-password"
             placeholder="Minimal 8 karakter"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
           />
         </label>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
         >
           {loading && (
             <span
@@ -108,7 +108,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-zinc-400">
           Sudah punya akun?{' '}
-          <Link href="/login" className="font-semibold text-emerald-400 hover:underline">
+          <Link href="/login" className="font-semibold text-brand-600 hover:underline">
             Masuk
           </Link>
         </p>
