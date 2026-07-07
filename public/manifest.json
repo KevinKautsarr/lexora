@@ -1,0 +1,30 @@
+{
+  "name": "LEXORA — Belajar Kosakata Bahasa Inggris",
+  "short_name": "LEXORA",
+  "description": "Belajar kosakata bahasa Inggris dengan cara yang seru",
+  "start_url": "/learn",
+  "display": "standalone",
+  "background_color": "#1c1c1e",
+  "theme_color": "#609966",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-filled-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

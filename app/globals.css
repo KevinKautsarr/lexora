@@ -110,6 +110,22 @@ summary {
   border-radius: 0.375rem;
 }
 
+/* Bounce lembut untuk node lesson yang sedang ditempuh (Journey). Naik-turun
+   8px, ease-in-out — cukup untuk mengundang klik tanpa meluber & menabrak
+   elemen sekitar. Dihormati oleh blok prefers-reduced-motion di bawah. */
+@keyframes node-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-node-bounce {
+  animation: node-bounce 1.6s ease-in-out infinite;
+}
+
 /* Respect users who ask for less motion: neutralize animations & transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -120,4 +136,20 @@ summary {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Floating animation for landing page elements */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+@keyframes bounce-slower {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-5deg); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 3.2s ease-in-out infinite;
+}
+.animate-bounce-slower {
+  animation: bounce-slower 4s ease-in-out infinite;
 }

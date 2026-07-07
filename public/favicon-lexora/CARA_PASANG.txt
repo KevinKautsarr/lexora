@@ -1,0 +1,30 @@
+FAVICON LEXORA — CARA PASANG
+=============================
+Isi paket:
+  favicon.ico              -> fallback semua browser (16/32/48px)
+  favicon-16.png ... -512  -> berbagai ukuran (tab, bookmark, shortcut)
+  apple-touch-icon.png     -> ikon iOS home screen (180px)
+  favicon-192.png / -512   -> Android / PWA
+  favicon-filled-512.png   -> ALTERNATIF: heksagon terisi hijau
+  logo-full-transparent.png-> logo besar transparan (untuk header/navbar)
+
+LANGKAH (Next.js -> taruh di folder /public, atau root web):
+1. Salin semua file ke /public
+2. Tambahkan di <head> (atau app/layout.tsx metadata):
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+3. (Opsional PWA) manifest.json:
+  "icons": [
+    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+
+CATATAN:
+- Favicon utama = versi outline transparan (wajah lebih menonjol).
+- Kalau di tab browser terlihat kurang kontras, coba pakai favicon-filled-512
+  sebagai gantinya (buat ulang .ico dari file itu).
+- Untuk hasil PALING tajam di 16px, idealnya trace logo jadi SVG.
