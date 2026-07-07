@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { NAV_ITEMS, isNavActive } from './nav-items'
@@ -12,14 +13,13 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col border-r border-zinc-800 bg-zinc-950 lg:flex">
       <div className="flex h-16 items-center px-5">
-        <Link
-          href="/learn"
-          aria-label="LEXORA — beranda"
-          translate="no"
-          className="text-xl font-black tracking-wide text-brand-600"
-        >
-          LEXORA
+        <Link href="/learn" aria-label="LEXORA — beranda" className="flex items-center gap-3">
+          <Image src="/logo-full-transparent.png" alt="LEXORA" width={56} height={56} priority className="rounded-xl" />
+          <span className="text-2xl font-black tracking-tight text-zinc-100">LEXORA</span>
         </Link>
+
+
+
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">

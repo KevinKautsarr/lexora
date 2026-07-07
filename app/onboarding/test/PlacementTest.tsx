@@ -1,9 +1,10 @@
 'use client'
 
-import { ArrowLeft, ArrowRight, CheckCircle2, FlaskConical, XCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Mascot from '@/components/Mascot'
 import {
   acceptRecommendation,
   startPlacement,
@@ -70,7 +71,7 @@ export default function PlacementTest({
   if (phase.name === 'intro' || phase.name === 'loading') {
     return (
       <Card>
-        <FlaskConical size={40} className="text-brand-600" aria-hidden />
+        <Mascot pose="wave" size={100} className="mb-2" />
         <h1 className="text-xl font-bold text-zinc-100">Tes Penempatan — {levelLabel}</h1>
         <p className="text-sm text-zinc-400">
           12 soal pilihan ganda, tanpa batas waktu. Benar minimal 9 untuk mulai
@@ -95,8 +96,8 @@ export default function PlacementTest({
   if (phase.name === 'error') {
     return (
       <Card>
-        <XCircle size={40} className="text-red-600" aria-hidden />
-        <p className="text-sm text-red-700">{phase.message}</p>
+        <Mascot pose="thinking" size={100} className="mb-2" />
+        <p className="text-sm text-red-400">{phase.message}</p>
         <Link
           href="/onboarding"
           className="mt-2 rounded-xl border border-zinc-600 px-5 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-800"
@@ -188,9 +189,9 @@ export default function PlacementTest({
   return (
     <Card>
       {result.passed ? (
-        <CheckCircle2 size={40} className="text-brand-600" aria-hidden />
+        <Mascot pose="graduation" size={100} className="mb-2" />
       ) : (
-        <XCircle size={40} className="text-amber-600" aria-hidden />
+        <Mascot pose="confused" size={100} className="mb-2" />
       )}
       <h1 className="text-xl font-bold text-zinc-100">
         {result.passed ? 'Lulus! 🎉' : 'Belum lulus'}

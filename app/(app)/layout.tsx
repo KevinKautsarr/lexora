@@ -1,8 +1,8 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import BottomNav from '@/components/BottomNav'
-import UserStats from '@/components/UserStats'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 
@@ -29,19 +29,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar />
       {/* Mobile: tanpa offset kiri, BottomNav di bawah. Desktop: offset sidebar. */}
       <div className="flex flex-1 flex-col lg:pl-56">
-        <header className="flex h-16 items-center justify-between border-b border-zinc-800 px-4 sm:px-8">
-          {/* Logo hanya di mobile — di desktop sudah ada di sidebar. */}
-          <Link
-            href="/learn"
-            aria-label="LEXORA — beranda"
-            translate="no"
-            className="text-xl font-black tracking-wide text-brand-600 lg:hidden"
-          >
-            LEXORA
+        {/* Header hanya di mobile — cuma logo. Stats pindah ke sidebar Journey.
+            Di desktop logo sudah ada di sidebar kiri, jadi header tak diperlukan. */}
+        <header className="flex h-16 items-center border-b border-zinc-800 px-4 sm:px-8 lg:hidden">
+          <Link href="/learn" aria-label="LEXORA — beranda" className="flex items-center gap-3">
+            <Image src="/logo-full-transparent.png" alt="LEXORA" width={52} height={52} priority className="rounded-xl" />
+            <span className="text-2xl font-black tracking-tight text-zinc-100">LEXORA</span>
           </Link>
-          <div className="ml-auto">
-            <UserStats />
-          </div>
+
+
+
         </header>
         {/* pb ekstra di mobile agar konten tidak tertutup BottomNav (56px + safe-area). */}
         <main

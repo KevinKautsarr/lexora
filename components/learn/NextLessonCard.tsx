@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Play, BookOpen } from 'lucide-react'
+import Mascot from '@/components/Mascot'
 import { getUnitsWithLessons } from '@/lib/catalog'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
@@ -58,10 +59,17 @@ export default async function NextLessonCard() {
           </Link>
         </div>
       ) : (
-        <p className="text-center text-sm text-zinc-500">
-          🎉 Semua lesson sudah selesai!
-        </p>
+        <div className="flex flex-col items-center gap-2 py-2">
+          <Mascot pose="graduation" size={80} />
+          <p className="text-center text-sm font-bold text-zinc-100">
+            Semua Materi Selesai!
+          </p>
+          <p className="text-center text-xs text-zinc-400">
+            Luar biasa! Kamu telah menuntaskan seluruh pelajaran yang tersedia.
+          </p>
+        </div>
       )}
     </div>
   )
 }
+

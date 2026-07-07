@@ -1,6 +1,7 @@
 import { Lock } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import Image from 'next/image'
 import { getLevelsWithUnits } from '@/lib/catalog'
 import { prisma } from '@/lib/prisma'
 import {
@@ -11,9 +12,13 @@ import {
 import { getSessionUser } from '@/lib/session'
 import JourneyPath, { type UnitSection } from '@/components/JourneyPath'
 import ScrollToActiveLesson from '@/components/ScrollToActiveLesson'
+import ScrollToggleButton from '@/components/ScrollToggleButton'
+import UserStats from '@/components/UserStats'
 import DailyGoalsCard from '@/components/learn/DailyGoalsCard'
 import StreakCard from '@/components/learn/StreakCard'
 import NextLessonCard from '@/components/learn/NextLessonCard'
+import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
+import ResetNotification from '@/components/learn/ResetNotification'
 
 export default async function LearnPage({
   searchParams,
@@ -21,7 +26,11 @@ export default async function LearnPage({
   searchParams: Promise<{ notice?: string }>
 }) {
   const sessionUser = await getSessionUser()
+
   if (!sessionUser) redirect('/login')
+
+  // Run weekly league reset check
+  await checkAndResetWeeklyLeagueGlobal()
 
   const { notice } = await searchParams
 
@@ -65,17 +74,27 @@ export default async function LearnPage({
   const activeLevelOrder = frontmost?.levelOrder ?? null
 
   return (
-    <div className="flex gap-6 lg:gap-8">
+    // items-start supaya aside kanan bisa sticky (bukan di-stretch penuh).
+    <div className="flex items-start gap-6 lg:gap-8 relative">
+      {user?.previousDivision && (
+        <ResetNotification
+          previousDivision={user.previousDivision}
+          currentDivision={user.division}
+        />
+      )}
       {/* Auto-scroll ke lesson yang sedang dikerjakan saat halaman dibuka. */}
       <ScrollToActiveLesson />
+      {/* Tombol melayang untuk scroll ke pelajaran aktif (fixed positioning). */}
+      <ScrollToggleButton />
       {/* ─── Main: Journey Path per Level ─── */}
-      <div className="flex min-w-0 flex-1 flex-col gap-8">
+      <div className="flex min-w-0 flex-1 flex-col gap-10">
         {notice === 'practice-empty' && (
           <p className="rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-medium text-amber-700">
             Mode Practice terbuka setelah kamu menyelesaikan minimal 1 lesson —
             mulai dari lesson pertama di bawah!
           </p>
         )}
+
         <header>
           <h1 className="text-2xl font-black tracking-tight text-zinc-100">
             Journey
@@ -191,18 +210,59 @@ export default async function LearnPage({
             </section>
           )
         })}
+
+        {/* End of Journey CTA Banner */}
+        <div className="mt-6 relative overflow-hidden rounded-3xl border border-zinc-700 bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+          <div className="absolute inset-0 opacity-5 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 10% 20%, #fff 0%, transparent 40%)',
+            }}
+          />
+          <div className="flex flex-col gap-2 text-center sm:text-left z-10">
+            <span className="w-max mx-auto sm:mx-0 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-500">
+              Target Berikutnya
+            </span>
+            <h2 className="text-xl font-black text-zinc-100">Siap Naik ke Level Selanjutnya?</h2>
+            <p className="text-sm text-zinc-400 max-w-md text-pretty">
+              Kumpulkan lebih banyak XP dari lesson dan raih pencapaian baru hari ini! Selesaikan target harian untuk membuka peti hadiah.
+            </p>
+          </div>
+          <div className="relative h-28 w-44 shrink-0 z-10 select-none">
+            <Image
+              src="/images/14_footer_cta_gamified-1.png"
+              alt="Hadiah Gamifikasi"
+              fill
+              sizes="176px"
+              className="object-contain"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* ─── Right Sidebar (hidden < lg) ─── */}
-      <aside className="hidden w-72 flex-shrink-0 lg:flex lg:flex-col lg:gap-4">
+      {/* ─── Right Sidebar (hidden < lg) — sticky supaya tetap saat scroll.
+          max-h + overflow-y-auto: kalau kartunya lebih tinggi dari layar,
+          sidebar scroll sendiri (tidak terpotong di atas). Scrollbar sidebar
+          disembunyikan agar rapi. ─── */}
+      <aside className="hidden w-72 flex-shrink-0 lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100vh-4rem)] lg:flex-col lg:gap-4 lg:overflow-y-auto lg:pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Suspense fallback={<SidebarCardSkeleton />}>
-          <NextLessonCard />
+          <div className="shrink-0">
+            <UserStats />
+          </div>
         </Suspense>
         <Suspense fallback={<SidebarCardSkeleton />}>
-          <DailyGoalsCard />
+          <div className="shrink-0">
+            <NextLessonCard />
+          </div>
         </Suspense>
         <Suspense fallback={<SidebarCardSkeleton />}>
-          <StreakCard />
+          <div className="shrink-0">
+            <DailyGoalsCard />
+          </div>
+        </Suspense>
+        <Suspense fallback={<SidebarCardSkeleton />}>
+          <div className="shrink-0">
+            <StreakCard />
+          </div>
         </Suspense>
       </aside>
     </div>

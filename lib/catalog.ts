@@ -4,7 +4,7 @@ import { prisma } from './prisma'
 
 // Katalog materi (level → unit → lesson) itu data statis yang sama untuk semua
 // pengguna. Dibungkus React.cache() supaya query berat ini hanya jalan SEKALI
-// per request meski dibutuhkan beberapa komponen (mis. dashboard/page +
+// per request meski dibutuhkan beberapa komponen (mis. learn/page +
 // NextLessonCard yang tadinya menembak query identik masing-masing).
 
 /** Semua unit terurut, lengkap dengan level & lesson-nya. */

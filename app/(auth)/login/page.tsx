@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Mail, Key } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 
 export default function LoginPage() {
@@ -11,8 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const errorRef = useRef<HTMLParagraphElement>(null)
 
-  // Uncontrolled inputs: read values from the form on submit instead of
-  // re-rendering on every keystroke.
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
@@ -25,8 +24,6 @@ export default function LoginPage() {
     setLoading(false)
     if (error) {
       setError(error.message ?? 'Login gagal')
-      // Move focus to the error so screen readers announce it and keyboard
-      // users land on the problem instead of staying on the submit button.
       requestAnimationFrame(() => errorRef.current?.focus())
       return
     }
@@ -35,70 +32,127 @@ export default function LoginPage() {
   }
 
   return (
-    <>
+    <div className="w-full flex flex-col gap-4">
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-zinc-800 bg-zinc-800/50 p-8"
+        className="flex w-full flex-col rounded-[28px] border border-zinc-700/60 bg-zinc-800/90 p-8 shadow-[0_8px_32px_rgba(64,81,59,0.08)]"
       >
-        <h1 className="text-2xl font-bold">Masuk LEXORA</h1>
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-zinc-700/60 mb-6 select-none">
+          <Link
+            href="/login"
+            aria-current="page"
+            className="flex-1 text-center pb-3 text-base font-bold transition-all relative text-zinc-100 focus-visible:outline-none focus-visible:text-brand-600"
+          >
+            Masuk
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-[3px] bg-brand-500 rounded-full" />
+          </Link>
+          <Link
+            href="/register"
+            className="flex-1 text-center pb-3 text-base font-bold transition-all text-zinc-400 hover:text-zinc-300 focus-visible:outline-none focus-visible:text-zinc-300"
+          >
+            Daftar
+          </Link>
+        </div>
 
         {error && (
           <p
             ref={errorRef}
             tabIndex={-1}
-            className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
+            className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-xs font-medium text-red-700 focus:outline-none"
             role="alert"
           >
             {error}
           </p>
         )}
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-zinc-300">
-          Email
-          <input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            inputMode="email"
-            spellCheck={false}
-            placeholder="nama@contoh.com"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm font-medium text-zinc-300">
-          Password
-          <input
-            type="password"
-            name="password"
-            required
-            autoComplete="current-password"
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
-        >
-          {loading && (
-            <span
-              className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
-              aria-hidden
+        <div className="flex flex-col gap-3.5">
+          {/* Email field */}
+          <div className="relative flex items-center">
+            <Mail className="absolute left-4 text-zinc-400 pointer-events-none" size={18} />
+            <input
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              inputMode="email"
+              spellCheck={false}
+              placeholder="email@example.com…"
+              className="w-full rounded-2xl border border-zinc-700/60 bg-zinc-950/60 py-3.5 pl-12 pr-4 text-sm text-zinc-100 placeholder-zinc-400 transition-colors focus:border-brand-500/80 focus:ring-1 focus:ring-brand-500/80 focus-visible:outline-none"
             />
-          )}
-          {loading ? 'Masuk…' : 'Masuk'}
-        </button>
+          </div>
 
-        <p className="text-center text-sm text-zinc-400">
-          Belum punya akun?{' '}
-          <Link href="/register" className="font-semibold text-brand-600 hover:underline">
-            Daftar
+          {/* Password field */}
+          <div className="relative flex items-center">
+            <Key className="absolute left-4 text-zinc-400 pointer-events-none" size={18} />
+            <input
+              type="password"
+              name="password"
+              required
+              autoComplete="current-password"
+              placeholder="••••••••…"
+              className="w-full rounded-2xl border border-zinc-700/60 bg-zinc-950/60 py-3.5 pl-12 pr-4 text-sm text-zinc-100 placeholder-zinc-400 transition-colors focus:border-brand-500/80 focus:ring-1 focus:ring-brand-500/80 focus-visible:outline-none"
+            />
+          </div>
+
+          {/* Log in Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-brand-600 border-b-[4px] border-brand-800 py-3.5 text-sm font-bold tracking-wider text-white transition-all hover:bg-brand-500 hover:border-brand-700 active:border-b-0 active:translate-y-[4px] disabled:opacity-50 select-none"
+          >
+            {loading && (
+              <span
+                className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                aria-hidden
+              />
+            )}
+            {loading ? 'MASUK…' : 'MASUK'}
+          </button>
+
+          {/* Forgot Password */}
+          <button
+            type="button"
+            onClick={() => alert('Fitur reset password belum tersedia.')}
+            className="text-center text-xs font-bold text-brand-600 hover:text-brand-500 transition-colors select-none py-1 hover:underline focus-visible:outline-none"
+          >
+            Lupa password?
+          </button>
+
+          {/* Separator OR */}
+          <div className="flex items-center gap-3 my-1 text-zinc-400 text-[10px] font-extrabold uppercase tracking-widest select-none">
+            <span className="h-px flex-1 bg-zinc-700/60" />
+            ATAU
+            <span className="h-px flex-1 bg-zinc-700/60" />
+          </div>
+
+          {/* Social: Google (Full width) */}
+          <div className="w-full select-none">
+            <button
+              type="button"
+              onClick={() => alert('Masuk dengan Google belum tersedia.')}
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-zinc-700/60 bg-zinc-950/80 hover:bg-zinc-950 transition-colors text-[10px] font-black tracking-wider text-zinc-100 hover:text-brand-600"
+            >
+              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12.2 10.3h11.4c.1.7.2 1.4.2 2.3 0 6.9-4.6 11.8-11.6 11.8C5.5 24.4 0 18.9 0 12.2S5.5 0 12.2 0c3.3 0 6 1.2 8.1 3.2L16.9 6.5C15.7 5.3 14.1 4.7 12.2 4.7c-4.1 0-7.4 3.4-7.4 7.5s3.3 7.5 7.4 7.5c4.7 0 6.5-3.4 6.8-5.1h-6.8v-4.3Z" />
+              </svg>
+              MASUK DENGAN GOOGLE
+            </button>
+          </div>
+        </div>
+
+        {/* Agreement Footer */}
+        <p className="mt-8 text-center text-[10px] leading-relaxed text-zinc-400 select-none text-pretty">
+          Dengan melanjutkan, kamu menyetujui{' '}
+          <Link href="/terms" className="text-brand-600 underline hover:text-brand-500">
+            Ketentuan Layanan
+          </Link>{' '}
+          dan{' '}
+          <Link href="/privacy" className="text-brand-600 underline hover:text-brand-500">
+            Kebijakan Privasi
           </Link>
         </p>
       </form>
-    </>
+    </div>
   )
 }

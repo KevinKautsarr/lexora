@@ -1,7 +1,8 @@
-import { ArrowRight, GraduationCap, Rocket } from 'lucide-react'
+import { ArrowRight, Rocket } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
+import Mascot from '@/components/Mascot'
 import { chooseLevel } from './actions'
 
 export default async function OnboardingPage() {
@@ -21,7 +22,7 @@ export default async function OnboardingPage() {
     <main className="flex min-h-screen items-center justify-center p-4">
       <div className="flex w-full max-w-xl flex-col gap-6">
         <header className="text-center">
-          <GraduationCap size={40} className="mx-auto mb-3 text-brand-600" aria-hidden />
+          <Mascot pose="wave" size={100} className="mx-auto mb-3" />
           <h1 className="text-2xl font-black tracking-tight text-zinc-100">
             Selamat datang{user.name ? `, ${user.name}` : ''}! 👋
           </h1>

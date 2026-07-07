@@ -1,4 +1,4 @@
-import { Map, Dumbbell, Flag, LayoutDashboard, Trophy, User } from 'lucide-react'
+import { Map, Dumbbell, Flag, Trophy, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type NavItem = {
@@ -15,7 +15,6 @@ export const NAV_ITEMS: NavItem[] = [
   // exact: /game/[lessonId] datang dari Journey, jangan menyorot Practice
   { href: '/game', label: 'Practice', icon: Dumbbell, exact: true },
   { href: '/goals', label: 'Goals', icon: Flag },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
 ]

@@ -14,6 +14,13 @@ model User {
   xp               Int       @default(0)
   xpToday          Int       @default(0)
   lastXpDate       DateTime?
+  perfectToday     Int       @default(0)
+  lastPerfectDate  DateTime?
+  xpThisWeek       Int       @default(0)
+  lastWeekStart    DateTime  @default(now())
+  division         String    @default("BRONZE")
+  previousDivision String?
+  goldWins         Int       @default(0)
   streak           Int       @default(0)
   longestStreak    Int       @default(0)
   lastActivityDate DateTime?

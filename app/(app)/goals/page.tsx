@@ -1,12 +1,14 @@
-import { CheckCircle2, Gift, Sparkles, Target, Trophy } from 'lucide-react'
+import { CheckCircle2, Sparkles, Target, Trophy } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { isGoalMetToday, utcDateOnly } from '@/lib/streak'
 import DailyResetCountdown from '@/components/DailyResetCountdown'
+import RewardChest from '@/components/RewardChest'
 
 const XP_GOAL = 50
 const LESSON_GOAL = 1
+const PERFECT_GOAL = 3
 
 // Kutipan berganti tiap hari (deterministik dari tanggal UTC → aman dari
 // hydration mismatch, dihitung di server).
@@ -26,15 +28,27 @@ export default async function GoalsPage() {
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: sessionUser.id },
-    select: { xpToday: true, lastXpDate: true, lastActivityDate: true },
+    select: {
+      xpToday: true,
+      lastXpDate: true,
+      lastActivityDate: true,
+      perfectToday: true,
+      lastPerfectDate: true,
+    },
   })
 
   const now = new Date()
+  const todayMs = utcDateOnly(now).getTime()
   const lessonDoneToday = isGoalMetToday(user.lastActivityDate, now) ? 1 : 0
-  const isToday =
-    user.lastXpDate !== null &&
-    utcDateOnly(new Date(user.lastXpDate)).getTime() === utcDateOnly(now).getTime()
-  const xpToday = isToday ? user.xpToday : 0
+  const xpToday =
+    user.lastXpDate && utcDateOnly(new Date(user.lastXpDate)).getTime() === todayMs
+      ? user.xpToday
+      : 0
+  const perfectToday =
+    user.lastPerfectDate &&
+    utcDateOnly(new Date(user.lastPerfectDate)).getTime() === todayMs
+      ? user.perfectToday
+      : 0
 
   const goals = [
     {
@@ -50,6 +64,13 @@ export default async function GoalsPage() {
       current: Math.min(xpToday, XP_GOAL),
       total: XP_GOAL,
       barClass: 'bg-xp-400',
+    },
+    {
+      id: 'daily-perfect',
+      label: `Selesaikan ${PERFECT_GOAL} lesson sempurna`,
+      current: Math.min(perfectToday, PERFECT_GOAL),
+      total: PERFECT_GOAL,
+      barClass: 'bg-brand-500',
     },
   ]
 
@@ -96,11 +117,7 @@ export default async function GoalsPage() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <Gift
-                  size={22}
-                  className={done ? 'text-xp-500' : 'text-zinc-500'}
-                  aria-label={done ? 'Hadiah terbuka' : 'Hadiah terkunci'}
-                />
+                <RewardChest unlocked={done} size={28} />
               </div>
             </div>
           )

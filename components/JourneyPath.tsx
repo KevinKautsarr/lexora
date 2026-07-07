@@ -92,7 +92,7 @@ function SingleNode({
         return `${base} border-brand-500 bg-brand-500 text-white hover:scale-110`
       case 'unlocked':
         return `${base} border-brand-500 bg-zinc-950 text-brand-600 ${
-          lesson.isFrontmost ? 'shadow-[0_0_20px_4px_color-mix(in_oklch,var(--color-brand-500)_45%,transparent)]' : ''
+          lesson.isFrontmost ? 'shadow-[0_0_12px_2px_color-mix(in_oklch,var(--color-brand-500)_40%,transparent)]' : ''
         } hover:scale-110 cursor-pointer`
       case 'locked':
       default:
@@ -144,23 +144,26 @@ function SingleNode({
   return (
     <div
       id={isActiveLesson ? 'active-lesson' : undefined}
+      data-lesson-id={isActiveLesson ? lesson.id : undefined}
       className="group relative flex justify-center scroll-mt-24"
       style={{ transform: `translateX(${offset}px)` }}
     >
-      {/* Pulse ring for frontmost unlocked lesson */}
-      {isActiveLesson && (
-        <span className="absolute inset-0 rounded-full animate-ping bg-brand-400/20" />
-      )}
 
-      {isClickable ? (
-        <Link href={`/game/${lesson.id}`} aria-label={lesson.title} className={nodeClasses}>
-          {icon}
-        </Link>
-      ) : (
-        <div aria-disabled aria-label={lesson.title} className={nodeClasses}>
-          {icon}
-        </div>
-      )}
+      {/* Node aktif ("sedang ditempuh") memantul lembat naik-turun untuk
+          mengundang klik. Bounce di wrapper (translateY) supaya tidak bentrok
+          dengan hover:scale-110 di node (elemen berbeda). Wrapper terpisah dari
+          div terluar yang memegang translateX offset zigzag. */}
+      <div className={isActiveLesson ? 'animate-node-bounce' : undefined}>
+        {isClickable ? (
+          <Link href={`/game/${lesson.id}`} aria-label={lesson.title} className={nodeClasses}>
+            {icon}
+          </Link>
+        ) : (
+          <div aria-disabled aria-label={lesson.title} className={nodeClasses}>
+            {icon}
+          </div>
+        )}
+      </div>
 
       {tooltip}
     </div>
@@ -243,8 +246,10 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
   // Flatten to compute global index for zigzag
   let globalIndex = 0
 
+  // pb kecil di bawah memberi ruang untuk bounce node terakhir (naik-turun 8px)
+  // supaya tidak menabrak header level berikutnya.
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-12 pb-4">
       {units.map((unit) => {
         const unitStartIndex = globalIndex
 

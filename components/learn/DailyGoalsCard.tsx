@@ -1,10 +1,12 @@
-import { Gift, Target } from 'lucide-react'
+import { Target } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { isGoalMetToday, utcDateOnly } from '@/lib/streak'
+import RewardChest from '@/components/RewardChest'
 
 const XP_GOAL = 50
 const LESSON_GOAL = 1
+const PERFECT_GOAL = 3
 
 export default async function DailyGoalsCard() {
   const sessionUser = await getSessionUser()
@@ -12,21 +14,35 @@ export default async function DailyGoalsCard() {
 
   const user = await prisma.user.findUnique({
     where: { id: sessionUser.id },
-    select: { xpToday: true, lastXpDate: true, lastActivityDate: true },
+    select: {
+      xpToday: true,
+      lastXpDate: true,
+      lastActivityDate: true,
+      perfectToday: true,
+      lastPerfectDate: true,
+    },
   })
   if (!user) return null
 
   const now = new Date()
+  const todayMs = utcDateOnly(now).getTime()
 
   // Lesson hari ini: lastActivityDate di-set ke UTC-date-only saat lesson completed.
   const lessonDoneToday = isGoalMetToday(user.lastActivityDate, now) ? 1 : 0
 
   // XP hari ini: xpToday direset tiap hari baru (dikelola di submitScore).
   // Kalau lastXpDate bukan hari ini, xpToday sudah stale → anggap 0.
-  const isToday =
-    user.lastXpDate !== null &&
-    utcDateOnly(new Date(user.lastXpDate)).getTime() === utcDateOnly(now).getTime()
-  const xpToday = isToday ? user.xpToday : 0
+  const xpToday =
+    user.lastXpDate && utcDateOnly(new Date(user.lastXpDate)).getTime() === todayMs
+      ? user.xpToday
+      : 0
+
+  // Lesson sempurna (akurasi 100%) hari ini — sama pola stale-check-nya.
+  const perfectToday =
+    user.lastPerfectDate &&
+    utcDateOnly(new Date(user.lastPerfectDate)).getTime() === todayMs
+      ? user.perfectToday
+      : 0
 
   const goals = [
     {
@@ -42,6 +58,13 @@ export default async function DailyGoalsCard() {
       current: Math.min(xpToday, XP_GOAL),
       total: XP_GOAL,
       color: 'xp',
+    },
+    {
+      id: 'daily-perfect',
+      label: `Selesaikan ${PERFECT_GOAL} lesson sempurna`,
+      current: Math.min(perfectToday, PERFECT_GOAL),
+      total: PERFECT_GOAL,
+      color: 'brand',
     },
   ]
 
@@ -80,11 +103,7 @@ export default async function DailyGoalsCard() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <Gift
-                  size={18}
-                  className={done ? 'text-xp-500' : 'text-zinc-500'}
-                  aria-label={done ? 'Hadiah terbuka' : 'Hadiah terkunci'}
-                />
+                <RewardChest unlocked={done} size={24} />
               </div>
             </div>
           )
