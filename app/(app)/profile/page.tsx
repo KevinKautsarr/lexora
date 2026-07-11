@@ -1,41 +1,58 @@
-import { Flame, Star, Zap, Shield, Target, TrendingUp, Calendar, LogOut } from 'lucide-react'
+import { Flame, Zap, TrendingUp, Calendar, Settings, Gem } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getCurrentCefrLevel } from '@/lib/cefr'
 import { levelForXp } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
+import { buildAchievementCategories } from '@/lib/achievements'
 import Avatar from '@/components/Avatar'
-import LogoutButton from '@/components/LogoutButton'
-import NameForm from './NameForm'
-import PasswordForm from './PasswordForm'
+import LeagueBadge, { type Division } from '@/components/LeagueBadge'
+import AchievementBadges from '@/components/profile/AchievementBadges'
 
 export default async function ProfilePage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
 
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { id: sessionUser.id },
-    select: {
-      email: true,
-      name: true,
-      createdAt: true,
-      xp: true,
-      streak: true,
-      longestStreak: true,
-      startLevelOrder: true,
-      division: true,
-      goldWins: true,
-    },
-  })
+  const [user, lessonsCompleted] = await Promise.all([
+    prisma.user.findUniqueOrThrow({
+      where: { id: sessionUser.id },
+      select: {
+        email: true,
+        name: true,
+        createdAt: true,
+        xp: true,
+        streak: true,
+        longestStreak: true,
+        startLevelOrder: true,
+        division: true,
+        goldWins: true,
+        gems: true,
+      },
+    }),
+    prisma.lessonProgress.count({
+      where: { userId: sessionUser.id, completed: true },
+    }),
+  ])
 
   const cefr = await getCurrentCefrLevel(sessionUser.id, user.startLevelOrder)
+
+  const achievementCategories = buildAchievementCategories({
+    streak: user.streak,
+    longestStreak: user.longestStreak,
+    xp: user.xp,
+    gems: user.gems,
+    goldWins: user.goldWins,
+    lessonsCompleted,
+    cefrOrder: cefr?.order ?? 0,
+  })
 
   const joinedAt = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(user.createdAt)
   const displayName = user.name ?? user.email
   const level = levelForXp(user.xp)
 
   const divisionLabel =
-    user.division === 'GOLD' ? 'Emas 🥇' : user.division === 'SILVER' ? 'Perak 🥈' : 'Perunggu 🥉'
+    user.division === 'GOLD' ? 'Emas' : user.division === 'SILVER' ? 'Perak' : 'Perunggu'
   const divisionColor =
     user.division === 'GOLD'
       ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/25'
@@ -51,9 +68,9 @@ export default async function ProfilePage() {
         className="relative overflow-hidden rounded-3xl border border-zinc-700/60 bg-zinc-800/50 backdrop-blur-sm shadow-xl"
         aria-label="Kartu profil pengguna"
       >
-        {/* Cover banner with gradient */}
+        {/* Cover banner with gradient — lebih pendek, cukup untuk aksen visual */}
         <div
-          className="relative h-32 bg-gradient-to-br from-brand-700 via-brand-500 to-emerald-600"
+          className="relative h-20 bg-gradient-to-br from-brand-700 via-brand-500 to-emerald-600"
           aria-hidden
         >
           {/* Decorative mesh pattern */}
@@ -67,6 +84,16 @@ export default async function ProfilePage() {
           />
           {/* Glow overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 to-transparent" />
+
+          {/* Tombol Settings di banner — hanya mobile; desktop pakai Settings
+              di sidebar (lg+), jadi disembunyikan agar tidak dobel. */}
+          <Link
+            href="/settings"
+            aria-label="Buka pengaturan"
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-zinc-900/40 text-white/90 backdrop-blur-sm transition-colors hover:bg-zinc-900/60 hover:text-white lg:hidden"
+          >
+            <Settings size={18} aria-hidden />
+          </Link>
         </div>
 
         <div className="px-5 pb-6">
@@ -92,8 +119,8 @@ export default async function ProfilePage() {
 
           {/* Meta info */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${divisionColor}`}>
-              <Shield size={10} />
+            <span className={`flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${divisionColor}`}>
+              <LeagueBadge division={user.division as Division} size={16} className="shrink-0" />
               Liga {divisionLabel}
             </span>
             {user.goldWins > 0 && (
@@ -137,17 +164,15 @@ export default async function ProfilePage() {
             <dt className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Total XP</dt>
           </div>
 
-          {/* Level */}
+          {/* Gems — menggantikan "Level CEFR" yang duplikat dengan badge di kartu identitas */}
           <div className="group flex flex-col items-center gap-2 rounded-2xl border border-zinc-700/60 bg-zinc-800/50 p-4 transition-colors hover:border-emerald-500/30 hover:bg-emerald-500/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <Star size={20} className="text-emerald-400" aria-hidden />
+              <Gem size={20} className="text-emerald-400" aria-hidden />
             </div>
             <dd className="text-3xl font-black tabular-nums text-emerald-400 leading-none">
-              {cefr ? cefr.code : `${level}`}
+              {user.gems.toLocaleString('id-ID')}
             </dd>
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-              {cefr ? 'Level CEFR' : 'Level'}
-            </dt>
+            <dt className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Gems</dt>
           </div>
 
           {/* Longest Streak */}
@@ -163,49 +188,8 @@ export default async function ProfilePage() {
         </dl>
       </section>
 
-      {/* ── Account Settings ────────────────────────────────────── */}
-      <section
-        className="overflow-hidden rounded-3xl border border-zinc-700/60 bg-zinc-800/40 backdrop-blur-sm"
-        aria-labelledby="settings-heading"
-      >
-        <div className="border-b border-zinc-700/50 px-5 py-4">
-          <h2 id="settings-heading" className="flex items-center gap-2 text-sm font-black text-zinc-100">
-            <Target size={16} className="text-brand-500" aria-hidden />
-            Pengaturan Akun
-          </h2>
-        </div>
-
-        {/* Edit Name */}
-        <div className="border-b border-zinc-700/40 px-5 py-5">
-          <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-zinc-400">
-            Nama Tampilan
-          </h3>
-          <NameForm currentName={user.name ?? ''} />
-        </div>
-
-        {/* Change Password */}
-        <div className="px-5 py-5">
-          <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-zinc-400">
-            Ganti Password
-          </h3>
-          <PasswordForm />
-        </div>
-      </section>
-
-      {/* ── Danger Zone ─────────────────────────────────────────── */}
-      <section
-        className="rounded-3xl border border-zinc-800/60 bg-zinc-900/40 p-5"
-        aria-label="Zona berbahaya"
-      >
-        <h2 className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-500">
-          <LogOut size={13} aria-hidden />
-          Keluar dari Akun
-        </h2>
-        <p className="mb-4 text-xs text-zinc-500 leading-relaxed">
-          Kamu akan dikeluarkan dari sesi aktif. Data belajar kamu tetap aman dan tersimpan.
-        </p>
-        <LogoutButton className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-700/60 bg-zinc-800/60 px-5 py-3 text-sm font-bold text-zinc-400 transition-all duration-150 hover:border-rose-500/40 hover:bg-rose-500/8 hover:text-rose-400 cursor-pointer" />
-      </section>
+      {/* ── Pencapaian (signature) ──────────────────────────────── */}
+      <AchievementBadges categories={achievementCategories} />
     </div>
   )
 }
