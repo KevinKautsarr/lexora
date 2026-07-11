@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Desktop marketing features panel */}
         <div className="hidden max-w-sm flex-col gap-6 lg:flex z-10">
-          <h2 className="text-4xl font-extrabold tracking-tight text-zinc-100 text-pretty leading-tight select-none">
+          <h2 className="font-display text-4xl font-extrabold tracking-tight text-zinc-100 text-pretty leading-tight select-none">
             Mulai Petualangan Bahasamu
           </h2>
           <ul className="flex flex-col gap-4">

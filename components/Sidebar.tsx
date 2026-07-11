@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { Settings } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { NAV_ITEMS, isNavActive } from './nav-items'
 import LogoutButton from './LogoutButton'
@@ -48,7 +49,24 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 pb-4">
+      <div className="flex flex-col gap-1 px-3 pb-4">
+        {/* Settings — dipindah dari tombol gear di halaman profile (desktop). */}
+        <Link
+          href="/settings"
+          aria-label="Pengaturan"
+          aria-current={pathname === '/settings' || pathname.startsWith('/settings/') ? 'page' : undefined}
+          className={`relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-colors ${
+            pathname === '/settings' || pathname.startsWith('/settings/')
+              ? 'bg-zinc-800 text-brand-600'
+              : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
+          }`}
+        >
+          {(pathname === '/settings' || pathname.startsWith('/settings/')) && (
+            <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-brand-500" />
+          )}
+          <Settings size={20} aria-hidden />
+          Pengaturan
+        </Link>
         <LogoutButton className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-red-600" />
       </div>
     </aside>

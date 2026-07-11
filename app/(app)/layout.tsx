@@ -34,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <header className="flex h-16 items-center border-b border-zinc-800 px-4 sm:px-8 lg:hidden">
           <Link href="/learn" aria-label="LEXORA — beranda" className="flex items-center gap-3">
             <Image src="/logo-full-transparent.png" alt="LEXORA" width={52} height={52} priority className="rounded-xl" />
-            <span className="text-2xl font-black tracking-tight text-zinc-100">LEXORA</span>
+            <span className="font-display text-2xl font-extrabold tracking-tight text-zinc-100">LEXORA</span>
           </Link>
 
 

@@ -1,4 +1,4 @@
-import { Map, Dumbbell, Flag, Trophy, User } from 'lucide-react'
+import { Map, Flame, Flag, Trophy, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type NavItem = {
@@ -12,10 +12,9 @@ export type NavItem = {
 // Sumber tunggal untuk navigasi — dipakai Sidebar (desktop) & BottomNav (mobile).
 export const NAV_ITEMS: NavItem[] = [
   { href: '/learn', label: 'Journey', icon: Map },
-  // exact: /game/[lessonId] datang dari Journey, jangan menyorot Practice
-  { href: '/game', label: 'Practice', icon: Dumbbell, exact: true },
-  { href: '/goals', label: 'Goals', icon: Flag },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { href: '/goals', label: 'Goals', icon: Flag },
+  { href: '/streak', label: 'Streak', icon: Flame },
   { href: '/profile', label: 'Profile', icon: User },
 ]
 

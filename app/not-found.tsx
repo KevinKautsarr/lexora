@@ -21,7 +21,7 @@ export default function NotFound() {
           <span className="text-xs font-black uppercase tracking-widest text-brand-500">
             Halaman Tidak Ditemukan
           </span>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-100">
+          <h1 className="font-display text-4xl font-extrabold tracking-tight text-zinc-100">
             Waduh, 404! 🦖
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-zinc-400 text-pretty">

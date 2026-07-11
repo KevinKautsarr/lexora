@@ -24,6 +24,12 @@ model User {
   streak           Int       @default(0)
   longestStreak    Int       @default(0)
   lastActivityDate DateTime?
+  gems             Int       @default(0)
+  streakFreezes    Int       @default(0) // Freeze yang dimiliki (max 3), auto-pakai saat bolong
+  reminderEnabled  Boolean   @default(false) // Pengingat belajar harian aktif?
+  reminderHour     Int       @default(19)    // Jam pengingat (0-23, WIB)
+  boosterMultiplier Float     @default(1.0)
+  boosterExpiry    DateTime?
   onboarded        Boolean   @default(false)
   startLevelOrder  Int       @default(1)
   createdAt DateTime @default(now())
@@ -36,6 +42,11 @@ model User {
   sessions          Session[]
   accounts          Account[]
 
+  // Guard reset liga mingguan (findFirst lastWeekStart >= currentWeekStart)
+  // jalan di tiap page-load — tanpa index ini jadi full table scan.
+  @@index([lastWeekStart])
+  // Query leaderboard: filter division + urut xpThisWeek desc.
+  @@index([division, xpThisWeek])
   @@map("user")
 }
 

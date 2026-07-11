@@ -4,6 +4,7 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
 @theme {
@@ -55,14 +56,88 @@
   --color-zinc-400: #6b7865; /* teks redup / placeholder */
   --color-zinc-500: #6b7a5e; /* teks paling redup — digelapkan utk WCAG AA 4.5:1 */
   --color-zinc-600: #b6c3a6; /* border kuat / divider */
-  --color-zinc-700: #cddcbb; /* border kartu */
-  --color-zinc-800: #dde8c8; /* permukaan kartu terangkat */
+  --color-zinc-700: #b9cca0; /* border kartu — digelapkan agar kartu tidak menyatu dgn background */
+  --color-zinc-800: #c6daad; /* permukaan kartu terangkat — kontras lebih jelas dari zinc-900 */
   --color-zinc-900: #edf1d6; /* permukaan utama / background (krem) */
   --color-zinc-950: #f5f8e6; /* background paling terang */
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   DARK MODE — nilai token didefinisikan ulang, className komponen TIDAK
+   diubah (semua merujuk var --color-*). Skala zinc dibalik lagi ke
+   "gelap sungguhan": zinc-900 = surface gelap, zinc-100 = teks terang.
+   Brand/xp digeser agar teks aksen tetap kontras di ground gelap.
+
+   Diterapkan lewat @media (preferensi OS) DAN :root[data-theme="dark"]
+   (override manual dari toggle). Blok .theme-vars-dark dipakai keduanya.
+   ══════════════════════════════════════════════════════════════════ */
+@layer base {
+  :root[data-theme="dark"],
+  :root[data-theme="dark"] * {
+    color-scheme: dark;
+  }
+}
+
+/* Kumpulan nilai token gelap — dipakai oleh media query & data-theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Netral: gelap earthy (hijau-hitam) */
+    --color-zinc-50: #f5f8e6;  /* teks paling kuat */
+    --color-zinc-100: #e6eed4; /* teks utama (terang) */
+    --color-zinc-200: #d3ddbf;
+    --color-zinc-300: #b6c3a6; /* teks sekunder */
+    --color-zinc-400: #93a385; /* teks redup / placeholder */
+    --color-zinc-500: #8a9a7d; /* teks paling redup */
+    --color-zinc-600: #3f4f41; /* border kuat / divider */
+    --color-zinc-700: #364438; /* border kartu */
+    --color-zinc-800: #26302a; /* permukaan kartu terangkat */
+    --color-zinc-900: #1a231d; /* permukaan utama / background gelap */
+    --color-zinc-950: #141b16; /* background paling gelap */
+    /* Brand: shade terang (dipakai sbg kartu) digelapkan; shade teks
+       (600/700) diterangkan agar kontras di ground gelap. */
+    --color-brand-50: #21301f;
+    --color-brand-100: #24361f;
+    --color-brand-200: #2c4227;
+    --color-brand-600: #7fae76;
+    --color-brand-700: #9dc08b;
+    /* XP: shade terang (sbg bg) digelapkan; teks diterangkan. */
+    --color-xp-50: #2a2410;
+    --color-xp-100: #322a12;
+    --color-xp-200: #4a3d18;
+    --color-xp-600: #e0b04a;
+    --color-xp-700: #cf9a32;
+  }
+}
+
+/* Override manual dari toggle (menang atas preferensi OS di kedua arah). */
+:root[data-theme="dark"] {
+  --color-zinc-50: #f5f8e6;
+  --color-zinc-100: #e6eed4;
+  --color-zinc-200: #d3ddbf;
+  --color-zinc-300: #b6c3a6;
+  --color-zinc-400: #93a385;
+  --color-zinc-500: #8a9a7d;
+  --color-zinc-600: #3f4f41;
+  --color-zinc-700: #364438;
+  --color-zinc-800: #26302a;
+  --color-zinc-900: #1a231d;
+  --color-zinc-950: #141b16;
+  --color-brand-50: #21301f;
+  --color-brand-100: #24361f;
+  --color-brand-200: #2c4227;
+  --color-brand-600: #7fae76;
+  --color-brand-700: #9dc08b;
+  --color-xp-50: #2a2410;
+  --color-xp-100: #322a12;
+  --color-xp-200: #4a3d18;
+  --color-xp-600: #e0b04a;
+  --color-xp-700: #cf9a32;
+}
+
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: var(--color-zinc-900);
+  color: var(--color-zinc-100);
 }
 
 /* Scrollbar bernuansa sage — default browser di light mode tampil putih polos

@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
       <div className="flex w-full max-w-xl flex-col gap-6">
         <header className="text-center">
           <Mascot pose="wave" size={100} className="mx-auto mb-3" />
-          <h1 className="text-2xl font-black tracking-tight text-zinc-100">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-zinc-100">
             Selamat datang{user.name ? `, ${user.name}` : ''}! 👋
           </h1>
           <p className="mt-1 text-sm text-zinc-400">
