@@ -18,6 +18,10 @@ export default async function StreakCard() {
   const activeToday = isGoalMetToday(user.lastActivityDate, new Date())
   const isInDanger = streak > 0 && !activeToday
 
+  // Pose Lexi: berisiko → mengantuk (streak-danger); sudah belajar hari ini →
+  // jempol (thumbsup); belum mulai → penjaga api (streak-keeper).
+  const pose = isInDanger ? 'streak-danger' : activeToday ? 'thumbsup' : 'streak-keeper'
+
   return (
     <div className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 p-4">
       <div className="mb-3 flex items-center gap-2">
@@ -29,11 +33,8 @@ export default async function StreakCard() {
       <div className={`mb-3 flex items-center gap-4 rounded-xl bg-zinc-900/40 p-3 border ${
         isInDanger ? 'border-orange-500/30' : 'border-zinc-700/40'
       }`}>
-        <div className="shrink-0 rounded-lg bg-zinc-900/60 p-1">
-          <Mascot
-            pose={isInDanger ? 'streak-danger' : 'streak-keeper'}
-            size={56}
-          />
+        <div className="shrink-0 rounded-lg bg-transparent p-1">
+          <Mascot pose={pose} size={56} />
         </div>
         <div className="flex-1">
           <p className={`text-2xl font-black tabular-nums ${streak > 0 ? 'text-orange-500' : 'text-zinc-500'}`}>

@@ -1,16 +1,17 @@
-import { CheckCircle2, Sparkles, Target, Trophy } from 'lucide-react'
+import { CheckCircle2, Sparkles, Target } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
-import { isGoalMetToday, utcDateOnly } from '@/lib/streak'
-import DailyResetCountdown from '@/components/DailyResetCountdown'
-import RewardChest from '@/components/RewardChest'
+import { isGoalMetToday, wibDateOnly } from '@/lib/streak'
+import GoalsHeroRing from '@/components/goals/GoalsHeroRing'
+import Mascot from '@/components/Mascot'
 
 const XP_GOAL = 50
 const LESSON_GOAL = 1
 const PERFECT_GOAL = 3
 
-// Kutipan berganti tiap hari (deterministik dari tanggal UTC → aman dari
+// Kutipan berganti tiap hari (deterministik dari tanggal WIB → aman dari
 // hydration mismatch, dihitung di server).
 const QUOTES = [
   'Sedikit demi sedikit, lama-lama jadi bukit.',
@@ -38,15 +39,15 @@ export default async function GoalsPage() {
   })
 
   const now = new Date()
-  const todayMs = utcDateOnly(now).getTime()
+  const todayMs = wibDateOnly(now).getTime()
   const lessonDoneToday = isGoalMetToday(user.lastActivityDate, now) ? 1 : 0
   const xpToday =
-    user.lastXpDate && utcDateOnly(new Date(user.lastXpDate)).getTime() === todayMs
+    user.lastXpDate && wibDateOnly(new Date(user.lastXpDate)).getTime() === todayMs
       ? user.xpToday
       : 0
   const perfectToday =
     user.lastPerfectDate &&
-    utcDateOnly(new Date(user.lastPerfectDate)).getTime() === todayMs
+    wibDateOnly(new Date(user.lastPerfectDate)).getTime() === todayMs
       ? user.perfectToday
       : 0
 
@@ -74,21 +75,22 @@ export default async function GoalsPage() {
     },
   ]
 
-  const allDone = goals.every((g) => g.current >= g.total)
+  const goalsDone = goals.filter((g) => g.current >= g.total).length
+  const allDone = goalsDone === goals.length
 
-  // Indeks kutipan dari jumlah hari sejak epoch (UTC) → berganti tiap hari.
-  const dayIndex = Math.floor(utcDateOnly(now).getTime() / 86_400_000)
+  // Indeks kutipan dari jumlah hari sejak epoch (WIB) → berganti tiap hari.
+  const dayIndex = Math.floor(wibDateOnly(now).getTime() / 86_400_000)
   const quote = QUOTES[dayIndex % QUOTES.length]
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight">
-          <Target size={26} className="text-brand-600" aria-hidden />
-          Daily Goals
-        </h1>
-        <DailyResetCountdown />
-      </header>
+      <h1 className="flex items-center gap-2 font-display text-2xl font-extrabold tracking-tight">
+        <Target size={26} className="text-brand-600" aria-hidden />
+        Daily Goals
+      </h1>
+
+      {/* ── Hero: ring progres keseluruhan (signature) ── */}
+      <GoalsHeroRing goalsDone={goalsDone} totalGoals={goals.length} allDone={allDone} />
 
       {/* ── List goal besar + reward peti ── */}
       <section className="flex flex-col gap-5 rounded-3xl border border-zinc-700 bg-zinc-800/50 p-6">
@@ -117,37 +119,51 @@ export default async function GoalsPage() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <RewardChest unlocked={done} size={28} />
+                <div className="relative h-7 w-7 shrink-0 select-none">
+                  <Image
+                    src={done ? '/icons-flat/128/chest-gold-glow.png' : '/icons-flat/128/chest-locked-grey.png'}
+                    alt={done ? 'Hadiah terbuka' : 'Hadiah terkunci'}
+                    fill
+                    sizes="28px"
+                    className="object-contain"
+                  />
+                </div>
               </div>
             </div>
           )
         })}
       </section>
 
-      {/* ── Conquer them all ── */}
-      <section
-        className={`relative flex items-center gap-4 overflow-hidden rounded-3xl border p-6 ${
-          allDone
-            ? 'border-brand-300 bg-brand-100'
-            : 'border-zinc-700 bg-zinc-800/50'
-        }`}
-      >
-        <Trophy
-          size={40}
-          className={allDone ? 'shrink-0 text-xp-500' : 'shrink-0 text-zinc-500'}
-          aria-hidden
-        />
-        <div className="min-w-0">
-          <h2 className="text-lg font-bold text-zinc-100">
-            {allDone ? 'Semua goal tercapai! 🎉' : 'Taklukkan semua'}
-          </h2>
-          <p className="mt-0.5 text-sm text-zinc-400">
-            {allDone
-              ? 'Kerja bagus hari ini. Goal baru menunggu besok.'
-              : 'Selesaikan semua goal untuk mengklaim hadiah. Goal di-reset tiap hari.'}
-          </p>
-        </div>
-      </section>
+      {/* ── Perayaan: hanya saat SEMUA goal selesai ── */}
+      {allDone && (
+        <section
+          className="relative flex flex-col items-center gap-3 overflow-hidden rounded-3xl border border-xp-400/60 bg-gradient-to-b from-xp-100 to-brand-100 p-6 text-center"
+          aria-label="Semua goal harian selesai"
+        >
+          {/* Glow dekoratif */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-xp-400) 45%, transparent), transparent 60%)',
+            }}
+            aria-hidden
+          />
+          <Mascot
+            mood="cheer"
+            size={112}
+            className="relative select-none drop-shadow-[0_8px_24px_rgba(224,176,74,0.45)]"
+          />
+          <div className="relative">
+            <h2 className="font-display text-xl font-extrabold tracking-tight text-brand-700">
+              Semua goal selesai! 🎉
+            </h2>
+            <p className="mt-1 text-sm font-medium text-brand-600">
+              Hadiah harian sudah kamu klaim. Sampai jumpa besok!
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* ── Motivational quote ── */}
       <section className="flex items-start gap-3 rounded-3xl border border-zinc-700 bg-zinc-800/30 p-6">

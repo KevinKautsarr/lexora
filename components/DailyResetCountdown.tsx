@@ -3,15 +3,20 @@
 import { Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-// Hitung mundur ke reset goal harian = tengah malam UTC berikutnya
-// (konsisten dengan utcDateOnly di lib/streak — hari dihitung berbasis UTC).
-function msUntilNextUtcMidnight(now: Date): number {
-  const next = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 1,
+// Hitung mundur ke reset goal harian = tengah malam WIB berikutnya
+// (konsisten dengan wibDateOnly di lib/streak — hari dihitung berbasis UTC+7).
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+
+function msUntilNextWibMidnight(now: Date): number {
+  // Kerjakan dalam "waktu WIB" dengan menggeser +7 jam, hitung midnight
+  // berikutnya di ruang itu, lalu geser balik ke epoch nyata.
+  const wibNow = new Date(now.getTime() + WIB_OFFSET_MS)
+  const nextWibMidnight = Date.UTC(
+    wibNow.getUTCFullYear(),
+    wibNow.getUTCMonth(),
+    wibNow.getUTCDate() + 1,
   )
-  return next - now.getTime()
+  return nextWibMidnight - wibNow.getTime()
 }
 
 function format(ms: number): string {
@@ -29,7 +34,7 @@ export default function DailyResetCountdown() {
   const [remaining, setRemaining] = useState<number | null>(null)
 
   useEffect(() => {
-    const tick = () => setRemaining(msUntilNextUtcMidnight(new Date()))
+    const tick = () => setRemaining(msUntilNextWibMidnight(new Date()))
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
