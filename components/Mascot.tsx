@@ -16,6 +16,12 @@ export type MascotPose =
   | 'premium-locked'
   | 'footer-cta-1'
   | 'footer-cta-2'
+  // Pose baru (aset assets/) — ekspresi lebih spesifik.
+  | 'cheer'
+  | 'thumbsup'
+  | 'sad'
+  | 'reading'
+  | 'medal'
 
 const POSE_MAP: Record<MascotPose, string> = {
   avatar: '/images/01_favicon_avatar.png',
@@ -33,6 +39,11 @@ const POSE_MAP: Record<MascotPose, string> = {
   'premium-locked': '/images/13_premium_locked.png',
   'footer-cta-1': '/images/14_footer_cta_gamified-1.png',
   'footer-cta-2': '/images/14_footer_cta_gamified-2.png',
+  cheer: '/assets/dino-cheer.png',
+  thumbsup: '/assets/dino-thumbsup.png',
+  sad: '/assets/dino-sad.png',
+  reading: '/assets/dino-reading.png',
+  medal: '/assets/dino-medal.png',
 }
 
 type MascotMood = 'happy' | 'cheer' | 'sad'
@@ -53,9 +64,9 @@ export default function Mascot({
   let resolvedPose: MascotPose = pose || 'neutral'
   if (mood && !pose) {
     if (mood === 'cheer') {
-      resolvedPose = 'success'
+      resolvedPose = 'cheer'
     } else if (mood === 'sad') {
-      resolvedPose = 'confused'
+      resolvedPose = 'sad'
     } else {
       resolvedPose = 'wave'
     }

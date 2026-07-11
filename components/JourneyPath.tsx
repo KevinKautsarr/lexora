@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Check, Lock, Play, Trophy } from 'lucide-react'
+import Image from 'next/image'
+import { MAX_LESSON_SCORE } from '@/app/(app)/game/scoring'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -83,48 +84,49 @@ function SingleNode({
 }) {
   const isClickable = lesson.status !== 'locked'
 
-  const nodeClasses = (() => {
-    const base =
-      'relative flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 transition-transform duration-200 select-none cursor-default'
-
+  // Pilih badge PNG sesuai status lesson. Prioritas: lesson terakhir unit &
+  // sudah selesai → trophy; selesai dengan skor sempurna → perfect (bintang);
+  // selesai biasa → completed (check); terbuka → active (play); terkunci → locked.
+  const isPerfect = lesson.status === 'completed' && lesson.bestScore === MAX_LESSON_SCORE
+  const badge = (() => {
+    if (lesson.isLastInUnit && lesson.status === 'completed') return '/node-trophy.png'
+    if (isPerfect) return '/node-perfect.png'
     switch (lesson.status) {
       case 'completed':
-        return `${base} border-brand-500 bg-brand-500 text-white hover:scale-110`
+        return '/node-completed.png'
       case 'unlocked':
-        return `${base} border-brand-500 bg-zinc-950 text-brand-600 ${
-          lesson.isFrontmost ? 'shadow-[0_0_12px_2px_color-mix(in_oklch,var(--color-brand-500)_40%,transparent)]' : ''
-        } hover:scale-110 cursor-pointer`
+        return '/node-active.png'
       case 'locked':
       default:
-        return `${base} border-zinc-700 bg-zinc-800/60 text-zinc-600`
+        return '/node-locked.png'
     }
   })()
 
-  const icon = (() => {
-    if (lesson.isLastInUnit) {
-      return (
-        <Trophy
-          size={28}
-          strokeWidth={2}
-          className={
-            lesson.status === 'completed'
-              ? 'text-yellow-600'
-              : lesson.status === 'unlocked'
-                ? 'text-brand-600'
-                : 'text-zinc-600'
-          }
-        />
-      )
-    }
-    switch (lesson.status) {
-      case 'completed':
-        return <Check size={30} strokeWidth={2.5} />
-      case 'unlocked':
-        return <Play size={26} strokeWidth={2} className="translate-x-0.5" />
-      case 'locked':
-        return <Lock size={24} strokeWidth={2} />
-    }
-  })()
+  // Badge lesson-terakhir yang belum selesai tetap pakai state normalnya
+  // (active/locked) supaya user tahu ini masih bisa/tak bisa dimainkan; trophy
+  // hanya muncul setelah unit tuntas — memberi rasa "hadiah".
+
+  const isActiveLessonNode = lesson.isFrontmost && lesson.status === 'unlocked'
+  const nodeClasses = `relative block h-[72px] w-[72px] select-none transition-transform duration-200 ${
+    isClickable ? 'hover:scale-110 cursor-pointer' : 'cursor-default'
+  } ${
+    isActiveLessonNode
+      ? 'drop-shadow-[0_0_12px_color-mix(in_oklch,var(--color-brand-500)_55%,transparent)]'
+      : lesson.status === 'locked'
+        ? 'opacity-90'
+        : ''
+  }`
+
+  const nodeImage = (
+    <Image
+      src={badge}
+      alt=""
+      width={72}
+      height={72}
+      className="h-full w-full object-contain drop-shadow-sm"
+      priority={isActiveLessonNode}
+    />
+  )
 
   // Tooltip shows on hover AND keyboard focus (group-hover/group-focus-within),
   // so keyboard and touch users get the title, best score & locked reason too.
@@ -138,13 +140,10 @@ function SingleNode({
     </div>
   )
 
-  // Node yang sedang dikerjakan diberi anchor supaya bisa di-scroll otomatis.
-  const isActiveLesson = lesson.isFrontmost && lesson.status === 'unlocked'
-
   return (
     <div
-      id={isActiveLesson ? 'active-lesson' : undefined}
-      data-lesson-id={isActiveLesson ? lesson.id : undefined}
+      id={isActiveLessonNode ? 'active-lesson' : undefined}
+      data-lesson-id={isActiveLessonNode ? lesson.id : undefined}
       className="group relative flex justify-center scroll-mt-24"
       style={{ transform: `translateX(${offset}px)` }}
     >
@@ -153,14 +152,14 @@ function SingleNode({
           mengundang klik. Bounce di wrapper (translateY) supaya tidak bentrok
           dengan hover:scale-110 di node (elemen berbeda). Wrapper terpisah dari
           div terluar yang memegang translateX offset zigzag. */}
-      <div className={isActiveLesson ? 'animate-node-bounce' : undefined}>
+      <div className={isActiveLessonNode ? 'animate-node-bounce' : undefined}>
         {isClickable ? (
           <Link href={`/game/${lesson.id}`} aria-label={lesson.title} className={nodeClasses}>
-            {icon}
+            {nodeImage}
           </Link>
         ) : (
           <div aria-disabled aria-label={lesson.title} className={nodeClasses}>
-            {icon}
+            {nodeImage}
           </div>
         )}
       </div>
@@ -177,42 +176,10 @@ function SingleNode({
 const CONTAINER_WIDTH = 280 // px — same as the w-[280px] container
 const CONNECTOR_HEIGHT = 40 // px — vertical gap between nodes
 
-function ConnectorLine({
-  fromOffset,
-  toOffset,
-  completed,
-}: {
-  fromOffset: number
-  toOffset: number
-  completed: boolean
-}) {
-  const cx = CONTAINER_WIDTH / 2
-  const x1 = cx + fromOffset
-  const y1 = 0
-  const x2 = cx + toOffset
-  const y2 = CONNECTOR_HEIGHT
-
-  return (
-    <svg
-      width="100%"
-      height={CONNECTOR_HEIGHT}
-      viewBox={`0 0 ${CONTAINER_WIDTH} ${CONNECTOR_HEIGHT}`}
-      preserveAspectRatio="xMidYMid meet"
-      className="w-full flex-shrink-0"
-      aria-hidden
-    >
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke={completed ? 'var(--color-brand-500)' : 'var(--color-zinc-600)'}
-        strokeWidth={3}
-        strokeDasharray={completed ? '0' : '6 4'}
-        strokeLinecap="round"
-      />
-    </svg>
-  )
+// Spacer vertikal antar node. Garis penghubung sengaja dihilangkan (gaya map
+// game seperti referensi) — hanya menyisakan jarak agar node tetap berspasi.
+function ConnectorLine() {
+  return <div className="w-full flex-shrink-0" style={{ height: CONNECTOR_HEIGHT }} aria-hidden />
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +237,6 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
                   lessonIdx < unit.lessons.length - 1
                     ? getOffset(globalIndex + 1)
                     : null
-                const isCompleted = lesson.status === 'completed'
 
                 globalIndex++
 
@@ -278,14 +244,8 @@ export default function JourneyPath({ units }: { units: UnitSection[] }) {
                   <div key={lesson.id} className="flex flex-col items-center w-full">
                     <SingleNode lesson={lesson} offset={myOffset} />
 
-                    {/* Connector to next node (not after last lesson in unit) */}
-                    {nextOffset !== null && (
-                      <ConnectorLine
-                        fromOffset={myOffset}
-                        toOffset={nextOffset}
-                        completed={isCompleted}
-                      />
-                    )}
+                    {/* Spacer antar node (garis penghubung dihilangkan) */}
+                    {nextOffset !== null && <ConnectorLine />}
                   </div>
                 )
               })}
