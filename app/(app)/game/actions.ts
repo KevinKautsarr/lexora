@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
-import { nextStreak, utcDateOnly } from '@/lib/streak'
+import { nextStreakWithFreeze, wibDateOnly } from '@/lib/streak'
 import { isLessonUnlockedForUser } from '@/lib/unlock'
 import { computeScore, REPEATS_PER_WORD } from './scoring'
 import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
@@ -14,6 +14,18 @@ import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
 // dengan mengulang lesson yang sama berkali-kali.
 const REPLAY_XP_FACTOR = 0.25
 
+// Booster duration in minutes
+const BOOSTER_1_5X_DURATION_MINUTES = 15
+const BOOSTER_2X_DURATION_MINUTES = 30
+
+export type GoalReward = {
+  goalId: string
+  label: string
+  gems: number
+  boosterMultiplier?: number  // e.g., 1.5 or 2.0
+  boosterDurationMinutes?: number
+}
+
 export type SubmitScoreResult =
   | {
       ok: true
@@ -22,6 +34,8 @@ export type SubmitScoreResult =
       completed: boolean
       totalXp: number
       xpGain: number
+      gems: number
+      goalsCompleted: GoalReward[]
     }
   | { ok: false; error: string }
 
@@ -76,6 +90,10 @@ export async function submitScore(
         lastXpDate: true,
         perfectToday: true,
         lastPerfectDate: true,
+        gems: true,
+        streakFreezes: true,
+        boosterMultiplier: true,
+        boosterExpiry: true,
       },
     }),
   ])
@@ -88,31 +106,45 @@ export async function submitScore(
   // Replay = lesson ini sudah pernah completed SEBELUM run ini. XP yang masuk
   // ke total user dipotong jadi 1/4; skor & histori lessonProgress tetap penuh.
   const isReplay = existing?.completed ?? false
-  const xpGain = isReplay ? Math.round(score * REPLAY_XP_FACTOR) : score
+  let baseXpGain = isReplay ? Math.round(score * REPLAY_XP_FACTOR) : score
+
+  // Cek booster aktif — jika boosterExpiry ada dan belum kedaluwarsa, kalikan XP
+  const now = new Date()
+  const boosterActive =
+    dbUser.boosterExpiry !== null &&
+    dbUser.boosterMultiplier > 1.0 &&
+    new Date(dbUser.boosterExpiry) > now
+  const xpGain = boosterActive
+    ? Math.round(baseXpGain * dbUser.boosterMultiplier)
+    : baseXpGain
 
   // Skor & akurasi tersimpan mengikuti run dengan skor terbaik.
   const improved = score > (existing?.score ?? -1)
 
-  // Streak hanya bergerak saat user MENYELESAIKAN lesson (bukan sekadar main).
-  const now = new Date()
-  const newStreak = completed
-    ? nextStreak(dbUser.streak, dbUser.lastActivityDate, now)
-    : dbUser.streak
-  const streakUpdate = completed
+  // Streak bertambah saat user mendapatkan XP dari lesson (xpGain > 0).
+  // Ini termasuk sesi tidak sempurna (waktu habis, ada salah) — yang penting
+  // user sudah sungguh-sungguh belajar. Freeze auto-pakai saat ada hari bolong.
+  const streakActive = xpGain > 0
+  const { streak: newStreak, freezesUsed } = streakActive
+    ? nextStreakWithFreeze(dbUser.streak, dbUser.lastActivityDate, now, dbUser.streakFreezes)
+    : { streak: dbUser.streak, freezesUsed: 0 }
+
+  const streakUpdate = streakActive
     ? {
         streak: newStreak,
         longestStreak: Math.max(dbUser.longestStreak, newStreak),
-        lastActivityDate: utcDateOnly(now),
+        lastActivityDate: wibDateOnly(now),
       }
     : {}
 
   // Hitung xpToday: reset jika hari baru (UTC), tambah jika hari sama.
   // xpGain (bukan score mentah) yang dihitung — supaya replay ×1/4 juga
   // tercermin di goal harian, bukan cuma total XP.
-  const today = utcDateOnly(now)
+  const today = wibDateOnly(now)
   const isNewXpDay =
     !dbUser.lastXpDate ||
-    utcDateOnly(new Date(dbUser.lastXpDate)).getTime() !== today.getTime()
+    wibDateOnly(new Date(dbUser.lastXpDate)).getTime() !== today.getTime()
+  const xpTodayBefore = isNewXpDay ? 0 : dbUser.xpToday
   const xpTodayUpdate = isNewXpDay
     ? { xpToday: xpGain, lastXpDate: today }
     : { xpToday: { increment: xpGain }, lastXpDate: today }
@@ -122,12 +154,107 @@ export async function submitScore(
   const isPerfect = completed && accuracy === 1
   const isNewPerfectDay =
     !dbUser.lastPerfectDate ||
-    utcDateOnly(new Date(dbUser.lastPerfectDate)).getTime() !== today.getTime()
+    wibDateOnly(new Date(dbUser.lastPerfectDate)).getTime() !== today.getTime()
+  const perfectTodayBefore = isNewPerfectDay ? 0 : dbUser.perfectToday
   const perfectTodayUpdate = isPerfect
     ? isNewPerfectDay
       ? { perfectToday: 1, lastPerfectDate: today }
       : { perfectToday: { increment: 1 }, lastPerfectDate: today }
     : {}
+
+  // Lesson done today (before this run)
+  const lessonDoneTodayBefore = dbUser.lastActivityDate
+    ? wibDateOnly(new Date(dbUser.lastActivityDate)).getTime() === today.getTime()
+      ? 1
+      : 0
+    : 0
+
+  // ── Cek transisi Daily Goals (sebelum vs sesudah) ──
+  const goalsCompleted: GoalReward[] = []
+  let gemsToAdd = 0
+  let newBoosterMultiplier: number | null = null
+  let newBoosterExpiry: Date | null = null
+
+  // Goal 1: Selesaikan 1 lesson (transisi 0 → 1 hari ini)
+  const lessonDoneTodayAfter = streakActive ? 1 : lessonDoneTodayBefore
+  if (lessonDoneTodayBefore === 0 && lessonDoneTodayAfter === 1) {
+    const reward: GoalReward = {
+      goalId: 'daily-lesson',
+      label: 'Selesaikan 1 Lesson',
+      gems: 10,
+      boosterMultiplier: 1.5,
+      boosterDurationMinutes: BOOSTER_1_5X_DURATION_MINUTES,
+    }
+    goalsCompleted.push(reward)
+    gemsToAdd += reward.gems
+    // Hanya perbarui booster jika tidak ada booster lebih kuat yang aktif
+    if (!boosterActive || dbUser.boosterMultiplier < 1.5) {
+      newBoosterMultiplier = 1.5
+      newBoosterExpiry = new Date(now.getTime() + BOOSTER_1_5X_DURATION_MINUTES * 60_000)
+    }
+  }
+
+  // Goal 2: Raih 50 XP hari ini (transisi < 50 → >= 50)
+  const XP_GOAL = 50
+  const xpTodayAfter = xpTodayBefore + xpGain
+  if (xpTodayBefore < XP_GOAL && xpTodayAfter >= XP_GOAL) {
+    const reward: GoalReward = {
+      goalId: 'daily-xp',
+      label: 'Raih 50 XP Hari Ini',
+      gems: 20,
+      boosterMultiplier: 2.0,
+      boosterDurationMinutes: BOOSTER_2X_DURATION_MINUTES,
+    }
+    goalsCompleted.push(reward)
+    gemsToAdd += reward.gems
+    // Booster 2x selalu menang atas 1.5x
+    newBoosterMultiplier = 2.0
+    newBoosterExpiry = new Date(now.getTime() + BOOSTER_2X_DURATION_MINUTES * 60_000)
+  }
+
+  // Goal 3: Selesaikan 3 lesson sempurna (transisi < 3 → >= 3)
+  const PERFECT_GOAL = 3
+  const perfectTodayAfter = perfectTodayBefore + (isPerfect ? 1 : 0)
+  if (perfectTodayBefore < PERFECT_GOAL && perfectTodayAfter >= PERFECT_GOAL) {
+    const reward: GoalReward = {
+      goalId: 'daily-perfect',
+      label: 'Selesaikan 3 Lesson Sempurna',
+      gems: 50,
+    }
+    goalsCompleted.push(reward)
+    gemsToAdd += reward.gems
+  }
+
+  // ── Drop Streak Freeze (10%) saat SEMUA goal harian selesai ──
+  // Freeze langka: hanya bisa jatuh di run yang MELENGKAPI goal terakhir
+  // (transisi "belum semua selesai" → "semua selesai"), peluang 10%, cap 3.
+  const allGoalsBefore =
+    lessonDoneTodayBefore >= 1 && xpTodayBefore >= XP_GOAL && perfectTodayBefore >= PERFECT_GOAL
+  const allGoalsAfter =
+    lessonDoneTodayAfter >= 1 && xpTodayAfter >= XP_GOAL && perfectTodayAfter >= PERFECT_GOAL
+
+  const FREEZE_DROP_CHANCE = 0.1
+  const MAX_FREEZES = 3
+  const freezesAfterConsume = dbUser.streakFreezes - freezesUsed
+  let freezeDropped = false
+  if (!allGoalsBefore && allGoalsAfter && freezesAfterConsume < MAX_FREEZES) {
+    if (Math.random() < FREEZE_DROP_CHANCE) {
+      freezeDropped = true
+    }
+  }
+
+  // Build booster update (hanya jika ada booster baru yang lebih baik)
+  const boosterUpdate =
+    newBoosterMultiplier !== null && newBoosterExpiry !== null
+      ? { boosterMultiplier: newBoosterMultiplier, boosterExpiry: newBoosterExpiry }
+      : {}
+
+  // Freeze final = nilai absolut setelah konsumsi (bolong) & drop, di-cap ke
+  // MAX_FREEZES. Nilai absolut (bukan increment/decrement) agar cap terjamin.
+  const freezeNet = dbUser.streakFreezes - freezesUsed + (freezeDropped ? 1 : 0)
+  const freezeFinal = Math.min(MAX_FREEZES, Math.max(0, freezeNet))
+  const freezeUpdate =
+    freezeFinal !== dbUser.streakFreezes ? { streakFreezes: freezeFinal } : {}
 
   const [, updatedUser] = await prisma.$transaction([
     prisma.lessonProgress.upsert({
@@ -143,9 +270,12 @@ export async function submitScore(
       data: {
         xp: { increment: xpGain },
         xpThisWeek: { increment: xpGain },
+        gems: { increment: gemsToAdd },
         ...streakUpdate,
+        ...freezeUpdate,
         ...xpTodayUpdate,
         ...perfectTodayUpdate,
+        ...boosterUpdate,
       },
     }),
   ])
@@ -154,5 +284,14 @@ export async function submitScore(
   // ikut ter-update dalam respons action yang sama, tanpa hard refresh.
   revalidatePath('/', 'layout')
 
-  return { ok: true, score, accuracy, completed, totalXp: updatedUser.xp, xpGain }
+  return {
+    ok: true,
+    score,
+    accuracy,
+    completed,
+    totalXp: updatedUser.xp,
+    xpGain,
+    gems: updatedUser.gems,
+    goalsCompleted,
+  }
 }

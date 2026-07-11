@@ -57,7 +57,7 @@ export default async function PracticePage() {
       {/* ── Header baris atas ── */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-zinc-100 sm:text-3xl">
+          <h1 className="flex items-center gap-2 font-display text-2xl font-extrabold tracking-tight text-zinc-100 sm:text-3xl">
             <Sparkles size={26} className="text-brand-500" aria-hidden />
             Latihan Personal
           </h1>

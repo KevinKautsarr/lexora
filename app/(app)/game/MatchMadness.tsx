@@ -8,7 +8,8 @@ import Mascot from '@/components/Mascot'
 import { levelForXp } from '@/lib/level'
 import { submitScore, type SubmitScoreResult } from './actions'
 import { GAME_DURATION, REPEATS_PER_WORD, computeScore } from './scoring'
-import { buildQueue, initialSlots, pickReplacement, type CardInstance } from './queue'
+import { buildQueue, initialSlots, pickReplacement, isValidMatch, type CardInstance } from './queue'
+import GoalRewardModal from '@/components/GoalRewardModal'
 
 export type WordPair = { id: string; english: string; indonesian: string }
 
@@ -71,7 +72,12 @@ export default function MatchMadness({
 
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null)
   const [selectedRight, setSelectedRight] = useState<string | null>(null)
+  // Instance yang sudah dicocokkan — penanda visual "kartu hilang". Kartu kiri
+  // (Indonesia) & kanan (Inggris) dari kata yang sama BERBAGI instanceId yang
+  // sama, jadi Set ini TIDAK bisa dipakai menghitung jumlah match (dua sisi =
+  // satu id). Penghitungan match memakai counter terpisah `matchCount`.
   const [matchedInstanceIds, setMatchedInstanceIds] = useState<Set<string>>(new Set())
+  const [matchCount, setMatchCount] = useState(0)
   const [successIds, setSuccessIds] = useState<Set<string>>(new Set())
   const [wrongPair, setWrongPair] = useState<{ left: string; right: string } | null>(null)
   const [pendingClear, setPendingClear] = useState<Set<string>>(new Set())
@@ -79,6 +85,7 @@ export default function MatchMadness({
   const [gameStarted, setGameStarted] = useState(false)
   const [attempts, setAttempts] = useState(0)
   const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' })
+  const [showRewardModal, setShowRewardModal] = useState(false)
 
   // Timeout penggantian kartu yang masih tertunda — dibatalkan saat game over
   // atau ronde baru supaya kartu antrian tidak "muncul lagi" setelah selesai.
@@ -93,7 +100,7 @@ export default function MatchMadness({
   }
   const [confettiParticles, setConfettiParticles] = useState<ConfettiParticle[]>([])
 
-  const correctCount = Math.floor(matchedInstanceIds.size / 2)
+  const correctCount = matchCount
   const allMatched = totalMatches > 0 && correctCount === totalMatches
   const gameOver = allMatched || timeLeft === 0
 
@@ -122,6 +129,7 @@ export default function MatchMadness({
     const applyShuffledState = () => {
       setSlots({ active, waiting: rest, rightOrder: shuffle(active) })
       setMatchedInstanceIds(new Set())
+      setMatchCount(0)
       setPendingClear(new Set())
     }
     const id = requestAnimationFrame(applyShuffledState)
@@ -178,6 +186,10 @@ export default function MatchMadness({
           const result = await submitScore(lessonId, correctCount, attempts)
           if (result.ok) {
             setSubmit({ status: 'saved', result })
+            // Tampilkan modal reward jika ada goal yang baru diselesaikan
+            if (result.goalsCompleted.length > 0) {
+              setShowRewardModal(true)
+            }
           } else {
             setSubmit({ status: 'error', message: result.error })
           }
@@ -269,7 +281,10 @@ export default function MatchMadness({
     const leftCard = currentSlots.active.find((c) => c?.instanceId === leftInstanceId)
     const rightCard = currentSlots.rightOrder.find((c) => c?.instanceId === rightInstanceId)
 
-    if (leftCard && rightCard && leftCard.wordId === rightCard.wordId) {
+    // Match VALID hanya jika kiri & kanan instance yang SAMA PERSIS (lihat
+    // isValidMatch) — mencegah dua pasang duplikat saling ter-solve.
+    if (isValidMatch(leftCard, rightCard)) {
+      setMatchCount((n) => n + 1)
       setMatchedInstanceIds((prev) => new Set(prev).add(leftInstanceId).add(rightInstanceId))
       setSuccessIds((prev) => new Set(prev).add(leftInstanceId).add(rightInstanceId))
       setTimeout(() => {
@@ -374,6 +389,14 @@ export default function MatchMadness({
     const currentLevel = levelForXp(finalXp)
 
     return (
+      <>
+      {/* Modal reward goal harian — muncul sebelum layar skor jika ada goal selesai */}
+      {showRewardModal && submit.status === 'saved' && submit.result.goalsCompleted.length > 0 && (
+        <GoalRewardModal
+          rewards={submit.result.goalsCompleted}
+          onClose={() => setShowRewardModal(false)}
+        />
+      )}
       <div className="relative mx-auto flex w-full max-w-sm flex-col items-center gap-6 overflow-hidden rounded-3xl border border-zinc-700 bg-zinc-800/40 p-8 text-center backdrop-blur-md shadow-2xl lg:max-w-lg">
         <style>{`
           .confetti-particle {
@@ -427,7 +450,7 @@ export default function MatchMadness({
               </span>
             )}
           </div>
-          <h2 className={`text-2xl font-black tracking-tight ${allMatched ? 'text-brand-500' : 'text-red-500'}`}>
+          <h2 className={`font-display text-3xl font-extrabold tracking-tight ${allMatched ? 'text-brand-500' : 'text-red-500'}`}>
             {allMatched ? 'Luar Biasa!' : 'Waktu Habis'}
           </h2>
           <p className="text-xs font-semibold text-zinc-400">
@@ -508,6 +531,7 @@ export default function MatchMadness({
           <ArrowRight size={20} aria-hidden />
         </button>
       </div>
+      </>
     )
   }
 

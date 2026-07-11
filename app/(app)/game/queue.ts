@@ -14,6 +14,26 @@ export type CardInstance = {
 export const MAX_VISIBLE_SLOTS = 5
 
 /**
+ * Apakah kartu kiri & kanan yang dipilih membentuk pasangan yang benar?
+ *
+ * Kartu kiri (Indonesia) & kanan (Inggris) dari SATU pasang kata berbagi
+ * instanceId yang identik (rightOrder dibangun dari objek instance yang sama).
+ * Jadi match valid HANYA jika instanceId keduanya sama persis.
+ *
+ * PENTING: jangan cukup membandingkan wordId. Kata yang sama bisa muncul lebih
+ * dari sekali (REPEATS_PER_WORD) dengan instanceId berbeda (w1-0, w1-1). Kalau
+ * dua instance itu kebetulan tampil bersamaan, membandingkan wordId membuat
+ * kiri-w1-0 cocok dengan kanan-w1-1 → dua pasang keliru dianggap selesai
+ * sekaligus. Membandingkan instanceId mencegah bug ini.
+ */
+export function isValidMatch(
+  left: CardInstance | null | undefined,
+  right: CardInstance | null | undefined,
+): boolean {
+  return !!left && !!right && left.instanceId === right.instanceId
+}
+
+/**
  * Bangun antrian penuh: tiap pair muncul `repeats` kali, lalu diacak.
  * Urutan acak inilah yang menentukan urutan kemunculan di antrian.
  */
