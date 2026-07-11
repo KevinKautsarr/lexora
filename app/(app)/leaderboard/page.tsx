@@ -1,11 +1,12 @@
 import { Crown, Medal, Trophy, ArrowUp, ArrowDown, Timer, Zap } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import Link from 'next/link'
-import Image from 'next/image'
 import { levelForXp } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import EmptyState from '@/components/EmptyState'
+import LeagueBadge from '@/components/LeagueBadge'
 import { checkAndResetWeeklyLeagueGlobal, getWeekStart } from '@/lib/league'
 
 const TOP_LIMIT = 20
@@ -94,13 +95,15 @@ function PodiumCard({
   isMe: boolean
 }) {
   // Rank 1 = emas (token xp), Rank 2 = perak (sand terang: zinc-800/700),
-  // Rank 3 = perunggu (amber lembut). Semua konsisten light-mode sage.
+  // Rank 3 = perunggu (amber lembut). Warna podium TETAP mengikuti rank,
+  // walau itu kartu "kamu" — status juara tidak boleh tertimpa. Penanda
+  // "kamu" cukup lewat ring luar + label, bukan ganti warna avatar.
   const configs = {
     1: {
       height: 'h-24',
       borderColor: 'border-xp-400/60',
       bgColor: 'bg-gradient-to-b from-xp-100 to-xp-50',
-      avatarBg: isMe ? 'bg-brand-100 border-brand-400 text-brand-700' : 'bg-xp-200 border-xp-400 text-xp-700',
+      avatarBg: 'bg-xp-200 border-xp-400 text-xp-700',
       numBg: 'bg-xp-500 text-white',
       order: 'order-2',
       icon: <Crown size={16} className="text-xp-600 animate-pulse" aria-hidden />,
@@ -109,7 +112,7 @@ function PodiumCard({
       height: 'h-16',
       borderColor: 'border-zinc-600/60',
       bgColor: 'bg-gradient-to-b from-zinc-800 to-zinc-900',
-      avatarBg: isMe ? 'bg-brand-100 border-brand-400 text-brand-700' : 'bg-zinc-700 border-zinc-600 text-zinc-100',
+      avatarBg: 'bg-zinc-700 border-zinc-600 text-zinc-100',
       numBg: 'bg-zinc-500 text-white',
       order: 'order-1',
       icon: null,
@@ -118,7 +121,7 @@ function PodiumCard({
       height: 'h-12',
       borderColor: 'border-amber-300/50',
       bgColor: 'bg-gradient-to-b from-amber-100 to-amber-50',
-      avatarBg: isMe ? 'bg-brand-100 border-brand-400 text-brand-700' : 'bg-amber-100 border-amber-300 text-amber-700',
+      avatarBg: 'bg-amber-100 border-amber-300 text-amber-700',
       numBg: 'bg-amber-600 text-white',
       order: 'order-3',
       icon: null,
@@ -129,7 +132,11 @@ function PodiumCard({
   return (
     <div className={`flex flex-col items-center gap-1.5 ${c.order}`}>
       {c.icon}
-      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border-2 text-sm font-black ${c.avatarBg}`}>
+      <div
+        className={`flex h-11 w-11 items-center justify-center rounded-2xl border-2 text-sm font-black ${c.avatarBg} ${
+          isMe ? 'ring-2 ring-brand-500 ring-offset-2 ring-offset-zinc-900' : ''
+        }`}
+      >
         {name.slice(0, 2).toUpperCase()}
       </div>
       <p className={`max-w-[76px] truncate text-center text-[11px] font-black leading-tight ${isMe ? 'text-brand-600' : 'text-zinc-700'}`}>
@@ -174,7 +181,11 @@ function Row({
     selectedDivision !== 'BRONZE' &&
     (xpThisWeek === 0 || (rank >= 4 && rank > totalCount - 3))
 
-  let rowClass = 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-800/60'
+  // Zebra-stripe pada baris netral (bukan zona kamu/promosi/degradasi) agar
+  // daftar panjang lebih mudah di-scan mata saat scroll.
+  let rowClass = rank % 2 === 0
+    ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-800/60'
+    : 'border-zinc-700 bg-zinc-800/20 hover:bg-zinc-800/60'
   let zoneBadge = null
 
   if (isMe) {
@@ -236,7 +247,12 @@ export default async function LeaderboardPage({
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
 
-  await checkAndResetWeeklyLeagueGlobal()
+  // Reset liga dijalankan non-blocking setelah respons (tidak menahan render).
+  // Trade-off: pada request pertama tiap minggu, papan peringkat bisa tampil
+  // dengan data minggu sebelumnya sesaat; refresh berikutnya sudah ter-reset.
+  after(async () => {
+    await checkAndResetWeeklyLeagueGlobal()
+  })
 
   const sp = await searchParams
   const me = await prisma.user.findUniqueOrThrow({
@@ -300,7 +316,7 @@ export default async function LeaderboardPage({
               )}
             </div>
 
-            <h1 className="text-xl font-black leading-tight text-zinc-100 tracking-tight md:text-2xl">
+            <h1 className="font-display text-xl font-extrabold leading-tight text-zinc-100 tracking-tight md:text-2xl">
               Liga Mingguan Lexora
             </h1>
             <p className="text-xs leading-relaxed text-zinc-400 max-w-[240px]">
@@ -317,16 +333,9 @@ export default async function LeaderboardPage({
             </div>
           </div>
 
-          {/* Trophy image */}
-          <div className="relative h-20 w-20 shrink-0 select-none">
-            <Image
-              src="/images/07_champion_trophy.png"
-              alt="Trofi Juara"
-              fill
-              sizes="80px"
-              className="object-contain drop-shadow-lg"
-              priority
-            />
+          {/* Division badge — elemen LCP di halaman ini, load eager. */}
+          <div className="shrink-0 select-none drop-shadow-lg">
+            <LeagueBadge division={selectedDivision} size={80} priority />
           </div>
         </div>
       </div>
@@ -362,13 +371,14 @@ export default async function LeaderboardPage({
         <EmptyState
           title="Papan peringkat masih kosong"
           description="Selesaikan lesson pertama kamu minggu ini untuk menempati posisi teratas!"
+          image={{ src: '/assets/treasure-map.png', ratio: 1, width: 128 }}
         />
       ) : (
         <>
           {/* ── Podium Top 3 ──────────────────────────────────────── */}
           {topThree.length >= 1 && (
-            <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 px-4 pb-0 pt-5">
-              <p className="mb-4 text-center text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 px-4 pb-2 pt-4">
+              <p className="mb-3 text-center text-[10px] font-black uppercase tracking-widest text-zinc-500">
                 Posisi Teratas Minggu Ini
               </p>
               <div className="grid grid-cols-3 items-end gap-2">
