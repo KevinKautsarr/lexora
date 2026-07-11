@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, RotateCcw, Sparkles } from 'lucide-react'
+import { RotateCcw, Target, Zap } from 'lucide-react'
 
 interface Card {
   id: string
@@ -11,208 +11,243 @@ interface Card {
 }
 
 const INITIAL_CARDS: Card[] = [
-  // English words
-  { id: 'en-1', text: 'Run', type: 'en', matchId: '1' },
-  { id: 'en-2', text: 'Book', type: 'en', matchId: '2' },
-  { id: 'en-3', text: 'Happy', type: 'en', matchId: '3' },
-  { id: 'en-4', text: 'School', type: 'en', matchId: '4' },
-  // Indonesian translations (shuffled manually)
-  { id: 'id-3', text: 'Senang', type: 'id', matchId: '3' },
-  { id: 'id-1', text: 'Berlari', type: 'id', matchId: '1' },
-  { id: 'id-4', text: 'Sekolah', type: 'id', matchId: '4' },
-  { id: 'id-2', text: 'Buku', type: 'id', matchId: '2' },
+  { id: 'id-3', text: 'Senang',   type: 'id', matchId: '3' },
+  { id: 'id-1', text: 'Berlari',  type: 'id', matchId: '1' },
+  { id: 'id-4', text: 'Sekolah',  type: 'id', matchId: '4' },
+  { id: 'id-2', text: 'Buku',     type: 'id', matchId: '2' },
+  { id: 'en-1', text: 'Run',      type: 'en', matchId: '1' },
+  { id: 'en-2', text: 'Book',     type: 'en', matchId: '2' },
+  { id: 'en-3', text: 'Happy',    type: 'en', matchId: '3' },
+  { id: 'en-4', text: 'School',   type: 'en', matchId: '4' },
 ]
 
+const TOTAL_PAIRS = INITIAL_CARDS.length / 2
+const GAME_DURATION = 60
+
+// Base card class — mirrors real MatchMadness
+const BASE =
+  'flex min-h-[3.2rem] w-full items-center justify-center rounded-2xl border-2 border-b-4 px-3 py-2.5 text-sm font-black transition-all duration-150 select-none shadow-sm text-center break-words'
+
+function cardClass(
+  isMatched: boolean,
+  isWrong: boolean,
+  isSuccess: boolean,
+  isSelected: boolean,
+) {
+  if (isMatched)  return `${BASE} invisible pointer-events-none`
+  if (isSuccess)  return `${BASE} border-green-600 bg-green-500/10 text-green-700 border-b-2 translate-y-[2px]`
+  if (isWrong)    return `${BASE} border-red-500 bg-red-500/10 text-red-700 border-b-2 translate-y-[2px] animate-shake`
+  if (isSelected) return `${BASE} border-brand-500 bg-brand-500/10 text-brand-700 border-b-2 translate-y-[2px]`
+  return `${BASE} border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-brand-500/60 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-2 cursor-pointer`
+}
+
 export default function MatchSimulation() {
-  const [cards, setCards] = useState<Card[]>(INITIAL_CARDS)
-  const [selectedEn, setSelectedEn] = useState<Card | null>(null)
-  const [selectedId, setSelectedId] = useState<Card | null>(null)
-  const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set())
-  const [wrongPairs, setWrongPairs] = useState<Set<string>>(new Set())
-  const [score, setScore] = useState(0)
+  const [selectedLeft, setSelectedLeft]   = useState<string | null>(null)
+  const [selectedRight, setSelectedRight] = useState<string | null>(null)
+  const [matchedIds, setMatchedIds]       = useState<Set<string>>(new Set())
+  const [wrongPair, setWrongPair]         = useState<{ left: string; right: string } | null>(null)
+  const [successIds, setSuccessIds]       = useState<Set<string>>(new Set())
+  const [score, setScore]                 = useState(0)
+  const [timeLeft, setTimeLeft]           = useState(GAME_DURATION)
+  const [started, setStarted]             = useState(false)
 
-  const handleCardClick = (card: Card) => {
-    if (matchedIds.has(card.matchId)) return
-    if (wrongPairs.size > 0) return // block clicks during wrong animation
+  const leftCards  = INITIAL_CARDS.filter((c) => c.type === 'id')
+  const rightCards = INITIAL_CARDS.filter((c) => c.type === 'en')
 
-    if (card.type === 'en') {
-      if (selectedEn?.id === card.id) {
-        setSelectedEn(null) // deselect
-      } else {
-        setSelectedEn(card)
-      }
-    } else {
-      if (selectedId?.id === card.id) {
-        setSelectedId(null) // deselect
-      } else {
-        setSelectedId(card)
-      }
-    }
-  }
+  const allMatched = matchedIds.size === TOTAL_PAIRS
+  const gameOver   = allMatched || timeLeft === 0
 
-  // Check for match
+  // Timer
   useEffect(() => {
-    if (selectedEn && selectedId) {
-      if (selectedEn.matchId === selectedId.matchId) {
-        // MATCH
-        const matchId = selectedEn.matchId
-        setMatchedIds((prev) => {
-          const next = new Set(prev)
-          next.add(matchId)
-          return next
+    if (!started || gameOver) return
+    const id = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000)
+    return () => clearInterval(id)
+  }, [started, gameOver])
+
+  // Wrong pair reset
+  useEffect(() => {
+    if (!wrongPair) return
+    const id = setTimeout(() => {
+      setWrongPair(null)
+      setSelectedLeft(null)
+      setSelectedRight(null)
+    }, 600)
+    return () => clearTimeout(id)
+  }, [wrongPair])
+
+  // Evaluate when both sides selected
+  useEffect(() => {
+    if (!selectedLeft || !selectedRight) return
+    const left  = leftCards.find((c) => c.id === selectedLeft)!
+    const right = rightCards.find((c) => c.id === selectedRight)!
+    if (left.matchId === right.matchId) {
+      setMatchedIds((prev) => new Set(prev).add(left.matchId))
+      setSuccessIds((prev) => new Set(prev).add(left.id).add(right.id))
+      setScore((s) => s + 20)
+      setTimeout(() => {
+        setSuccessIds((prev) => {
+          const n = new Set(prev); n.delete(left.id); n.delete(right.id); return n
         })
-        setScore((s) => s + 20)
-        setSelectedEn(null)
-        setSelectedId(null)
-      } else {
-        // MISMATCH
-        const currentEnId = selectedEn.id
-        const currentIdId = selectedId.id
-        setWrongPairs(new Set([currentEnId, currentIdId]))
-
-        // Reset after animation
-        const timer = setTimeout(() => {
-          setWrongPairs(new Set())
-          setSelectedEn(null)
-          setSelectedId(null)
-        }, 800)
-
-        return () => clearTimeout(timer)
-      }
+      }, 500)
+      setSelectedLeft(null)
+      setSelectedRight(null)
+    } else {
+      setWrongPair({ left: selectedLeft, right: selectedRight })
     }
-  }, [selectedEn, selectedId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLeft, selectedRight])
 
   const handleReset = () => {
-    setMatchedIds(new Set())
-    setSelectedEn(null)
-    setSelectedId(null)
-    setWrongPairs(new Set())
-    setScore(0)
+    setMatchedIds(new Set()); setSelectedLeft(null); setSelectedRight(null)
+    setWrongPair(null); setSuccessIds(new Set()); setScore(0)
+    setTimeLeft(GAME_DURATION); setStarted(false)
   }
 
-  const isCompleted = matchedIds.size === INITIAL_CARDS.length / 2
+  const handleLeftClick = (id: string) => {
+    if (gameOver || wrongPair) return
+    if (!started) setStarted(true)
+    setSelectedLeft(id)
+  }
+
+  const handleRightClick = (id: string) => {
+    if (gameOver || wrongPair) return
+    if (!started) setStarted(true)
+    setSelectedRight(id)
+  }
 
   return (
     <div className="w-full max-w-md rounded-3xl border border-zinc-700/60 bg-zinc-800/80 p-5 shadow-xl backdrop-blur-md">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between border-b border-zinc-700/50 pb-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="text-xp-400" size={18} />
-          <span className="text-sm font-black text-zinc-200 uppercase tracking-wider">
-            Match Madness Sim
-          </span>
-        </div>
-        <div className="rounded-lg bg-zinc-900/60 px-3 py-1 font-mono text-xs font-bold text-xp-400">
-          Skor: {score} XP
+      <style>{`
+        @keyframes shake {
+          0%,100% { transform: translateX(0); }
+          20%,60%  { transform: translateX(-6px); }
+          40%,80%  { transform: translateX(6px); }
+        }
+        .animate-shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+      `}</style>
+
+      {/* Header — matches real game */}
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-base font-black text-zinc-100 flex items-center gap-1.5">
+          ⚡ Match Madness
+        </h3>
+        <div
+          className={`flex items-center gap-1.5 rounded-2xl px-3 py-1 font-mono text-sm font-black tabular-nums border transition-all ${
+            timeLeft <= 10
+              ? 'bg-red-500/20 text-red-500 border-red-500 animate-pulse'
+              : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+          }`}
+        >
+          <span className={timeLeft <= 10 ? 'animate-bounce' : ''}>⏱️</span>
+          {timeLeft}s
         </div>
       </div>
 
-      {isCompleted ? (
-        <div className="flex flex-col items-center justify-center py-6 text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500/20 text-brand-500 animate-pulse">
-            <Check size={32} strokeWidth={3} />
+      {/* Progress bar */}
+      <div className="relative mb-4 h-3 w-full overflow-hidden rounded-full border border-zinc-700 bg-zinc-900/60 p-[2px]">
+        <div
+          className={`h-full rounded-full transition-all duration-1000 ease-linear ${
+            timeLeft <= 10
+              ? 'bg-gradient-to-r from-red-500 to-rose-600 animate-pulse'
+              : timeLeft <= 25
+              ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+              : 'bg-gradient-to-r from-brand-400 to-brand-500'
+          }`}
+          style={{ width: `${(timeLeft / GAME_DURATION) * 100}%` }}
+        />
+      </div>
+
+      {gameOver ? (
+        /* Result screen */
+        <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <div className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl ${
+            allMatched ? 'bg-brand-500/20' : 'bg-red-500/20'
+          }`}>
+            {allMatched ? '🎉' : '⏰'}
           </div>
-          <h4 className="text-base font-black text-zinc-100 mb-1">
-            Luar Biasa! Cocok Semua!
-          </h4>
-          <p className="text-xs text-zinc-400 max-w-[240px] mb-4">
-            Kamu baru saja melatih ingatan kosakata dengan cara mencocokkan kata.
-          </p>
+          <div>
+            <p className={`text-lg font-black ${allMatched ? 'text-brand-500' : 'text-red-500'}`}>
+              {allMatched ? 'Luar Biasa!' : 'Waktu Habis'}
+            </p>
+            <div className="mt-2 flex items-center justify-center gap-3">
+              <div className="flex flex-col items-center rounded-2xl bg-zinc-900/50 px-4 py-2 border border-zinc-700">
+                <span className="flex items-center gap-1 text-xl font-black text-brand-500">
+                  <Zap size={16} /> +{score}
+                </span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase">XP</span>
+              </div>
+              <div className="flex flex-col items-center rounded-2xl bg-zinc-900/50 px-4 py-2 border border-zinc-700">
+                <span className="flex items-center gap-1 text-xl font-black text-zinc-100">
+                  <Target size={16} className="text-brand-500" /> {matchedIds.size}/{TOTAL_PAIRS}
+                </span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase">Pasangan</span>
+              </div>
+            </div>
+          </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-brand-500 active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 rounded-2xl border-b-4 border-brand-700 bg-brand-500 px-5 py-2.5 text-sm font-black text-zinc-900 hover:bg-brand-400 transition-all cursor-pointer"
           >
-            <RotateCcw size={14} />
-            Main Lagi
+            <RotateCcw size={14} /> Main Lagi
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {/* Indonesian Column */}
-          <div className="flex flex-col gap-2.5">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider pl-1 mb-1">
-              Bahasa Indonesia
-            </span>
-            {cards
-              .filter((c) => c.type === 'id')
-              .map((card) => {
-                const isSelected = selectedId?.id === card.id
-                const isMatched = matchedIds.has(card.matchId)
-                const isWrong = wrongPairs.has(card.id)
+        <>
+          {!started && (
+            <div className="mb-3 animate-pulse rounded-2xl border border-brand-500/30 bg-brand-500/10 px-3 py-2 text-center text-[10px] font-black uppercase tracking-wider text-brand-400">
+              👆 Klik kartu untuk memulai!
+            </div>
+          )}
 
-                return (
-                  <button
-                    key={card.id}
-                    onClick={() => handleCardClick(card)}
-                    disabled={isMatched}
-                    className={`flex h-12 w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-200 cursor-pointer text-left
-                      ${
-                        isMatched
-                          ? 'border-transparent bg-brand-500/10 text-brand-600 opacity-60 cursor-default'
-                          : isWrong
-                            ? 'border-red-500 bg-red-500/10 text-red-500 animate-shake'
-                            : isSelected
-                              ? 'border-brand-500 bg-zinc-950 text-brand-500 scale-[1.02] shadow-md shadow-brand-500/5'
-                              : 'border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-750'
-                      }
-                    `}
-                  >
-                    <span>{card.text}</span>
-                    {isMatched && <Check size={14} strokeWidth={3} />}
-                  </button>
-                )
-              })}
+          {/* Card grid — same 2-col layout as real game */}
+          <div className="grid grid-cols-2 gap-2.5">
+            {/* Left: Indonesian */}
+            <div className="flex flex-col gap-2">
+              {leftCards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  disabled={matchedIds.has(card.matchId)}
+                  onClick={() => handleLeftClick(card.id)}
+                  className={cardClass(
+                    matchedIds.has(card.matchId),
+                    wrongPair?.left === card.id,
+                    successIds.has(card.id),
+                    selectedLeft === card.id,
+                  )}
+                >
+                  {card.text}
+                </button>
+              ))}
+            </div>
+
+            {/* Right: English */}
+            <div className="flex flex-col gap-2">
+              {rightCards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  disabled={matchedIds.has(card.matchId)}
+                  onClick={() => handleRightClick(card.id)}
+                  className={cardClass(
+                    matchedIds.has(card.matchId),
+                    wrongPair?.right === card.id,
+                    successIds.has(card.id),
+                    selectedRight === card.id,
+                  )}
+                >
+                  {card.text}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* English Column */}
-          <div className="flex flex-col gap-2.5">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider pl-1 mb-1">
-              Bahasa Inggris
-            </span>
-            {cards
-              .filter((c) => c.type === 'en')
-              .map((card) => {
-                const isSelected = selectedEn?.id === card.id
-                const isMatched = matchedIds.has(card.matchId)
-                const isWrong = wrongPairs.has(card.id)
-
-                return (
-                  <button
-                    key={card.id}
-                    onClick={() => handleCardClick(card)}
-                    disabled={isMatched}
-                    className={`flex h-12 w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-200 cursor-pointer text-left
-                      ${
-                        isMatched
-                          ? 'border-transparent bg-brand-500/10 text-brand-600 opacity-60 cursor-default'
-                          : isWrong
-                            ? 'border-red-500 bg-red-500/10 text-red-500 animate-shake'
-                            : isSelected
-                              ? 'border-brand-500 bg-zinc-950 text-brand-500 scale-[1.02] shadow-md shadow-brand-500/5'
-                              : 'border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-750'
-                      }
-                    `}
-                  >
-                    <span>{card.text}</span>
-                    {isMatched && <Check size={14} strokeWidth={3} />}
-                  </button>
-                )
-              })}
-          </div>
-        </div>
+          {/* Score footer */}
+          <p className="mt-3 text-center text-xs font-semibold text-zinc-500 bg-zinc-900/40 py-1.5 rounded-xl border border-zinc-800/60">
+            Cocok: <span className="font-black text-brand-500">{matchedIds.size}</span>/{TOTAL_PAIRS}
+          </p>
+        </>
       )}
-
-      {/* Styled animation helper */}
-      <style jsx global>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-4px); }
-          40%, 80% { transform: translateX(4px); }
-        }
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
-      `}</style>
     </div>
   )
 }

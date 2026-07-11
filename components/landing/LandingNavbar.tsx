@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, ArrowRight } from 'lucide-react'
+import ThemeButton from '@/components/ThemeButton'
 
 interface LandingNavbarProps {
   isLoggedIn: boolean
@@ -55,6 +56,7 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
 
           {/* Desktop CTA Button */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeButton />
             {isLoggedIn ? (
               <Link
                 href="/learn"
@@ -82,8 +84,9 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex md:hidden">
+          {/* Mobile: toggle tema + tombol menu */}
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeButton />
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none"

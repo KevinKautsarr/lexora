@@ -22,8 +22,8 @@ const FAQ_ITEMS: FaqItem[] = [
     answer: 'Match Madness adalah latihan kilat mencocokkan kata Bahasa Inggris dengan terjemahan Bahasa Indonesianya dalam batas waktu tertentu. Mode ini melatih kecepatan pengenalan kosakata di bawah tekanan waktu, sangat efektif untuk melatih memori cepat.',
   },
   {
-    question: 'Apakah ada sertifikat pencapaian setelah lulus?',
-    answer: 'Tentu saja! Di akhir setiap Level (misalnya Tingkat Pemula, Menengah, Mahir), kamu akan mendapatkan Sertifikat Kelulusan resmi dari Lexora yang mencantumkan namamu sebagai bukti penguasaan materi.',
+    question: 'Apakah ada sistem pencapaian di Lexora?',
+    answer: 'Ada! Lexora punya 38 badge pencapaian di 7 kategori (Streak, Lesson, XP, Gems, Liga, Level CEFR, dan lainnya) yang terekam otomatis dari aktivitas belajarmu. Cek progresnya kapan saja di halaman profil.',
   },
   {
     question: 'Apakah saya bisa belajar di handphone?',
