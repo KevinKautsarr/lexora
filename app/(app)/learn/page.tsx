@@ -1,5 +1,6 @@
 import { Lock } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { getLevelsWithUnits } from '@/lib/catalog'
@@ -10,6 +11,7 @@ import {
   type LessonOrderRef,
 } from '@/lib/progress'
 import { getSessionUser } from '@/lib/session'
+import { isGoalMetToday } from '@/lib/streak'
 import JourneyPath, { type UnitSection } from '@/components/JourneyPath'
 import ScrollToActiveLesson from '@/components/ScrollToActiveLesson'
 import ScrollToggleButton from '@/components/ScrollToggleButton'
@@ -17,6 +19,9 @@ import UserStats from '@/components/UserStats'
 import DailyGoalsCard from '@/components/learn/DailyGoalsCard'
 import StreakCard from '@/components/learn/StreakCard'
 import NextLessonCard from '@/components/learn/NextLessonCard'
+import ReminderBanner from '@/components/learn/ReminderBanner'
+import JourneyScenery from '@/components/JourneyScenery'
+import EmptyState from '@/components/EmptyState'
 import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
 import ResetNotification from '@/components/learn/ResetNotification'
 
@@ -29,8 +34,14 @@ export default async function LearnPage({
 
   if (!sessionUser) redirect('/login')
 
-  // Run weekly league reset check
-  await checkAndResetWeeklyLeagueGlobal()
+  // Reset liga mingguan dijalankan SETELAH respons terkirim (non-blocking) —
+  // tidak menahan render halaman. Konsekuensi: pada request pertama tiap minggu,
+  // popup promosi/degradasi (ResetNotification) baru muncul di kunjungan
+  // berikutnya, karena previousDivision di-set oleh reset ini. Dapat diterima:
+  // reset idempoten & hanya sekali per minggu.
+  after(async () => {
+    await checkAndResetWeeklyLeagueGlobal()
+  })
 
   const { notice } = await searchParams
 
@@ -73,6 +84,14 @@ export default async function LearnPage({
   const frontmost = findNextLessonRef(lessonRefs, completedIds, startLevelOrder)
   const activeLevelOrder = frontmost?.levelOrder ?? null
 
+  // Pengingat belajar: tampil jika reminder aktif, punya streak berjalan, dan
+  // belum belajar hari ini (streak berisiko putus). Syarat waktu (sudah lewat
+  // jam) dicek di client karena butuh waktu lokal.
+  const showReminder =
+    !!user?.reminderEnabled &&
+    (user?.streak ?? 0) > 0 &&
+    !isGoalMetToday(user?.lastActivityDate ?? null, new Date())
+
   return (
     // items-start supaya aside kanan bisa sticky (bukan di-stretch penuh).
     <div className="flex items-start gap-6 lg:gap-8 relative">
@@ -88,15 +107,11 @@ export default async function LearnPage({
       <ScrollToggleButton />
       {/* ─── Main: Journey Path per Level ─── */}
       <div className="flex min-w-0 flex-1 flex-col gap-10">
-        {notice === 'practice-empty' && (
-          <p className="rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-medium text-amber-700">
-            Mode Practice terbuka setelah kamu menyelesaikan minimal 1 lesson —
-            mulai dari lesson pertama di bawah!
-          </p>
+        {showReminder && user && (
+          <ReminderBanner reminderHour={user.reminderHour} streak={user.streak} />
         )}
-
         <header>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-100">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-zinc-100">
             Journey
           </h1>
           <p className="text-sm text-zinc-400 break-words">
@@ -109,11 +124,17 @@ export default async function LearnPage({
         </header>
 
         {levels.length === 0 && (
-          <p className="rounded-2xl border border-zinc-800 bg-zinc-800/40 px-6 py-10 text-center text-sm text-zinc-400">
-            Belum ada materi tersedia. Cek lagi sebentar lagi!
-          </p>
+          <EmptyState
+            pose="reading"
+            title="Belum ada materi tersedia"
+            description="Lexi sedang menyiapkan pelajaran baru. Cek lagi sebentar lagi!"
+          />
         )}
 
+        {/* Wrapper relatif untuk latar dekoratif biophilic (di belakang node). */}
+        <div className="relative">
+          <JourneyScenery />
+          <div className="relative z-10 flex flex-col gap-10">
         {levels.map((level) => {
           const isActive = level.order === activeLevelOrder
           const isFreelyOpen = level.order < startLevelOrder
@@ -210,6 +231,8 @@ export default async function LearnPage({
             </section>
           )
         })}
+          </div>
+        </div>
 
         {/* End of Journey CTA Banner */}
         <div className="mt-6 relative overflow-hidden rounded-3xl border border-zinc-700 bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
@@ -246,6 +269,11 @@ export default async function LearnPage({
       <aside className="hidden w-72 flex-shrink-0 lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100vh-4rem)] lg:flex-col lg:gap-4 lg:overflow-y-auto lg:pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Suspense fallback={<SidebarCardSkeleton />}>
           <div className="shrink-0">
+            <StreakCard />
+          </div>
+        </Suspense>
+        <Suspense fallback={<SidebarCardSkeleton />}>
+          <div className="shrink-0">
             <UserStats />
           </div>
         </Suspense>
@@ -257,11 +285,6 @@ export default async function LearnPage({
         <Suspense fallback={<SidebarCardSkeleton />}>
           <div className="shrink-0">
             <DailyGoalsCard />
-          </div>
-        </Suspense>
-        <Suspense fallback={<SidebarCardSkeleton />}>
-          <div className="shrink-0">
-            <StreakCard />
           </div>
         </Suspense>
       </aside>

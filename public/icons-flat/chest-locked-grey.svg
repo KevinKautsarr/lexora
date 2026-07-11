@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g stroke="#2d5a3d" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+
+
+
+<path d="M42 100 Q42 62 100 62 Q158 62 158 100 Z" fill="#c2c7cd"/>
+<path d="M100 62 Q158 62 158 100 L100 100 Z" fill="#9ba0a7"/>
+<path d="M42 100 Q42 62 100 62 Q158 62 158 100 Z" fill="none"/>
+<!-- badan depan -->
+<rect x="40" y="100" width="120" height="56" rx="6" fill="#a8adb4"/>
+<path d="M100 100 L160 100 L160 152 Q160 156 156 156 L100 156 Z" fill="#83888f"/>
+<rect x="40" y="100" width="120" height="56" rx="6" fill="none"/>
+<!-- band horizontal -->
+<rect x="36" y="94" width="128" height="16" rx="4" fill="#6f747a"/>
+
+<!-- gembok -->
+<rect x="86" y="118" width="28" height="24" rx="5" fill="#6f747a"/>
+<path d="M93 118 v-7 a7 7 0 0 1 14 0 v7" fill="none" stroke-width="6"/>
+<circle cx="100" cy="129" r="4" fill="#2d5a3d" stroke="none"/>
+
+</g></svg>

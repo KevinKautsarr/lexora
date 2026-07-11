@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g stroke="#2d5a3d" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+
+<path d="M38 53 Q40.42 61.58 49 64 Q40.42 66.42 38 75 Q35.58 66.42 27 64 Q35.58 61.58 38 53 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M162 67 Q164.42 75.58 173 78 Q164.42 80.42 162 89 Q159.58 80.42 151 78 Q159.58 75.58 162 67 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M150 42 Q151.76 48.24 158 50 Q151.76 51.76 150 58 Q148.24 51.76 142 50 Q148.24 48.24 150 42 Z" fill="#ffc94d" stroke-width="4"/>
+<!-- gabus -->
+<rect x="84" y="26" width="32" height="24" rx="5" fill="#b07a45"/>
+<path d="M100 26 L116 26 L116 50 L100 50 Z" fill="#966334"/>
+<rect x="84" y="26" width="32" height="24" rx="5" fill="none"/>
+<!-- leher -->
+<path d="M88 50 L88 74 L112 74 L112 50" fill="#ffb066"/>
+<path d="M100 50 L112 50 L112 74 L100 74 Z" fill="#f2933f"/>
+<path d="M88 50 L88 74 M112 50 L112 74" fill="none"/>
+<!-- badan botol -->
+<path d="M88 72 Q46 90 46 128 Q46 172 100 172 Q154 172 154 128 Q154 90 112 72 Z" fill="#ffd6a8"/>
+<!-- cairan -->
+<path d="M57 110 Q76 100 100 106 Q126 112 143 104 Q150 116 150 130 Q150 166 100 166 Q50 166 50 130 Q50 118 57 110 Z" fill="#ff8a2b"/>
+<path d="M100 106 Q126 112 143 104 Q150 116 150 130 Q150 166 100 166 Z" fill="#f2701a"/>
+<path d="M57 110 Q76 100 100 106 Q126 112 143 104" fill="none" stroke-width="5"/>
+<!-- outline botol -->
+<path d="M88 72 Q46 90 46 128 Q46 172 100 172 Q154 172 154 128 Q154 90 112 72" fill="none"/>
+<!-- label 2x -->
+<rect x="76" y="118" width="48" height="34" rx="5" fill="#fdf6e6"/>
+<rect x="76" y="118" width="48" height="34" rx="5" fill="none" stroke-width="5"/>
+<text x="100" y="144" font-family="Verdana,DejaVu Sans,sans-serif" font-size="24"
+      font-weight="bold" fill="#2d5a3d" text-anchor="middle" stroke="none">2x</text>
+<!-- kilau kaca -->
+<path d="M66 100 Q56 116 58 134" fill="none" stroke="#ffffff" stroke-opacity=".65" stroke-width="8"/>
+
+</g></svg>

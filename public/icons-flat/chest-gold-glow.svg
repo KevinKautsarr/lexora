@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g stroke="#2d5a3d" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+
+<path d="M36 55 Q38.42 63.58 47 66 Q38.42 68.42 36 77 Q33.58 68.42 25 66 Q33.58 63.58 36 55 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M164 53 Q166.42 61.58 175 64 Q166.42 66.42 164 75 Q161.58 66.42 153 64 Q161.58 61.58 164 53 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M32 123 Q33.98 130.02 41 132 Q33.98 133.98 32 141 Q30.02 133.98 23 132 Q30.02 130.02 32 123 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M168 127 Q169.98 134.02 177 136 Q169.98 137.98 168 145 Q166.02 137.98 159 136 Q166.02 134.02 168 127 Z" fill="#ffc94d" stroke-width="4"/>
+
+
+
+<path d="M42 100 Q42 62 100 62 Q158 62 158 100 Z" fill="#ffd964"/>
+<path d="M100 62 Q158 62 158 100 L100 100 Z" fill="#e8b53a"/>
+<path d="M42 100 Q42 62 100 62 Q158 62 158 100 Z" fill="none"/>
+<!-- badan depan -->
+<rect x="40" y="100" width="120" height="56" rx="6" fill="#f2c040"/>
+<path d="M100 100 L160 100 L160 152 Q160 156 156 156 L100 156 Z" fill="#d19a1e"/>
+<rect x="40" y="100" width="120" height="56" rx="6" fill="none"/>
+<!-- band horizontal -->
+<rect x="36" y="94" width="128" height="16" rx="4" fill="#b8850f"/>
+
+<!-- gembok -->
+<rect x="86" y="118" width="28" height="24" rx="5" fill="#b8850f"/>
+<path d="M93 118 v-7 a7 7 0 0 1 14 0 v7" fill="none" stroke-width="6"/>
+<circle cx="100" cy="129" r="4" fill="#2d5a3d" stroke="none"/>
+
+</g></svg>

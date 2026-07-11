@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g stroke="#2d5a3d" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+
+<path d="M34 43 Q36.42 51.58 45 54 Q36.42 56.42 34 65 Q31.58 56.42 23 54 Q31.58 51.58 34 43 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M166 43 Q168.42 51.58 177 54 Q168.42 56.42 166 65 Q163.58 56.42 155 54 Q163.58 51.58 166 43 Z" fill="#ffc94d" stroke-width="4"/>
+<path d="M100 16 Q102.2 23.8 110 26 Q102.2 28.2 100 36 Q97.8 28.2 90 26 Q97.8 23.8 100 16 Z" fill="#ffc94d" stroke-width="4"/>
+
+
+
+<path d="M48 98 L60 50 Q100 36 140 50 L152 98 Z" fill="#ffd964"/>
+<path d="M100 43 L140 50 L152 98 L100 98 Z" fill="#e8b53a"/>
+<path d="M48 98 L60 50 Q100 36 140 50 L152 98 Z" fill="none"/>
+<path d="M53 90 L147 90" fill="none" stroke-width="5"/>
+<!-- badan depan -->
+<rect x="40" y="102" width="120" height="56" rx="6" fill="#f2c040"/>
+<path d="M100 102 L160 102 L160 152 Q160 156 156 156 L100 156 Z" fill="#d19a1e"/>
+<rect x="40" y="102" width="120" height="56" rx="6" fill="none"/>
+<!-- band horizontal -->
+<rect x="36" y="96" width="128" height="16" rx="4" fill="#b8850f"/>
+
+<!-- koin mengintip -->
+<circle cx="80" cy="98" r="11" fill="#ffe98a"/>
+<circle cx="102" cy="94" r="12" fill="#ffd964"/>
+<circle cx="124" cy="99" r="10" fill="#ffe98a"/>
+<!-- gembok -->
+<rect x="86" y="120" width="28" height="24" rx="5" fill="#b8850f"/>
+<path d="M93 120 v-7 a7 7 0 0 1 14 0 v7" fill="none" stroke-width="6"/>
+<circle cx="100" cy="131" r="4" fill="#2d5a3d" stroke="none"/>
+
+</g></svg>

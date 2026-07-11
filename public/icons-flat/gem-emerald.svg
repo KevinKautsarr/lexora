@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g stroke="#2d5a3d" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+
+<path d="M40 48 Q42.64 57.36 52 60 Q42.64 62.64 40 72 Q37.36 62.64 28 60 Q37.36 57.36 40 48 Z" fill="#7fe3a0" stroke-width="4"/>
+<path d="M160 59 Q162.42 67.58 171 70 Q162.42 72.42 160 81 Q157.58 72.42 149 70 Q157.58 67.58 160 59 Z" fill="#7fe3a0" stroke-width="4"/>
+<path d="M152 131 Q153.98 138.02 161 140 Q153.98 141.98 152 149 Q150.02 141.98 143 140 Q150.02 138.02 152 131 Z" fill="#7fe3a0" stroke-width="4"/>
+<!-- badan gem: brilliant cut -->
+<path d="M56 82 L100 158 L144 82 Z" fill="#2fa869"/>
+<path d="M56 82 L100 158 L100 82 Z" fill="#3dc47c"/>
+<path d="M66 56 L134 56 L144 82 L56 82 Z" fill="#5fe09a"/>
+<path d="M66 56 L100 82 L56 82 Z" fill="#7ff0b2"/>
+<path d="M134 56 L144 82 L100 82 Z" fill="#3dc47c"/>
+<!-- facet lines -->
+<path d="M56 82 L144 82" fill="none" stroke-width="5"/>
+<path d="M81 82 L100 158" fill="none" stroke-width="4" stroke-opacity=".55"/>
+<path d="M119 82 L100 158" fill="none" stroke-width="4" stroke-opacity=".55"/>
+<path d="M100 56 L100 82" fill="none" stroke-width="4" stroke-opacity=".55"/>
+<!-- outline luar -->
+<path d="M66 56 L134 56 L144 82 L100 158 L56 82 Z" fill="none"/>
+<!-- kilau -->
+<path d="M73 63 L88 63 L78 78 L64 78 Z" fill="#ffffff" opacity=".5" stroke="none"/>
+
+</g></svg>
