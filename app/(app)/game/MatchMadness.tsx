@@ -1,23 +1,15 @@
 'use client'
 
-import type React from 'react'
-import { ArrowRight, Target, Zap } from 'lucide-react'
 import { startTransition, useEffect, useRef, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Mascot from '@/components/Mascot'
-import { levelForXp } from '@/lib/level'
-import { submitScore, type SubmitScoreResult } from './actions'
+import { submitScore } from './actions'
 import { GAME_DURATION, REPEATS_PER_WORD, computeScore } from './scoring'
 import { buildQueue, initialSlots, pickReplacement, isValidMatch, type CardInstance } from './queue'
-import GoalRewardModal from '@/components/GoalRewardModal'
+import MatchCard, { type MatchCardState } from './MatchCard'
+import ResultScreen, { type SubmitState } from './ResultScreen'
 import { playSfx } from '@/lib/sfx'
 
 export type WordPair = { id: string; english: string; indonesian: string }
-
-type SubmitState =
-  | { status: 'idle' | 'saving' }
-  | { status: 'saved'; result: Extract<SubmitScoreResult, { ok: true }> }
-  | { status: 'error'; message: string }
 
 // Jeda sebelum slot yang baru saja cocok diisi kartu antrian berikutnya —
 // beri waktu pemain melihat feedback "benar" sebelum kartu baru muncul.
@@ -94,15 +86,6 @@ export default function MatchMadness({
   // Timeout penggantian kartu yang masih tertunda — dibatalkan saat game over
   // atau ronde baru supaya kartu antrian tidak "muncul lagi" setelah selesai.
   const replaceTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-
-  // Partikel confetti di-generate sekali saat allMatched=true menggunakan
-  // useState + useEffect, BUKAN useMemo, agar Math.random() tidak dipanggil
-  // selama render (melanggar react-hooks/purity).
-  type ConfettiParticle = {
-    id: number; left: string; delay: string; color: string;
-    size: number; drift: string; duration: string
-  }
-  const [confettiParticles, setConfettiParticles] = useState<ConfettiParticle[]>([])
 
   const correctCount = matchCount
   const allMatched = totalMatches > 0 && correctCount === totalMatches
@@ -352,48 +335,18 @@ export default function MatchMadness({
     if (selectedLeft !== null) evaluate(selectedLeft, instanceId)
   }
 
-  // Isi confettiParticles sekali saat allMatched berubah menjadi true.
-  // Dibungkus rAF supaya setState tidak dipanggil sinkron di body effect.
-  useEffect(() => {
-    if (!allMatched) return
-    const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#ec4899', '#8b5cf6']
-    const rafId = requestAnimationFrame(() => {
-      setConfettiParticles(Array.from({ length: 50 }).map((_, i) => ({
-        id: i,
-        left: `${Math.random() * 100}%`,
-        delay: `${Math.random() * 1.5}s`,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        size: Math.random() * 6 + 5,
-        drift: `${Math.random() * 140 - 70}px`,
-        duration: `${Math.random() * 1.2 + 1.2}s`,
-      })))
-    })
-    return () => cancelAnimationFrame(rafId)
-  }, [allMatched])
-
-  const base =
-    'flex min-h-[3.8rem] w-full items-center justify-center rounded-2xl border-2 border-b-4 px-4 py-3 text-base sm:text-lg lg:text-xl font-black transition-all duration-150 select-none shadow-sm text-center break-words'
-
-  function buttonClass(instanceId: string | undefined, side: 'left' | 'right') {
-    if (!instanceId) return `${base} invisible pointer-events-none`
-    const selected = side === 'left' ? selectedLeft === instanceId : selectedRight === instanceId
-    const isWrong = wrongPair !== null && wrongPair[side] === instanceId
+  // Pemetaan state kartu — prioritas: matched (hilang) > success (hijau) >
+  // wrong (merah) > selected > idle. Tampilan per state ada di MatchCard.
+  function cardStateOf(instanceId: string | undefined, side: 'left' | 'right'): MatchCardState {
+    if (!instanceId) return 'matched' // slot kosong: tak terlihat
     const isSuccess = successIds.has(instanceId)
-    const isMatched = (matchedInstanceIds.has(instanceId) || pendingClear.has(instanceId)) && !isSuccess
-
-    if (isMatched) {
-      return `${base} invisible pointer-events-none`
+    if ((matchedInstanceIds.has(instanceId) || pendingClear.has(instanceId)) && !isSuccess) {
+      return 'matched'
     }
-    if (isSuccess) {
-      return `${base} border-green-600 bg-green-500/10 text-green-700 border-b-2 translate-y-[2px] animate-success-pop`
-    }
-    if (isWrong) {
-      return `${base} border-red-500 bg-red-500/10 text-red-700 border-b-2 translate-y-[2px] animate-shake`
-    }
-    if (selected) {
-      return `${base} border-brand-500 bg-brand-500/10 text-brand-700 border-b-2 translate-y-[2px]`
-    }
-    return `${base} border-zinc-700 bg-zinc-800 text-zinc-100 hover:border-brand-500/60 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-2 cursor-pointer`
+    if (isSuccess) return 'success'
+    if (wrongPair !== null && wrongPair[side] === instanceId) return 'wrong'
+    const selected = side === 'left' ? selectedLeft === instanceId : selectedRight === instanceId
+    return selected ? 'selected' : 'idle'
   }
 
   // Label status antrian, diumumkan ke screen reader saat kartu berganti.
@@ -404,188 +357,27 @@ export default function MatchMadness({
   )
 
   if (gameOver) {
-    const finalScore = submit.status === 'saved' ? submit.result.score : localScore
-    const accuracyPct = attempts > 0 ? Math.round(accuracy * 100) : 0
-    const saving = submit.status === 'saving'
-
-    const finalXp = submit.status === 'saved' ? submit.result.totalXp : userXp + (lessonId ? (allMatched ? localScore : 0) : 0)
-    const currentLevel = levelForXp(finalXp)
-
     return (
-      <>
-      {/* Modal reward goal harian — muncul sebelum layar skor jika ada goal selesai */}
-      {showRewardModal && submit.status === 'saved' && submit.result.goalsCompleted.length > 0 && (
-        <GoalRewardModal
-          rewards={submit.result.goalsCompleted}
-          onClose={() => setShowRewardModal(false)}
-        />
-      )}
-      <div className="relative mx-auto flex w-full max-w-sm flex-col items-center gap-6 overflow-hidden rounded-3xl border border-zinc-700 bg-zinc-800/40 p-8 text-center backdrop-blur-md shadow-2xl lg:max-w-lg">
-        <style>{`
-          .confetti-particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: confetti-fall 2.5s ease-out forwards;
-            pointer-events: none;
-          }
-          @keyframes confetti-fall {
-            0% {
-              transform: translateY(-20px) rotate(0deg);
-              opacity: 1;
-            }
-            100% {
-              transform: translateY(350px) translateX(var(--drift, 40px)) rotate(360deg);
-              opacity: 0;
-            }
-          }
-        `}</style>
-
-        {/* Confetti overlay */}
-        {allMatched && (
-          <div className="pointer-events-none absolute inset-0 overflow-hidden z-50">
-            {confettiParticles.map((p) => (
-              <div
-                key={p.id}
-                className="confetti-particle"
-                style={{
-                  left: p.left,
-                  animationDelay: p.delay,
-                  animationDuration: p.duration,
-                  backgroundColor: p.color,
-                  width: `${p.size}px`,
-                  height: `${p.size}px`,
-                  '--drift': p.drift,
-                } as React.CSSProperties & Record<string, string>}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Mascot Lexi & Header hasil */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative flex h-36 w-36 items-center justify-center rounded-3xl bg-zinc-900/60 p-4 shadow-inner">
-            <Mascot xp={finalXp} mood={allMatched ? 'cheer' : 'sad'} size={120} />
-            {allMatched && (
-              <span className="absolute -right-2 -top-2 flex h-8 w-8 animate-bounce items-center justify-center rounded-full bg-brand-500 text-white shadow-md">
-                🎉
-              </span>
-            )}
-          </div>
-          <h2 className={`font-display text-3xl font-extrabold tracking-tight ${allMatched ? 'text-brand-500' : 'text-red-500'}`}>
-            {allMatched ? 'Luar Biasa!' : 'Waktu Habis'}
-          </h2>
-          <p className="text-xs font-semibold text-zinc-400">
-            Lexi Level {currentLevel}
-          </p>
-        </div>
-
-        {/* Skor utama */}
-        <div className="flex flex-col items-center rounded-2xl bg-zinc-900/50 px-6 py-3 border border-zinc-700/40 min-w-[140px] shadow-sm">
-          {lessonId ? (
-            <>
-              <span className="flex items-center gap-1 text-4xl font-black tabular-nums text-brand-500 animate-pulse">
-                <Zap size={28} className="text-xp-500" aria-hidden />
-                +{finalScore}
-              </span>
-              <span className="mt-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-500">
-                XP Diperoleh
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="flex items-center gap-1 text-4xl font-black tabular-nums text-brand-500 animate-pulse">
-                <Target size={28} className="text-brand-500 animate-pulse" aria-hidden />
-                {finalScore}
-              </span>
-              <span className="mt-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-500">
-                Skor Latihan
-              </span>
-            </>
-          )}
-        </div>
-
-        {/* Stat tiles: pasangan & akurasi */}
-        <dl className="grid w-full grid-cols-2 gap-3">
-          <div className="flex flex-col items-center gap-1 rounded-2xl border border-zinc-700 bg-zinc-900/40 p-4 shadow-sm">
-            <Target size={18} className="text-brand-500" aria-hidden />
-            <dd className="text-lg font-black tabular-nums text-zinc-100">
-              {correctCount}/{totalMatches}
-            </dd>
-            <dt className="text-[11px] font-bold text-zinc-500">Pasangan</dt>
-          </div>
-          <div className="flex flex-col items-center gap-1 rounded-2xl border border-zinc-700 bg-zinc-900/40 p-4 shadow-sm">
-            <span className="text-lg" aria-hidden>🎯</span>
-            <dd className="text-lg font-black tabular-nums text-zinc-100">{accuracyPct}%</dd>
-            <dt className="text-[11px] font-bold text-zinc-500">Akurasi</dt>
-          </div>
-        </dl>
-
-        {/* Status simpan — halus, tidak mengganggu */}
-        {lessonId && (
-          <p className="min-h-[1.25rem] text-xs" aria-live="polite">
-            {saving && <span className="text-zinc-500 animate-pulse">Menyimpan skor...</span>}
-            {submit.status === 'saved' && (
-              <span className="font-semibold text-brand-500">
-                Tersimpan · Total XP {submit.result.totalXp.toLocaleString('id-ID')}
-                {submit.result.completed &&
-                  submit.result.xpGain < submit.result.score && (
-                    <span className="mt-0.5 block font-normal text-zinc-500 text-[11px]">
-                      Pernah selesai — XP diperoleh 25%
-                    </span>
-                  )}
-              </span>
-            )}
-            {submit.status === 'error' && (
-              <span className="font-medium text-red-500">{submit.message}</span>
-            )}
-          </p>
-        )}
-
-        {/* Tombol kembali ke Journey dengan look 3D */}
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => router.push('/learn')}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-brand-700 bg-brand-500 px-6 py-4 text-base font-black text-zinc-900 transition-all hover:bg-brand-400 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-        >
-          Lanjut ke Journey
-          <ArrowRight size={20} aria-hidden />
-        </button>
-      </div>
-      </>
+      <ResultScreen
+        allMatched={allMatched}
+        isLesson={Boolean(lessonId)}
+        localScore={localScore}
+        accuracy={accuracy}
+        attempts={attempts}
+        correctCount={correctCount}
+        totalMatches={totalMatches}
+        userXp={userXp}
+        submit={submit}
+        showRewardModal={showRewardModal}
+        onCloseRewardModal={() => setShowRewardModal(false)}
+        onExit={() => router.push("/learn")}
+      />
     )
   }
 
+  // Keyframes game (shake/success-pop/pulse-red/confetti) ada di globals.css.
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-6px); }
-          40%, 80% { transform: translateX(6px); }
-        }
-        .animate-shake {
-          animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
-        }
-        @keyframes success-pop {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); filter: brightness(1.15); }
-          100% { transform: scale(1); }
-        }
-        .animate-success-pop {
-          animation: success-pop 0.3s cubic-bezier(.175, .885, .32, 1.275);
-        }
-        @keyframes pulse-red {
-          0%, 100% { opacity: 1; border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
-          50% { opacity: 0.6; border-color: transparent; box-shadow: none; }
-        }
-        .animate-pulse-red {
-          animation: pulse-red 1s infinite;
-        }
-      `}</style>
-
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-black text-zinc-100 flex items-center gap-2">
           ⚡ Match Madness
@@ -635,28 +427,22 @@ export default function MatchMadness({
       <div className="grid grid-cols-2 gap-3 lg:gap-4">
         <div className="flex flex-col gap-3">
           {activeSlots.map((card, idx) => (
-            <button
+            <MatchCard
               key={card?.instanceId ?? `empty-left-${idx}`}
-              type="button"
-              disabled={!card}
+              label={card?.indonesian}
+              state={cardStateOf(card?.instanceId, 'left')}
               onClick={() => card && handleLeftClick(card.instanceId)}
-              className={buttonClass(card?.instanceId, 'left')}
-            >
-              {card?.indonesian}
-            </button>
+            />
           ))}
         </div>
         <div className="flex flex-col gap-3">
           {rightOrder.map((card, idx) => (
-            <button
+            <MatchCard
               key={card?.instanceId ?? `empty-right-${idx}`}
-              type="button"
-              disabled={!card}
+              label={card?.english}
+              state={cardStateOf(card?.instanceId, 'right')}
               onClick={() => card && handleRightClick(card.instanceId)}
-              className={buttonClass(card?.instanceId, 'right')}
-            >
-              {card?.english}
-            </button>
+            />
           ))}
         </div>
       </div>
