@@ -20,13 +20,19 @@ export default async function SettingsPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
 
-  const [user, sessions] = await Promise.all([
+  const [user, sessions, credentialCount] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: sessionUser.id },
       select: { name: true, email: true, reminderEnabled: true, reminderHour: true },
     }),
     listActiveSessions(),
+    // User yang masuk via Google saja tidak punya credential account —
+    // form ganti password tak relevan untuk mereka (pasti gagal).
+    prisma.account.count({
+      where: { userId: sessionUser.id, providerId: 'credential' },
+    }),
   ])
+  const hasPassword = credentialCount > 0
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -85,7 +91,14 @@ export default async function SettingsPage() {
           <KeyRound size={16} className="text-brand-500" aria-hidden />
           Ganti Password
         </h2>
-        <PasswordForm />
+        {hasPassword ? (
+          <PasswordForm />
+        ) : (
+          <p className="rounded-2xl border border-zinc-700/60 bg-zinc-900/40 px-4 py-3 text-sm leading-relaxed text-zinc-400">
+            Akun ini masuk lewat <span className="font-bold text-zinc-200">Google</span>{' '}
+            dan tidak memakai password. Keamanan login dikelola oleh akun Google-mu.
+          </p>
+        )}
       </section>
 
       {/* ── Pengingat Belajar ───────────────────────────────────── */}
@@ -139,7 +152,7 @@ export default async function SettingsPage() {
           <Trash2 size={16} aria-hidden />
           Hapus Akun
         </h2>
-        <DeleteAccountForm email={user.email} />
+        <DeleteAccountForm email={user.email} hasPassword={hasPassword} />
       </section>
     </div>
   )

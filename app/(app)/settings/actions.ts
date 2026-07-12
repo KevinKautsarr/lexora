@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { verifyPassword } from 'better-auth/crypto'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
@@ -123,9 +124,12 @@ export async function revokeOtherSessions(): Promise<RevokeState> {
 export type DeleteAccountState = { ok: boolean; message: string } | null
 
 /**
- * Hapus akun permanen. Konfirmasi: user harus mengetik ulang email-nya
- * (dikirim lewat form) — dicocokkan di server. Relasi (session, progress,
- * dll) ikut terhapus lewat onDelete: Cascade di schema.
+ * Hapus akun permanen. Konfirmasi berlapis:
+ * - Semua user: ketik ulang email (dicocokkan di server).
+ * - User credential: WAJIB password juga — sesi yang dicuri saja tidak cukup
+ *   untuk memusnahkan akun. User Google-only tidak punya password, jadi
+ *   untuk mereka konfirmasi email adalah satu-satunya lapisan.
+ * Relasi (session, progress, dll) ikut terhapus lewat onDelete: Cascade.
  */
 export async function deleteAccount(
   _prev: DeleteAccountState,
@@ -138,6 +142,18 @@ export async function deleteAccount(
   const confirm = typeof confirmRaw === 'string' ? confirmRaw.trim() : ''
   if (confirm.toLowerCase() !== sessionUser.email.toLowerCase()) {
     return { ok: false, message: 'Email konfirmasi tidak cocok' }
+  }
+
+  const credential = await prisma.account.findFirst({
+    where: { userId: sessionUser.id, providerId: 'credential' },
+    select: { password: true },
+  })
+  if (credential?.password) {
+    const passwordRaw = formData.get('password')
+    const password = typeof passwordRaw === 'string' ? passwordRaw : ''
+    if (!password) return { ok: false, message: 'Masukkan password untuk konfirmasi' }
+    const valid = await verifyPassword({ hash: credential.password, password })
+    if (!valid) return { ok: false, message: 'Password salah' }
   }
 
   // Keluarkan semua sesi lalu hapus user (cascade menghapus data terkait).

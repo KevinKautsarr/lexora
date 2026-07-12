@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { authClient } from '@/lib/auth-client'
+import { authErrorMessage } from '@/lib/auth-errors'
 
 export default function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -22,7 +23,7 @@ export default function PasswordForm() {
     })
     setLoading(false)
     if (error) {
-      setFeedback({ ok: false, message: error.message ?? 'Gagal mengganti password' })
+      setFeedback({ ok: false, message: authErrorMessage(error, 'Gagal mengganti password') })
       return
     }
     setFeedback({ ok: true, message: 'Password berhasil diganti' })

@@ -4,7 +4,14 @@ import { useState, useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteAccount, type DeleteAccountState } from './actions'
 
-export default function DeleteAccountForm({ email }: { email: string }) {
+export default function DeleteAccountForm({
+  email,
+  hasPassword,
+}: {
+  email: string
+  /** User credential wajib memasukkan password; user Google-only tidak punya. */
+  hasPassword: boolean
+}) {
   const router = useRouter()
   const [typed, setTyped] = useState('')
   const [state, formAction, pending] = useActionState<DeleteAccountState, FormData>(
@@ -41,6 +48,21 @@ export default function DeleteAccountForm({ email }: { email: string }) {
           className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-rose-500"
         />
       </label>
+
+      {hasPassword && (
+        <label className="flex flex-col gap-1 text-xs font-bold text-zinc-400">
+          Password akun
+          <input
+            type="password"
+            name="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            aria-label="Password untuk konfirmasi hapus akun"
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-rose-500"
+          />
+        </label>
+      )}
 
       {state && !state.ok && (
         <p role="status" className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700">
