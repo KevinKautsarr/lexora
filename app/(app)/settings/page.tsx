@@ -8,6 +8,7 @@ import NameForm from './NameForm'
 import PasswordForm from './PasswordForm'
 import ReminderForm from './ReminderForm'
 import ThemeToggle from './ThemeToggle'
+import SoundToggle from './SoundToggle'
 import SessionsList from './SessionsList'
 import DeleteAccountForm from './DeleteAccountForm'
 import { listActiveSessions } from './actions'
@@ -55,6 +56,9 @@ export default async function SettingsPage() {
           Tampilan
         </h2>
         <ThemeToggle />
+        <div className="mt-5 border-t border-zinc-700/50 pt-5">
+          <SoundToggle />
+        </div>
       </section>
 
       {/* ── Nama Tampilan ───────────────────────────────────────── */}

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import type { GoalReward } from '@/app/(app)/game/actions'
+import { playSfx } from '@/lib/sfx'
 
 type GoalRewardModalProps = {
   rewards: GoalReward[]
@@ -19,7 +20,10 @@ export default function GoalRewardModal({ rewards, onClose }: GoalRewardModalPro
   useEffect(() => {
     // Animasi sequence: locked → glow → open → items muncul
     const t1 = setTimeout(() => setPhase('glow'), 200)
-    const t2 = setTimeout(() => setPhase('open'), CHEST_OPEN_DELAY_MS)
+    const t2 = setTimeout(() => {
+      setPhase('open')
+      playSfx('reward')
+    }, CHEST_OPEN_DELAY_MS)
     const t3 = setTimeout(() => setPhase('items'), ITEMS_FLY_DELAY_MS)
     return () => {
       clearTimeout(t1)
