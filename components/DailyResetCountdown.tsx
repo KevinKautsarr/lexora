@@ -2,10 +2,10 @@
 
 import { Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { WIB_OFFSET_MS } from '@/lib/streak'
 
 // Hitung mundur ke reset goal harian = tengah malam WIB berikutnya
 // (konsisten dengan wibDateOnly di lib/streak — hari dihitung berbasis UTC+7).
-const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
 
 function msUntilNextWibMidnight(now: Date): number {
   // Kerjakan dalam "waktu WIB" dengan menggeser +7 jam, hitung midnight

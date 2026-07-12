@@ -8,7 +8,10 @@
 // midnight, mengembalikan Date yang secara nilai adalah "midnight UTC" namun
 // MEWAKILI midnight WIB. Aman selama SEMUA baca/tulis tanggal streak/goal
 // konsisten memakai fungsi ini (jangan bandingkan hasilnya dengan Date mentah).
-const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+// Diekspor sebagai satu-satunya sumber offset WIB — dipakai juga oleh
+// komponen client (countdown, reminder) & halaman streak. File ini murni
+// (tanpa server-only) jadi aman diimpor dari mana saja.
+export const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
 
 /** Potong ke tengah malam WIB — representasi kanonis satu "hari". */
 export function wibDateOnly(date: Date): Date {

@@ -4,8 +4,7 @@ import { getSessionUser } from '@/lib/session'
 import { levelForXp } from '@/lib/level'
 import { getCurrentCefrLevel } from '@/lib/cefr'
 import StreakPageClient from '@/components/streak/StreakPageClient'
-
-const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+import { WIB_OFFSET_MS } from '@/lib/streak'
 
 // Format tanggal WIB (YYYY-MM-DD) — geser +7 jam lalu ambil komponen UTC,
 // konsisten dengan wibDateOnly di lib/streak. Dipakai agar kalender streak

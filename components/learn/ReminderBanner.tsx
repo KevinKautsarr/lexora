@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Flame, X } from 'lucide-react'
-
-const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+import { WIB_OFFSET_MS } from '@/lib/streak'
 
 /**
  * Banner pengingat belajar in-app. Server sudah memastikan syarat statis
