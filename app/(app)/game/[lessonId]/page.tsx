@@ -8,6 +8,9 @@ import { createGameToken } from '@/lib/game-token'
 import Mascot from '@/components/Mascot'
 import MatchMadness from '../MatchMadness'
 
+
+export const metadata = { title: 'Match Madness' }
+
 export default async function LessonGamePage({
   params,
 }: {

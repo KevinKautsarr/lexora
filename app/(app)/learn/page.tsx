@@ -25,6 +25,9 @@ import EmptyState from '@/components/EmptyState'
 import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
 import ResetNotification from '@/components/learn/ResetNotification'
 
+
+export const metadata = { title: 'Journey' }
+
 export default async function LearnPage({
   searchParams,
 }: {

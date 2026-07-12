@@ -10,6 +10,9 @@ import Avatar from '@/components/Avatar'
 import LeagueBadge, { type Division } from '@/components/LeagueBadge'
 import AchievementBadges from '@/components/profile/AchievementBadges'
 
+
+export const metadata = { title: 'Profil' }
+
 export default async function ProfilePage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')

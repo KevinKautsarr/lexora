@@ -1,6 +1,10 @@
 import Link from 'next/link'
 import { ChevronLeft, BookOpen, Infinity, Gamepad2, User, TrendingUp } from 'lucide-react'
 
+// Judul untuk kedua halaman auth — login/register adalah client component
+// sehingga tidak bisa mengekspor metadata sendiri.
+export const metadata = { title: 'Masuk atau Daftar' }
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-900 p-4 font-sans antialiased select-none">

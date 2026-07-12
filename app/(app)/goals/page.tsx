@@ -23,6 +23,9 @@ const QUOTES = [
   'Hari ini belajar, besok lebih lancar.',
 ]
 
+
+export const metadata = { title: 'Goals Harian' }
+
 export default async function GoalsPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')

@@ -15,6 +15,9 @@ import {
 } from './config'
 import BuyButton from './BuyButton'
 
+
+export const metadata = { title: 'Toko' }
+
 export default async function ShopPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')

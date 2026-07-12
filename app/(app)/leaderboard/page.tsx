@@ -239,6 +239,9 @@ function Row({
 }
 
 // ── Page ──────────────────────────────────────────────────────────
+
+export const metadata = { title: 'Liga Mingguan' }
+
 export default async function LeaderboardPage({
   searchParams,
 }: {

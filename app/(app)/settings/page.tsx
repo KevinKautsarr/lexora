@@ -13,6 +13,9 @@ import SessionsList from './SessionsList'
 import DeleteAccountForm from './DeleteAccountForm'
 import { listActiveSessions } from './actions'
 
+
+export const metadata = { title: 'Pengaturan' }
+
 export default async function SettingsPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')

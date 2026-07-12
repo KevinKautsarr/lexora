@@ -5,6 +5,9 @@ import { getSessionUser } from '@/lib/session'
 import Mascot from '@/components/Mascot'
 import { chooseLevel } from './actions'
 
+
+export const metadata = { title: 'Pilih Tingkat' }
+
 export default async function OnboardingPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')

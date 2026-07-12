@@ -10,6 +10,9 @@ import DictionaryClient, {
 // Kamus kosakata per tingkat CEFR — alat referensi, terpisah dari alur
 // Journey. Hero: Lexi membaca + deskripsi tingkat; tab level dengan jumlah
 // kata; pencarian sticky + tombol pengucapan (TTS) di client.
+
+export const metadata = { title: 'Kamus' }
+
 export default async function DictionaryPage({
   searchParams,
 }: {

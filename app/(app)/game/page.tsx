@@ -18,6 +18,9 @@ function shuffle<T>(items: T[]): T[] {
 
 // Mode Practice: review kata acak dari lesson yang sudah completed.
 // Tanpa lessonId → MatchMadness tidak menyimpan skor/XP, murni latihan.
+
+export const metadata = { title: 'Latihan Personal' }
+
 export default async function PracticePage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
