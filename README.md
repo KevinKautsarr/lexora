@@ -1,27 +1,64 @@
-# LEXORA 🇬🇧→🇮🇩
+<div align="center">
 
-Aplikasi belajar kosakata bahasa Inggris bergaya Duolingo: journey path per unit, game mencocokkan kata melawan waktu, XP, level, streak harian, dan leaderboard.
+<img src="public/logo-full-transparent.png" alt="Logo Lexora" width="96" height="96" />
 
-**Live demo:** https://lexorapp.vercel.app
+# LEXORA
 
-> _Screenshot menyusul — halaman Journey (dark theme, sidebar) dan game Match Madness._
+**Belajar kosakata bahasa Inggris dengan cara yang seru — journey path, game melawan waktu, streak, liga mingguan, dan Lexi si dinosaurus.**
+
+[![CI](https://github.com/KevinKautsarr/lexora/actions/workflows/ci.yml/badge.svg)](https://github.com/KevinKautsarr/lexora/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev)
+[![Prisma](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma)](https://prisma.io)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**🌐 Live demo: [lexorapp.vercel.app](https://lexorapp.vercel.app)**
+
+</div>
+
+---
+
+## ✨ Fitur
+
+### 📚 Belajar
+
+- **Journey path bertingkat CEFR (A1–C1)** — 225 lesson / 1.800 kata tersusun per tingkat → unit → lesson, dengan unlock berantai yang ditegakkan tiga lapis (UI, guard halaman, validasi server). Peta bergaya petualangan dengan node zigzag, popover Mulai/Ulas, dan scenery ilustrasi.
+- **Placement test anti-curang** — 12 soal pilihan ganda dibuat & dinilai sepenuhnya di server; klien tidak pernah menerima kunci jawaban.
+- **Match Madness** — cocokkan kata Indonesia ↔ Inggris dalam 60 detik. Timer berbasis wall-clock (tidak bisa "dipause" lewat pindah tab), skor dihitung server.
+- **Kamus** — seluruh kosakata per tingkat dengan pencarian dan tombol pengucapan (Web Speech API), tersusun accordion per unit.
+- **Practice mode** — review acak kosakata dari lesson yang sudah selesai, tanpa memengaruhi XP.
+
+### 🎮 Gamifikasi
+
+- **XP & Level** — 500 XP per level; replay lesson hanya memberi ¼ XP (anti-farming).
+- **Streak harian berbasis WIB** — batas hari dihitung UTC+7 (bukan UTC) sesuai pengguna Indonesia, dengan **streak freeze** yang menambal hari bolong otomatis.
+- **Liga mingguan** — divisi Perunggu/Perak/Emas dengan promosi & degradasi otomatis tiap minggu (top 3 naik, bottom 3 turun), reset lazy tanpa cron.
+- **Daily goals + peti hadiah** — 3 goal harian dengan hadiah gems & XP booster, modal peti dengan animasi & efek suara.
+- **Toko gems** — beli streak freeze dan XP booster 2×; pembelian atomic (anti double-spend).
+- **38 badge pencapaian** dalam 7 kategori, dihitung dari data belajar nyata tanpa flag tersimpan.
+- **Efek suara** — nada marimba hasil sintesis sendiri untuk benar/salah/menang/kalah/hadiah, dengan toggle mute.
+
+### 🔐 Akun & Keamanan
+
+- **Better Auth** — email + password *dan* login Google (OAuth), dengan verifikasi email wajib sebelum masuk.
+- **Reset password via email** (Resend) — token sekali pakai berlaku 1 jam, semua sesi lama dicabut setelah reset.
+- **Manajemen sesi per perangkat** — lihat perangkat yang login (browser + OS + IP) dan keluarkan yang tak dikenali.
+- **Hapus akun berlapis** — konfirmasi ketik email *plus* password (untuk akun credential).
+- **Anti-cheat game** — skor hanya diterima dengan token HMAC bukti-mulai, durasi main minimal, laju match manusiawi, dan throttle antar-submit.
+- **Security headers** — X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy di semua route.
+
+### 🎨 Pengalaman
+
+- Dark/light theme via CSS variables (toggle + ikut preferensi sistem), maskot Lexi dengan 20 pose, skeleton loading di semua route, halaman error bergaya sendiri, responsif mobile-first dengan bottom-nav + menu overflow, dan aksesibilitas (focus ring, aria, `prefers-reduced-motion`).
+
+> _Screenshot menyusul — halaman Journey dan game Match Madness._
 <!-- ![Journey](docs/screenshot-journey.png) -->
 <!-- ![Match Madness](docs/screenshot-game.png) -->
 
-## Fitur Utama
+---
 
-- **Tingkatan CEFR (A1–C1)** — 5 tingkat × 3 unit × 3 lesson = 45 lesson / 360 kata, disusun mengacu penjenjangan CEFR. Konten seluruhnya dari `prisma/vocabulary-seed.json` (seed idempotent).
-- **Onboarding + placement test** — user baru memilih tingkat awal. Pilih Pemula (A1) → langsung mulai; tingkat lain → tes penempatan 12 soal pilihan ganda yang **dibuat dan dinilai di server** (klien tidak pernah menerima kunci jawaban). Lulus ≥9/12 menempatkan user di tingkat itu; gagal memberi rekomendasi tingkat yang pas.
-- **Journey path dengan unlock berlevel** — dikelompokkan per tingkat CEFR. Tingkat di bawah titik awal user terbuka bebas untuk review; tingkat aktif berantai (lesson berikutnya terbuka setelah sebelumnya selesai). Ditegakkan tiga lapis: UI, guard halaman, dan validasi server.
-- **Match Madness** — game mencocokkan kata Indonesia (kiri) ↔ Inggris (kanan) dalam 60 detik. Skor **dihitung di server**: klien hanya mengirim jumlah benar + percobaan, divalidasi terhadap isi lesson di database — skor tidak bisa dipalsukan dari client.
-- **Progresi pemain** — dua metrik berbeda: **Tingkat** (CEFR, kemampuan bahasa) dan **Level** (dari XP, 500 XP/level). Plus streak harian (basis hari UTC), streak terpanjang, dan daily goals (1 lesson + 50 XP per hari).
-- **Practice mode** — review acak dari kosakata lesson yang sudah diselesaikan, tanpa memengaruhi XP.
-- **Leaderboard** — peringkat XP semua pengguna, top-3 diberi badge, posisi sendiri selalu terlihat.
-- **Autentikasi** — email + password via Better Auth (session di database, ganti password perlu password lama, semua server action memvalidasi session).
-
-### Sistem Tingkatan CEFR & Placement Test
-
-Ada **dua konsep berbeda** yang sengaja dibedakan agar tidak rancu:
+## 🧠 Dua Progres yang Sengaja Dibedakan
 
 | | **Tingkat** (CEFR) | **Level** (XP) |
 |---|---|---|
@@ -29,30 +66,31 @@ Ada **dua konsep berbeda** yang sengaja dibedakan agar tidak rancu:
 | Berubah saat | Menyelesaikan lesson di tingkat lebih tinggi | Mengumpulkan XP |
 | Ditampilkan | "Tingkat: Menengah (B1)" | "Level 4" |
 
-**Placement test** (anti-curang):
-- Soal disampel di server (8 kata tingkat target + 4 tingkat di bawahnya), dikirim ke klien **tanpa penanda jawaban benar** — hanya prompt Indonesia + 4 opsi Inggris acak.
-- Penilaian membandingkan jawaban terhadap kunci yang diambil ulang dari database via `questionWordIds` — memanipulasi jawaban lewat request langsung tetap dinilai apa adanya oleh server.
-- Sesi tidak bisa di-submit dua kali; `startPlacement` berulang memakai sesi yang sama (anti re-roll soal).
-- Alasan pilihan ganda (bukan matching): matching memberi petunjuk silang sehingga menilai kemampuan terlalu tinggi; per-soal pilihan ganda lebih akurat sebagai alat ukur.
+---
 
-## Tech Stack & Arsitektur
+## 🛠 Tech Stack
 
 | Lapisan | Teknologi |
 |---|---|
-| Framework | Next.js (App Router, Turbopack) + TypeScript |
-| Database | PostgreSQL serverless (Neon) via Prisma 7 + `@prisma/adapter-neon` |
-| Auth | Better Auth (Prisma adapter, session-based) |
-| UI | Tailwind CSS v4, lucide-react, dark theme |
-| Testing | Vitest (unit test logika murni) |
+| Framework | Next.js 16 (App Router, Turbopack) + React 19 + TypeScript |
+| Database | PostgreSQL serverless ([Neon](https://neon.tech)) via Prisma 7 + `@prisma/adapter-neon` |
+| Auth | [Better Auth](https://better-auth.com) — session di database, Google OAuth, verifikasi email |
+| Email | [Resend](https://resend.com) — reset password & verifikasi (via fetch, tanpa SDK) |
+| UI | Tailwind CSS v4 (design token `@theme`), lucide-react, font Baloo 2 + Geist |
+| Testing & CI | Vitest (71 unit test) + GitHub Actions (typecheck, lint, test tiap push) |
+| Deploy | Vercel — function di-pin ke `sin1` (Singapore), satu region dengan database |
 
-Pola arsitektur yang dipakai:
+### Keputusan arsitektur
 
-- **Server Components** untuk semua fetching data (tidak ada API route untuk read) — halaman meng-query Prisma langsung di server.
-- **Server Actions** untuk mutasi (`submitScore`, `updateName`) — setiap action memvalidasi session dan input di server, lalu `revalidatePath` menyegarkan UI dalam satu roundtrip.
-- **Logika murni terisolasi** di `lib/` (`progress.ts` unlock, `level.ts`, `streak.ts`, `scoring.ts`) — gampang di-unit-test dan dipakai bersama oleh halaman + validasi server.
-- **Anti-cheat**: perhitungan skor, cek unlock, dan streak semuanya server-side dalam satu transaksi Prisma.
+- **Server Components untuk semua read** — halaman meng-query Prisma langsung; tidak ada API route untuk fetching.
+- **Server Actions untuk semua mutasi** — tiap action memvalidasi sesi + input + kepemilikan di server, lalu `revalidatePath` menyegarkan UI dalam satu roundtrip.
+- **Logika murni terisolasi di `lib/`** (`streak.ts`, `scoring.ts`, `queue.ts`, `placement.ts`, `game-token-core.ts`) — bebas framework, teruji unit, dipakai bersama oleh halaman dan validasi server.
+- **Anti-cheat stateless** — token HMAC (`timingSafeEqual`) membuktikan kapan sesi game dimulai, tanpa tabel tambahan.
+- **Reset liga lazy & batched** — terpicu request pertama tiap minggu, dieksekusi ±7 `updateMany` berapa pun jumlah user.
 
-## Menjalankan Secara Lokal
+---
+
+## 🚀 Menjalankan Secara Lokal
 
 ```bash
 git clone https://github.com/KevinKautsarr/lexora.git
@@ -62,40 +100,66 @@ npm install                     # prisma generate otomatis via postinstall
 cp .env.example .env            # lalu isi nilainya (lihat komentar di dalamnya)
 
 npx prisma migrate dev          # buat tabel
-npx prisma db seed              # isi 5 tingkat CEFR / 45 lesson / 360 kata dari JSON
+npx prisma db seed              # isi 5 tingkat CEFR / 225 lesson / 1.800 kata
 
 npm run dev                     # http://localhost:3000
 ```
 
-Perintah lain: `npm test` (unit test), `npm run build` (build produksi), `npx prisma studio` (GUI database).
+Environment yang dibutuhkan (detail di [`.env.example`](.env.example)):
 
-**Akun demo:** daftar akun baru langsung dari halaman register — kamu akan melewati onboarding pemilihan tingkat (pilih Pemula untuk mulai cepat, atau tingkat lain untuk mencoba placement test).
-
-## Deploy ke Vercel
-
-1. Push repo ke GitHub (`.env` ter-gitignore; `.env.example` jadi acuan).
-2. Import repo di Vercel — preset Next.js default sudah benar, `prisma generate` jalan otomatis via `postinstall`.
-3. Isi environment variables: `DATABASE_URL` (Neon), `BETTER_AUTH_SECRET` (baru, `openssl rand -hex 32`), `BETTER_AUTH_URL` (URL produksi, mis. `https://lexorapp.vercel.app`).
-4. Deploy, lalu uji register/login di URL produksi.
-
-Catatan: migrasi database dijalankan dari mesin dev (`npx prisma migrate dev`), bukan oleh build Vercel. Error origin/CSRF saat login hampir pasti berarti `BETTER_AUTH_URL` tidak cocok dengan domain.
-
-## Laravel vs Next.js — Catatan Perbandingan
-
-_Draft perbandingan membangun aplikasi serupa di dua stack (akan dilengkapi dengan pengalaman pribadi):_
-
-| Konsep | Laravel | Next.js (proyek ini) |
+| Variabel | Wajib | Keterangan |
 |---|---|---|
-| Templating | Blade — HTML dirender server, interaktivitas butuh Alpine/Livewire | React Server + Client Components — satu bahasa untuk render server dan interaksi client |
-| Endpoint mutasi | Controller + Route + FormRequest | Server Action — fungsi yang dipanggil langsung dari komponen, tanpa mendefinisikan route |
-| ORM | Eloquent (Active Record: `$user->save()`) | Prisma (client ter-generate dari schema, fully typed: `prisma.user.update()`) |
-| Proteksi halaman | Middleware `auth` di route group | Cek session di tiap server component (`getSessionUser()` + `redirect`) |
-| Validasi | FormRequest / `$request->validate()` | Manual di awal server action (tipe + rentang + kepemilikan) |
-| Migrasi | `php artisan migrate` | `npx prisma migrate dev` |
-| Auth bawaan | Breeze/Jetstream/Fortify | Pilih library — di sini Better Auth (schema di-generate ke Prisma) |
+| `DATABASE_URL` | ✅ | Connection string Neon |
+| `BETTER_AUTH_SECRET` | ✅ | `openssl rand -hex 32` |
+| `BETTER_AUTH_URL` | ✅ | `http://localhost:3000` (dev) |
+| `RESEND_API_KEY` | ✅ | Verifikasi email & reset password |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ⬜ | Login Google (opsional) |
+| `EMAIL_FROM` | ⬜ | Kosongkan untuk testing |
 
-Perbedaan paling terasa: di Laravel batas request/response selalu eksplisit (route → controller → view), sedangkan di Next.js batas server/client ada **di dalam pohon komponen** — mudah membuat data fetching kolokasi dengan UI, tapi menuntut disiplin soal apa yang boleh bocor ke client.
+### Perintah lain
+
+| Perintah | Fungsi |
+|---|---|
+| `npm test` | 71 unit test (streak, scoring, queue, placement, token, dll) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+| `npx prisma studio` | GUI database |
 
 ---
 
-Dibangun sebagai proyek pembelajaran full-stack. Ide lanjutan: leaderboard mingguan (league), streak per-timezone, verifikasi email, CMS kosakata, tipe soal baru (pilihan ganda, listening), dan achievement.
+## ☁️ Deploy ke Vercel
+
+1. Push repo ke GitHub (`.env` ter-gitignore).
+2. Import di Vercel — preset Next.js default sudah benar; region function sudah di-pin ke Singapore via `vercel.json`.
+3. Isi environment variables (nilai production: `BETTER_AUTH_URL` = domain kamu, kredensial Google dengan redirect URI production).
+4. Migrasi dijalankan dari mesin dev (`npx prisma migrate dev`), bukan oleh build Vercel.
+
+> **Catatan:** error origin/CSRF saat login hampir pasti berarti `BETTER_AUTH_URL` tidak cocok dengan domain.
+
+---
+
+## 📁 Struktur Singkat
+
+```
+app/
+  (app)/          # halaman ber-login: learn, game, dictionary, leaderboard,
+                  # goals, streak, shop, profile, settings
+  (auth)/         # login, register, forgot/reset password
+  page.tsx        # landing page publik
+components/       # UI bersama (Mascot, JourneyPath, BottomNav, …)
+lib/              # logika murni + infrastruktur (streak, scoring, auth, email)
+prisma/           # schema, migrasi, seed (vocabulary-seed.json)
+tests/            # unit test Vitest
+```
+
+---
+
+## 📄 Lisensi
+
+Dirilis di bawah [Lisensi MIT](LICENSE) — bebas dipakai, dimodifikasi, dan didistribusikan dengan menyertakan atribusi.
+
+<div align="center">
+
+Dibangun dengan 💚 oleh [Kevin Kautsar](https://github.com/KevinKautsarr)
+
+</div>
