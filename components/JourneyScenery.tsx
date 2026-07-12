@@ -16,11 +16,14 @@ type EnvAccent = {
   width: number
   ratio: number // w / h
   opacity: number
+  /** true untuk aksen di atas fold (top ≤ ~15%) — load eager agar tidak jadi
+   *  LCP yang lazy (warning Next.js); sisanya tetap lazy. */
+  eager?: boolean
 }
 
 const ENV: EnvAccent[] = [
   // Pohon besar — jangkar visual di kiri atas & kanan bawah.
-  { src: '/assets/env-tree.png', className: 'left-[-2%] top-[8%]', width: 120, ratio: 752 / 1275, opacity: 0.85 },
+  { src: '/assets/env-tree.png', className: 'left-[-2%] top-[8%]', width: 120, ratio: 752 / 1275, opacity: 0.85, eager: true },
   { src: '/assets/env-tree.png', className: 'right-[-3%] top-[52%] -scale-x-100', width: 104, ratio: 752 / 1275, opacity: 0.7 },
   // Papan penunjuk — sentuhan "peta petualangan".
   { src: '/assets/env-signpost.png', className: 'left-[3%] top-[40%]', width: 76, ratio: 522 / 603, opacity: 0.8 },
@@ -31,8 +34,8 @@ const ENV: EnvAccent[] = [
   { src: '/assets/env-bush.png', className: 'right-[8%] top-[26%]', width: 80, ratio: 623 / 467, opacity: 0.7 },
   { src: '/assets/env-bush.png', className: 'left-[10%] top-[90%]', width: 64, ratio: 623 / 467, opacity: 0.6 },
   // Awan mengambang di atas.
-  { src: '/assets/env-cloud.png', className: 'left-[18%] top-[3%]', width: 96, ratio: 668 / 447, opacity: 0.55 },
-  { src: '/assets/env-cloud.png', className: 'right-[16%] top-[10%]', width: 76, ratio: 668 / 447, opacity: 0.45 },
+  { src: '/assets/env-cloud.png', className: 'left-[18%] top-[3%]', width: 96, ratio: 668 / 447, opacity: 0.55, eager: true },
+  { src: '/assets/env-cloud.png', className: 'right-[16%] top-[10%]', width: 76, ratio: 668 / 447, opacity: 0.45, eager: true },
 ]
 
 export default function JourneyScenery() {
@@ -68,6 +71,7 @@ export default function JourneyScenery() {
             alt=""
             fill
             sizes={`${e.width}px`}
+            loading={e.eager ? 'eager' : undefined}
             className="object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
           />
         </span>
