@@ -15,6 +15,9 @@ function wibDateStr(date: Date): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
 }
 
+
+export const metadata = { title: 'Streak' }
+
 export default async function StreakPage() {
   const sessionUser = await getSessionUser()
   if (!sessionUser) redirect('/login')
@@ -36,8 +39,11 @@ export default async function StreakPage() {
       where: { userId: sessionUser.id, completed: true },
       select: { updatedAt: true, accuracy: true },
     }),
+    // Papan streak teratas — hanya user dengan streak berjalan (angka nol
+    // tidak memotivasi siapa pun).
     prisma.user.findMany({
-      orderBy: { streak: 'desc' },
+      where: { streak: { gt: 0 } },
+      orderBy: [{ streak: 'desc' }, { longestStreak: 'desc' }],
       take: 5,
       select: {
         id: true,

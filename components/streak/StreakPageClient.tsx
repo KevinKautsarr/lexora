@@ -31,10 +31,12 @@ type StreakPageClientProps = {
 }
 
 export default function StreakPageClient({
+  currentUserId,
   user,
   completedDates,
   currentLevel,
   accuracyPercent,
+  topStreaks,
 }: StreakPageClientProps) {
   // Streak "berisiko" = punya streak berjalan tapi belum belajar hari ini →
   // Lexi tampil pose 'streak-danger' (mengantuk/khawatir). Kalau aman atau
@@ -137,6 +139,63 @@ export default function StreakPageClient({
           <StreakCalendar completedDates={completedDates} streakFreezes={user.streakFreezes} />
         </div>
       </div>
+
+      {/* ── Streak Teratas — kompetisi kecil antar pembelajar ── */}
+      <section
+        aria-label="Streak teratas"
+        className="rounded-3xl border border-zinc-700 bg-zinc-800/70 p-5 shadow-sm"
+      >
+        <h2 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-500">
+          <Flame size={14} className="text-orange-500" aria-hidden />
+          Streak Teratas
+        </h2>
+
+        {topStreaks.length === 0 ? (
+          <p className="rounded-2xl border border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-xs text-zinc-500">
+            Belum ada yang punya streak berjalan. Jadilah yang pertama — mulai
+            belajar hari ini!
+          </p>
+        ) : (
+          <ol className="flex flex-col gap-2">
+            {topStreaks.map((u, i) => {
+              const isMe = u.id === currentUserId
+              const displayName = u.name ?? u.email.split('@')[0]
+              return (
+                <li
+                  key={u.id}
+                  className={`flex items-center gap-3 rounded-2xl border px-4 py-2.5 ${
+                    isMe
+                      ? 'border-brand-500/60 bg-brand-100/60'
+                      : 'border-zinc-700/60 bg-zinc-900/40'
+                  }`}
+                >
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black tabular-nums ${
+                      i === 0
+                        ? 'bg-orange-500/15 text-orange-500'
+                        : 'bg-zinc-800 text-zinc-400'
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className={`min-w-0 flex-1 truncate text-sm font-bold ${isMe ? 'text-brand-700' : 'text-zinc-200'}`}>
+                    {displayName}
+                    {isMe && (
+                      <span className="ml-1.5 text-[10px] font-black uppercase text-brand-500">
+                        (kamu)
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1 text-sm font-black tabular-nums text-orange-500">
+                    <Flame size={14} aria-hidden className="fill-orange-500/30" />
+                    {u.streak}
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+        )}
+      </section>
     </div>
   )
 }
