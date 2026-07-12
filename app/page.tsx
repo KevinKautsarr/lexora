@@ -23,7 +23,10 @@ import {
 } from 'lucide-react'
 
 export default async function Home() {
-  const sessionUser = await getSessionUser()
+  // Landing page publik: status login hanya kosmetik (tombol navbar).
+  // Kalau cek sesi gagal (DB cold start / jaringan goyah), degradasi ke
+  // tampilan logged-out — jangan lempar user ke layar error.
+  const sessionUser = await getSessionUser().catch(() => null)
   const isLoggedIn = !!sessionUser
   const totalBadges = totalAchievementCount()
 
