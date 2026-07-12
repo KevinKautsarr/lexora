@@ -1,16 +1,49 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Key } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
+import { authErrorMessage, oauthErrorMessage } from '@/lib/auth-errors'
 
 export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const errorRef = useRef<HTMLParagraphElement>(null)
+
+  // OAuth yang gagal/dibatalkan mendarat balik ke sini dengan ?error=…
+  // (errorCallbackURL). Dibaca via window agar tak perlu Suspense boundary;
+  // setState di dalam rAF agar tidak sinkron di body effect (aturan linter).
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('error')
+    const message = oauthErrorMessage(code)
+    if (!message) return
+    const rafId = requestAnimationFrame(() => setError(message))
+    return () => cancelAnimationFrame(rafId)
+  }, [])
+
+  // OAuth Google: browser di-redirect ke Google lalu kembali ke callbackURL.
+  // Error hanya muncul bila redirect gagal dimulai (mis. provider belum
+  // dikonfigurasi di server).
+  async function handleGoogle() {
+    setError(null)
+    setGoogleLoading(true)
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/learn',
+      // Gagal/dibatalkan di sisi Google → balik ke login dengan ?error=…
+      // (bukan halaman error default Better Auth yang berbahasa Inggris).
+      errorCallbackURL: '/login',
+    })
+    if (error) {
+      setGoogleLoading(false)
+      setError(authErrorMessage(error, 'Masuk dengan Google gagal — coba lagi'))
+      requestAnimationFrame(() => errorRef.current?.focus())
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -23,7 +56,7 @@ export default function LoginPage() {
     const { error } = await authClient.signIn.email({ email, password })
     setLoading(false)
     if (error) {
-      setError(error.message ?? 'Login gagal')
+      setError(authErrorMessage(error, 'Login gagal — coba lagi'))
       requestAnimationFrame(() => errorRef.current?.focus())
       return
     }
@@ -111,13 +144,12 @@ export default function LoginPage() {
           </button>
 
           {/* Forgot Password */}
-          <button
-            type="button"
-            onClick={() => alert('Fitur reset password belum tersedia.')}
+          <Link
+            href="/forgot-password"
             className="text-center text-xs font-bold text-brand-600 hover:text-brand-500 transition-colors select-none py-1 hover:underline focus-visible:outline-none"
           >
             Lupa password?
-          </button>
+          </Link>
 
           {/* Separator OR */}
           <div className="flex items-center gap-3 my-1 text-zinc-400 text-[10px] font-extrabold uppercase tracking-widest select-none">
@@ -130,13 +162,21 @@ export default function LoginPage() {
           <div className="w-full select-none">
             <button
               type="button"
-              onClick={() => alert('Masuk dengan Google belum tersedia.')}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-zinc-700/60 bg-zinc-950/80 hover:bg-zinc-950 transition-colors text-[10px] font-black tracking-wider text-zinc-100 hover:text-brand-600"
+              disabled={googleLoading}
+              onClick={handleGoogle}
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-zinc-700/60 bg-zinc-950/80 hover:bg-zinc-950 transition-colors text-[10px] font-black tracking-wider text-zinc-100 hover:text-brand-600 disabled:opacity-60 cursor-pointer"
             >
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12.2 10.3h11.4c.1.7.2 1.4.2 2.3 0 6.9-4.6 11.8-11.6 11.8C5.5 24.4 0 18.9 0 12.2S5.5 0 12.2 0c3.3 0 6 1.2 8.1 3.2L16.9 6.5C15.7 5.3 14.1 4.7 12.2 4.7c-4.1 0-7.4 3.4-7.4 7.5s3.3 7.5 7.4 7.5c4.7 0 6.5-3.4 6.8-5.1h-6.8v-4.3Z" />
-              </svg>
-              MASUK DENGAN GOOGLE
+              {googleLoading ? (
+                <span
+                  className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-100"
+                  aria-hidden
+                />
+              ) : (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12.2 10.3h11.4c.1.7.2 1.4.2 2.3 0 6.9-4.6 11.8-11.6 11.8C5.5 24.4 0 18.9 0 12.2S5.5 0 12.2 0c3.3 0 6 1.2 8.1 3.2L16.9 6.5C15.7 5.3 14.1 4.7 12.2 4.7c-4.1 0-7.4 3.4-7.4 7.5s3.3 7.5 7.4 7.5c4.7 0 6.5-3.4 6.8-5.1h-6.8v-4.3Z" />
+                </svg>
+              )}
+              {googleLoading ? 'MENGHUBUNGKAN…' : 'MASUK DENGAN GOOGLE'}
             </button>
           </div>
         </div>
