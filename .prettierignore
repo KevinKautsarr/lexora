@@ -1,0 +1,7 @@
+# Artefak build & dependensi
+.next/
+node_modules/
+public/
+
+# Skema & migrasi Prisma punya formatter sendiri (prisma format)
+prisma/migrations/
