@@ -9,7 +9,8 @@ export type NavItem = {
   exact?: boolean
 }
 
-// Sumber tunggal untuk navigasi — dipakai Sidebar (desktop) & BottomNav (mobile).
+// Sumber tunggal untuk navigasi — dipakai Sidebar (desktop, semua item rata)
+// & BottomNav (mobile, dipecah primary/overflow — lihat di bawah).
 export const NAV_ITEMS: NavItem[] = [
   { href: '/learn', label: 'Journey', icon: Map },
   { href: '/dictionary', label: 'Kamus', icon: BookA },
@@ -19,6 +20,11 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/shop', label: 'Toko', icon: ShoppingBag },
   { href: '/profile', label: 'Profil', icon: User },
 ]
+
+// Bottom nav mobile: guideline UX membatasi ≤5 slot agar tiap target tetap
+// mudah dijangkau jempol. 4 dipilih untuk jalur inti (belajar, referensi,
+// kompetisi, kebiasaan harian) + 1 slot "Lainnya" untuk sisanya.
+export const BOTTOM_NAV_PRIMARY_HREFS = ['/learn', '/dictionary', '/leaderboard', '/streak']
 
 /** Apakah `href` aktif untuk `pathname` saat ini (menghormati flag `exact`). */
 export function isNavActive(pathname: string, item: NavItem): boolean {
