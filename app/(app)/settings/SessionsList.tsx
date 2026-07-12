@@ -9,17 +9,22 @@ import { revokeOtherSessions, type ActiveSession } from './actions'
 function describeDevice(ua: string | null): { label: string; mobile: boolean } {
   if (!ua) return { label: 'Perangkat tidak dikenal', mobile: false }
   const mobile = /Mobile|Android|iPhone|iPad/i.test(ua)
+  // CriOS/FxiOS = Chrome/Firefox versi iOS (UA-nya tidak memuat "Chrome/").
   const browser =
     /Edg\//.test(ua) ? 'Edge'
+    : /CriOS\//.test(ua) ? 'Chrome'
+    : /FxiOS\//.test(ua) ? 'Firefox'
     : /Chrome\//.test(ua) ? 'Chrome'
     : /Firefox\//.test(ua) ? 'Firefox'
     : /Safari\//.test(ua) ? 'Safari'
     : 'Browser'
+  // iPhone/iPad DULUAN sebelum Mac OS — UA iPhone memuat "like Mac OS X",
+  // jadi cek /Mac OS/ lebih dulu salah-label iPhone sebagai macOS.
   const os =
-    /Windows/.test(ua) ? 'Windows'
-    : /Mac OS/.test(ua) ? 'macOS'
+    /iPhone|iPad|iPod/.test(ua) ? 'iOS'
     : /Android/.test(ua) ? 'Android'
-    : /iPhone|iPad|iOS/.test(ua) ? 'iOS'
+    : /Windows/.test(ua) ? 'Windows'
+    : /Mac OS|Macintosh/.test(ua) ? 'macOS'
     : /Linux/.test(ua) ? 'Linux'
     : 'perangkat'
   return { label: `${browser} di ${os}`, mobile }
@@ -29,6 +34,14 @@ function formatWhen(iso: string): string {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(
     new Date(iso),
   )
+}
+
+// IP hanya ditampilkan bila informatif. Alamat lokal/kosong (::, ::1,
+// 0000:…:0000, 127.x) muncul dari sesi dev/proxy dan cuma membingungkan.
+function displayIp(ip: string | null): string | null {
+  if (!ip) return null
+  if (/^(::1?$|0{1,4}(:0{1,4}){7}$|127\.)/.test(ip)) return null
+  return ip
 }
 
 export default function SessionsList({ sessions }: { sessions: ActiveSession[] }) {
@@ -69,7 +82,8 @@ export default function SessionsList({ sessions }: { sessions: ActiveSession[] }
                   )}
                 </p>
                 <p className="truncate text-[11px] text-zinc-500">
-                  {s.ipAddress ? `${s.ipAddress} · ` : ''}Masuk {formatWhen(s.createdAt)}
+                  {displayIp(s.ipAddress) ? `${displayIp(s.ipAddress)} · ` : ''}Masuk{' '}
+                  {formatWhen(s.createdAt)}
                 </p>
               </div>
             </li>
