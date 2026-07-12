@@ -11,7 +11,7 @@ const MOCK_LESSONS = [
 // 3-cycle zigzag: center → right → left
 const ZIGZAG_OFFSETS = [0, 48, -48] as const
 
-function badgeFor(status: 'completed' | 'unlocked' | 'locked', isLastInUnit: boolean, isFrontmost: boolean) {
+function badgeFor(status: 'completed' | 'unlocked' | 'locked', isLastInUnit: boolean) {
   if (isLastInUnit && status === 'completed') return '/node-trophy.png'
   if (status === 'completed') return '/node-completed.png'
   if (status === 'unlocked') return '/node-active.png'
@@ -56,7 +56,7 @@ export default function MobilePathMock() {
       <div className="flex flex-col items-center py-2">
         {MOCK_LESSONS.map((lesson, idx) => {
           const offset = ZIGZAG_OFFSETS[idx % ZIGZAG_OFFSETS.length]
-          const badge = badgeFor(lesson.status, lesson.isLastInUnit, lesson.isFrontmost)
+          const badge = badgeFor(lesson.status, lesson.isLastInUnit)
           const isActive = lesson.isFrontmost && lesson.status === 'unlocked'
 
           return (

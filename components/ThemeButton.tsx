@@ -15,12 +15,15 @@ export default function ThemeButton({ className = '' }: { className?: string }) 
   const [isDark, setIsDark] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme')
-    if (stored === 'dark' || stored === 'light') {
-      setIsDark(stored === 'dark')
-    } else {
-      setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches)
-    }
+    const rafId = requestAnimationFrame(() => {
+      const stored = localStorage.getItem('theme')
+      if (stored === 'dark' || stored === 'light') {
+        setIsDark(stored === 'dark')
+      } else {
+        setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches)
+      }
+    })
+    return () => cancelAnimationFrame(rafId)
   }, [])
 
   function toggle() {

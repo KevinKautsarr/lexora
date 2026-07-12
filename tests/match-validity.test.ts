@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildQueue, isValidMatch, type CardInstance } from '@/app/(app)/game/queue'
+import { buildQueue, isValidMatch } from '@/app/(app)/game/queue'
 import type { WordPair } from '@/app/(app)/game/MatchMadness'
 
 const identity = <T,>(items: T[]): T[] => items

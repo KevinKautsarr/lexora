@@ -84,13 +84,11 @@ function RankBadge({ rank }: { rank: number }) {
 function PodiumCard({
   rank,
   name,
-  xp,
   xpThisWeek,
   isMe,
 }: {
   rank: 1 | 2 | 3
   name: string
-  xp: number
   xpThisWeek: number
   isMe: boolean
 }) {
@@ -175,7 +173,6 @@ function Row({
   totalCount: number
   selectedDivision: Division
 }) {
-  const meta = DIVISION_META[selectedDivision]
   const isPromotionZone = rank <= 3 && xpThisWeek > 0
   const isDemotionZone =
     selectedDivision !== 'BRONZE' &&
@@ -400,7 +397,6 @@ export default async function LeaderboardPage({
                       key={user.id}
                       rank={podiumRank}
                       name={user.name ?? 'Pelajar'}
-                      xp={user.xp}
                       xpThisWeek={user.xpThisWeek}
                       isMe={user.id === me.id}
                     />

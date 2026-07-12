@@ -26,7 +26,6 @@ const FreezeIcon = () => (
 
 // ─── Build calendar grid ─────────────────────────────────────────────
 function buildCalendarWeeks() {
-  const totalDays = new Date(Date.UTC(MOCK_YEAR, MOCK_MONTH + 1, 0)).getUTCDate()
   const startDayOfWeek = new Date(Date.UTC(MOCK_YEAR, MOCK_MONTH, 1)).getUTCDay()
   const gridStart = new Date(Date.UTC(MOCK_YEAR, MOCK_MONTH, 1 - startDayOfWeek))
 

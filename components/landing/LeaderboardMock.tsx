@@ -1,4 +1,4 @@
-import { Crown, Medal, Trophy, ArrowUp, Timer, Zap } from 'lucide-react'
+import { Crown, Medal, Trophy, ArrowUp, Zap } from 'lucide-react'
 
 // ─── Mock data ───────────────────────────────────────────────────────
 const MOCK_USERS = [

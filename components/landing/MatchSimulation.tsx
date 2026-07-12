@@ -75,11 +75,12 @@ export default function MatchSimulation() {
     return () => clearTimeout(id)
   }, [wrongPair])
 
-  // Evaluate when both sides selected
-  useEffect(() => {
-    if (!selectedLeft || !selectedRight) return
-    const left  = leftCards.find((c) => c.id === selectedLeft)!
-    const right = rightCards.find((c) => c.id === selectedRight)!
+  // Evaluasi dipanggil langsung dari handler klik (bukan effect yang bereaksi
+  // pada state pilihan) — menyamai pola MatchMadness asli, dan menghindari
+  // setState sinkron di effect body.
+  function evaluate(leftId: string, rightId: string) {
+    const left  = leftCards.find((c) => c.id === leftId)!
+    const right = rightCards.find((c) => c.id === rightId)!
     if (left.matchId === right.matchId) {
       setMatchedIds((prev) => new Set(prev).add(left.matchId))
       setSuccessIds((prev) => new Set(prev).add(left.id).add(right.id))
@@ -92,10 +93,9 @@ export default function MatchSimulation() {
       setSelectedLeft(null)
       setSelectedRight(null)
     } else {
-      setWrongPair({ left: selectedLeft, right: selectedRight })
+      setWrongPair({ left: leftId, right: rightId })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLeft, selectedRight])
+  }
 
   const handleReset = () => {
     setMatchedIds(new Set()); setSelectedLeft(null); setSelectedRight(null)
@@ -107,12 +107,14 @@ export default function MatchSimulation() {
     if (gameOver || wrongPair) return
     if (!started) setStarted(true)
     setSelectedLeft(id)
+    if (selectedRight) evaluate(id, selectedRight)
   }
 
   const handleRightClick = (id: string) => {
     if (gameOver || wrongPair) return
     if (!started) setStarted(true)
     setSelectedRight(id)
+    if (selectedLeft) evaluate(selectedLeft, id)
   }
 
   return (

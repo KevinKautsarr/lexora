@@ -1,4 +1,4 @@
-import { Lock } from 'lucide-react'
+import { Lock, Dumbbell } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { Suspense } from 'react'
@@ -112,6 +112,16 @@ export default async function LearnPage({
       <div className="flex min-w-0 flex-1 flex-col gap-10">
         {showReminder && user && (
           <ReminderBanner reminderHour={user.reminderHour} streak={user.streak} />
+        )}
+        {notice === 'practice-empty' && (
+          <div
+            role="status"
+            className="flex items-center gap-3 rounded-2xl border border-brand-500/30 bg-brand-500/10 px-4 py-3 text-sm text-brand-200"
+          >
+            <Dumbbell size={18} className="shrink-0 text-brand-400" aria-hidden />
+            Latihan Personal butuh minimal satu lesson yang sudah selesai.
+            Selesaikan lesson pertamamu di bawah ini, lalu coba lagi!
+          </div>
         )}
         <header>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-zinc-100">

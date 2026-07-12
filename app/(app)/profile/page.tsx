@@ -2,7 +2,6 @@ import { Flame, Zap, TrendingUp, Calendar, Settings, Gem } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentCefrLevel } from '@/lib/cefr'
-import { levelForXp } from '@/lib/level'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { buildAchievementCategories } from '@/lib/achievements'
@@ -52,7 +51,6 @@ export default async function ProfilePage() {
 
   const joinedAt = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(user.createdAt)
   const displayName = user.name ?? user.email
-  const level = levelForXp(user.xp)
 
   const divisionLabel =
     user.division === 'GOLD' ? 'Emas' : user.division === 'SILVER' ? 'Perak' : 'Perunggu'

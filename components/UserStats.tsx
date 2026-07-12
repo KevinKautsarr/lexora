@@ -29,11 +29,6 @@ export default async function UserStats() {
     user.boosterMultiplier > 1.0 &&
     new Date(user.boosterExpiry) > now
 
-  // Sisa waktu booster dalam menit
-  const boosterMinsLeft = boosterActive
-    ? Math.max(1, Math.ceil((new Date(user.boosterExpiry!).getTime() - now.getTime()) / 60_000))
-    : 0
-
   const tiles = [
     {
       id: 'gems',

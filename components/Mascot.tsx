@@ -58,7 +58,7 @@ export default function Mascot({
   mood?: MascotMood
   size?: number
   className?: string
-  [key: string]: any // To swallow props like xp passed by some parents
+  [key: string]: unknown // To swallow props like xp passed by some parents
 }) {
   // If mood is provided, resolve it to an appropriate pose if no specific pose is set
   let resolvedPose: MascotPose = pose || 'neutral'

@@ -22,9 +22,12 @@ export default function ReminderBanner({
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    const nowWib = new Date(Date.now() + WIB_OFFSET_MS)
-    const currentHourWib = nowWib.getUTCHours()
-    setVisible(currentHourWib >= reminderHour)
+    const rafId = requestAnimationFrame(() => {
+      const nowWib = new Date(Date.now() + WIB_OFFSET_MS)
+      const currentHourWib = nowWib.getUTCHours()
+      setVisible(currentHourWib >= reminderHour)
+    })
+    return () => cancelAnimationFrame(rafId)
   }, [reminderHour])
 
   if (!visible || dismissed) return null

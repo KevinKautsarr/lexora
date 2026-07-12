@@ -49,9 +49,6 @@ export default function StreakCalendar({ completedDates, streakFreezes }: Streak
   const [year, setYear] = useState(now.getUTCFullYear())
   const [month, setMonth] = useState(now.getUTCMonth()) // 0-indexed
 
-  // Ambil total hari di bulan ini
-  const totalDays = new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
-
   // Hari pertama di bulan ini jatuh di hari apa (0 = Minggu, 1 = Senin, dst)
   const startDayOfWeek = new Date(Date.UTC(year, month, 1)).getUTCDay()
 

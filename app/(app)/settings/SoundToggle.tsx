@@ -10,7 +10,8 @@ import { isSfxMuted, setSfxMuted, playSfx } from '@/lib/sfx'
 export default function SoundToggle() {
   const [muted, setMuted] = useState(false)
   useEffect(() => {
-    setMuted(isSfxMuted())
+    const rafId = requestAnimationFrame(() => setMuted(isSfxMuted()))
+    return () => cancelAnimationFrame(rafId)
   }, [])
 
   function toggle() {

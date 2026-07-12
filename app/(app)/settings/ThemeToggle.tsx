@@ -30,8 +30,11 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme')
-    setTheme(stored === 'light' || stored === 'dark' ? stored : 'system')
+    const rafId = requestAnimationFrame(() => {
+      const stored = localStorage.getItem('theme')
+      setTheme(stored === 'light' || stored === 'dark' ? stored : 'system')
+    })
+    return () => cancelAnimationFrame(rafId)
   }, [])
 
   function choose(next: Theme) {

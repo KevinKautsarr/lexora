@@ -51,7 +51,8 @@ export default function BottomNav() {
 
   // Tutup otomatis saat pathname berubah (navigasi lewat item di sheet).
   useEffect(() => {
-    setMoreOpen(false)
+    const rafId = requestAnimationFrame(() => setMoreOpen(false))
+    return () => cancelAnimationFrame(rafId)
   }, [pathname])
 
   // Esc menutup sheet — pola standar untuk overlay modal-like.
