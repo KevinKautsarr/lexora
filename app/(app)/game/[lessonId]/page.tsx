@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, Layers, Target } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
 import { isLessonUnlockedForUser } from '@/lib/unlock'
+import { createGameToken } from '@/lib/game-token'
 import Mascot from '@/components/Mascot'
 import MatchMadness from '../MatchMadness'
 
@@ -38,6 +39,9 @@ export default async function LessonGamePage({
     english: word.term,
     indonesian: word.translation,
   }))
+
+  // Bukti-mulai untuk submitScore — lihat lib/game-token.ts.
+  const startToken = createGameToken(sessionUser.id, lesson.id)
 
   return (
     <main className="mx-auto w-full max-w-6xl">
@@ -95,7 +99,7 @@ export default async function LessonGamePage({
 
         {/* ── Kolom kanan: Game board ── */}
         <section className="rounded-3xl border border-zinc-700 bg-zinc-800/50 p-6 shadow-xl sm:p-8">
-          <MatchMadness pairs={pairs} lessonId={lesson.id} userXp={user.xp} />
+          <MatchMadness pairs={pairs} lessonId={lesson.id} userXp={user.xp} startToken={startToken} />
         </section>
       </div>
     </main>

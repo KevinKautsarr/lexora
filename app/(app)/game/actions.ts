@@ -7,6 +7,7 @@ import { nextStreakWithFreeze, wibDateOnly } from '@/lib/streak'
 import { isLessonUnlockedForUser } from '@/lib/unlock'
 import { computeScore, REPEATS_PER_WORD } from './scoring'
 import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
+import { verifyGameToken } from '@/lib/game-token'
 
 // Replay (lesson yang sudah pernah completed sebelumnya) hanya menyumbang
 // 1/4 XP ke total user — skor & histori lessonProgress tetap dihitung penuh,
@@ -39,10 +40,19 @@ export type SubmitScoreResult =
     }
   | { ok: false; error: string }
 
+// Anti-cheat: durasi main minimal & laju match maksimal yang masih manusiawi.
+// Game 60 detik dengan lock 600ms per salah → attempts fisik ≤ ~200; cap 500
+// memberi ruang lega tapi menutup nilai absurd.
+const MIN_PLAY_MS = 8_000
+const MAX_MATCHES_PER_SECOND = 2.5
+const MAX_ATTEMPTS = 500
+const SUBMIT_THROTTLE_MS = 15_000
+
 export async function submitScore(
   lessonId: string,
   correctCount: number,
   attempts: number,
+  startToken: string,
 ): Promise<SubmitScoreResult> {
   const sessionUser = await getSessionUser()
   if (!sessionUser) return { ok: false, error: 'Harus login dulu' }
@@ -52,13 +62,26 @@ export async function submitScore(
 
   if (
     typeof lessonId !== 'string' ||
+    typeof startToken !== 'string' ||
     !Number.isInteger(correctCount) ||
     !Number.isInteger(attempts) ||
     correctCount < 0 ||
     attempts < correctCount ||
-    attempts > 10_000
+    attempts > MAX_ATTEMPTS
   ) {
     return { ok: false, error: 'Input tidak valid' }
+  }
+
+  // Token bukti-mulai: skor hanya diterima dari sesi game yang benar-benar
+  // dirender server (bukan panggilan action langsung), setelah durasi main
+  // yang masuk akal, dengan laju match yang manusiawi.
+  const tokenCheck = verifyGameToken(startToken, sessionUser.id, lessonId)
+  if (!tokenCheck.ok) return { ok: false, error: 'Sesi game tidak valid — muat ulang halaman' }
+  if (tokenCheck.elapsedMs < MIN_PLAY_MS) {
+    return { ok: false, error: 'Sesi game terlalu singkat' }
+  }
+  if (correctCount > (tokenCheck.elapsedMs / 1000) * MAX_MATCHES_PER_SECOND) {
+    return { ok: false, error: 'Skor tidak wajar' }
   }
 
   const lesson = await prisma.lesson.findUnique({
@@ -103,10 +126,16 @@ export async function submitScore(
   const completed = totalMatches > 0 && correctCount === totalMatches
   const { score, accuracy } = computeScore(correctCount, attempts, totalMatches, completed)
 
+  // Throttle antar-submit: satu ronde penuh butuh puluhan detik, jadi dua
+  // submit untuk lesson yang sama dalam <15 detik pasti bukan permainan asli.
+  if (existing && Date.now() - new Date(existing.updatedAt).getTime() < SUBMIT_THROTTLE_MS) {
+    return { ok: false, error: 'Terlalu cepat — selesaikan ronde dulu' }
+  }
+
   // Replay = lesson ini sudah pernah completed SEBELUM run ini. XP yang masuk
   // ke total user dipotong jadi 1/4; skor & histori lessonProgress tetap penuh.
   const isReplay = existing?.completed ?? false
-  let baseXpGain = isReplay ? Math.round(score * REPLAY_XP_FACTOR) : score
+  const baseXpGain = isReplay ? Math.round(score * REPLAY_XP_FACTOR) : score
 
   // Cek booster aktif — jika boosterExpiry ada dan belum kedaluwarsa, kalikan XP
   const now = new Date()
@@ -180,7 +209,9 @@ export async function submitScore(
   if (lessonDoneTodayBefore === 0 && lessonDoneTodayAfter === 1) {
     const reward: GoalReward = {
       goalId: 'daily-lesson',
-      label: 'Selesaikan 1 Lesson',
+      // Label mengikuti logika sebenarnya (streakActive = dapat XP hari ini,
+      // tak harus sempurna) — jangan menjanjikan "selesaikan" bila tidak dicek.
+      label: 'Belajar 1 Sesi Hari Ini',
       gems: 10,
       boosterMultiplier: 1.5,
       boosterDurationMinutes: BOOSTER_1_5X_DURATION_MINUTES,

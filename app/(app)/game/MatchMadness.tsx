@@ -10,6 +10,7 @@ import { submitScore, type SubmitScoreResult } from './actions'
 import { GAME_DURATION, REPEATS_PER_WORD, computeScore } from './scoring'
 import { buildQueue, initialSlots, pickReplacement, isValidMatch, type CardInstance } from './queue'
 import GoalRewardModal from '@/components/GoalRewardModal'
+import { playSfx } from '@/lib/sfx'
 
 export type WordPair = { id: string; english: string; indonesian: string }
 
@@ -35,10 +36,13 @@ export default function MatchMadness({
   pairs,
   lessonId,
   userXp = 0,
+  startToken,
 }: {
   pairs: WordPair[]
   lessonId?: string
   userXp?: number
+  /** Token bukti-mulai dari server — wajib untuk mode lesson (simpan skor). */
+  startToken?: string
 }) {
   const router = useRouter()
   const totalMatches = pairs.length * REPEATS_PER_WORD
@@ -136,13 +140,30 @@ export default function MatchMadness({
     return () => cancelAnimationFrame(id)
   }, [])
 
+  // Timer berbasis deadline wall-clock, BUKAN decrement per-interval.
+  // setInterval di-throttle browser saat tab di-background — dengan decrement,
+  // pindah tab = waktu berhenti (bisa dipakai "pause" untuk berpikir).
+  // Deadline dihitung sekali saat mulai; tick hanya membaca sisa waktu nyata.
+  const deadlineRef = useRef<number | null>(null)
   useEffect(() => {
     if (gameOver || !gameStarted) return
-    const interval = setInterval(() => {
-      setTimeLeft((t) => Math.max(0, t - 1))
-    }, 1000)
+    if (deadlineRef.current === null) {
+      deadlineRef.current = Date.now() + GAME_DURATION * 1000
+    }
+    const tick = () =>
+      setTimeLeft(Math.max(0, Math.ceil((deadlineRef.current! - Date.now()) / 1000)))
+    tick()
+    const interval = setInterval(tick, 250)
     return () => clearInterval(interval)
   }, [gameOver, gameStarted])
+
+  // Fanfare menang / nada kalah saat layar hasil muncul. Sedikit ditunda agar
+  // tidak bertumpuk dengan sfx 'correct' dari match terakhir.
+  useEffect(() => {
+    if (!gameOver) return
+    const t = setTimeout(() => playSfx(allMatched ? 'win' : 'lose'), 350)
+    return () => clearTimeout(t)
+  }, [gameOver, allMatched])
 
   // Saat game berakhir, batalkan semua penggantian kartu yang masih tertunda —
   // mencegah kartu antrian "muncul lagi" di belakang layar hasil.
@@ -178,12 +199,12 @@ export default function MatchMadness({
   // requestAnimationFrame supaya tidak dipanggil sinkron di dalam body effect
   // (melanggar react-hooks/set-state-in-effect).
   useEffect(() => {
-    if (!gameOver || !lessonId || submit.status !== 'idle') return
+    if (!gameOver || !lessonId || !startToken || submit.status !== 'idle') return
     const rafId = requestAnimationFrame(() => {
       setSubmit({ status: 'saving' })
       startTransition(async () => {
         try {
-          const result = await submitScore(lessonId, correctCount, attempts)
+          const result = await submitScore(lessonId, correctCount, attempts, startToken)
           if (result.ok) {
             setSubmit({ status: 'saved', result })
             // Tampilkan modal reward jika ada goal yang baru diselesaikan
@@ -199,7 +220,7 @@ export default function MatchMadness({
       })
     })
     return () => cancelAnimationFrame(rafId)
-  }, [gameOver, lessonId, submit.status, correctCount, attempts])
+  }, [gameOver, lessonId, startToken, submit.status, correctCount, attempts])
 
   const { score: localScore, accuracy } = computeScore(
     correctCount,
@@ -284,6 +305,7 @@ export default function MatchMadness({
     // Match VALID hanya jika kiri & kanan instance yang SAMA PERSIS (lihat
     // isValidMatch) — mencegah dua pasang duplikat saling ter-solve.
     if (isValidMatch(leftCard, rightCard)) {
+      playSfx('correct')
       setMatchCount((n) => n + 1)
       setMatchedInstanceIds((prev) => new Set(prev).add(leftInstanceId).add(rightInstanceId))
       setSuccessIds((prev) => new Set(prev).add(leftInstanceId).add(rightInstanceId))
@@ -301,6 +323,7 @@ export default function MatchMadness({
       const isLastOverall = correctCount + 1 === totalMatches
       if (!isLastOverall) scheduleReplacement(leftInstanceId, rightInstanceId)
     } else {
+      playSfx('wrong')
       setWrongPair({ left: leftInstanceId, right: rightInstanceId })
     }
   }

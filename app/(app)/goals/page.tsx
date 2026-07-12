@@ -54,7 +54,9 @@ export default async function GoalsPage() {
   const goals = [
     {
       id: 'daily-lesson',
-      label: 'Selesaikan 1 lesson',
+      // Konsisten dengan logika reward di game/actions.ts: sesi belajar apa
+      // pun yang menghasilkan XP dihitung, tidak harus lesson sempurna.
+      label: 'Belajar 1 sesi hari ini',
       current: Math.min(lessonDoneToday, LESSON_GOAL),
       total: LESSON_GOAL,
       barClass: 'bg-brand-500',
