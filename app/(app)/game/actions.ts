@@ -6,7 +6,7 @@ import { getSessionUser } from '@/lib/session'
 import { nextStreakWithFreeze, wibDateOnly } from '@/lib/streak'
 import { isLessonUnlockedForUser } from '@/lib/unlock'
 import { computeScore, REPEATS_PER_WORD } from './scoring'
-import { checkAndResetWeeklyLeagueGlobal } from '@/lib/league'
+import { checkAndResetWeeklyLeagueGlobal, getWeekStart } from '@/lib/league'
 import { verifyGameToken } from '@/lib/game-token'
 
 // Replay (lesson yang sudah pernah completed sebelumnya) hanya menyumbang
@@ -57,9 +57,6 @@ export async function submitScore(
   const sessionUser = await getSessionUser()
   if (!sessionUser) return { ok: false, error: 'Harus login dulu' }
 
-  // Run weekly league reset check
-  await checkAndResetWeeklyLeagueGlobal()
-
   if (
     typeof lessonId !== 'string' ||
     typeof startToken !== 'string' ||
@@ -99,27 +96,46 @@ export async function submitScore(
   const unlocked = await isLessonUnlockedForUser(sessionUser.id, lessonId)
   if (!unlocked) return { ok: false, error: 'Lesson masih terkunci' }
 
-  const [existing, dbUser] = await Promise.all([
+  const userSelect = {
+    streak: true,
+    longestStreak: true,
+    lastActivityDate: true,
+    xpToday: true,
+    lastXpDate: true,
+    perfectToday: true,
+    lastPerfectDate: true,
+    gems: true,
+    streakFreezes: true,
+    boosterMultiplier: true,
+    boosterExpiry: true,
+    lastWeekStart: true,
+  } as const
+
+  const [existing, initialDbUser] = await Promise.all([
     prisma.lessonProgress.findUnique({
       where: { userId_lessonId: { userId: sessionUser.id, lessonId } },
     }),
     prisma.user.findUniqueOrThrow({
       where: { id: sessionUser.id },
-      select: {
-        streak: true,
-        longestStreak: true,
-        lastActivityDate: true,
-        xpToday: true,
-        lastXpDate: true,
-        perfectToday: true,
-        lastPerfectDate: true,
-        gems: true,
-        streakFreezes: true,
-        boosterMultiplier: true,
-        boosterExpiry: true,
-      },
+      select: userSelect,
     }),
   ])
+
+  // Reset liga mingguan hanya dipanggil bila minggu USER INI sudah basi —
+  // di minggu berjalan (99% kasus) tidak ada query ekstra sama sekali.
+  // Tidak boleh dilempar ke after(): reset harus jalan SEBELUM xpThisWeek
+  // di-increment, agar XP run ini tercatat ke minggu baru (bukan dihapus).
+  let dbUser = initialDbUser
+  const weekIsStale =
+    !dbUser.lastWeekStart || new Date(dbUser.lastWeekStart) < getWeekStart()
+  if (weekIsStale) {
+    await checkAndResetWeeklyLeagueGlobal()
+    // Reset mengubah xpThisWeek/division user — baca ulang state segar.
+    dbUser = await prisma.user.findUniqueOrThrow({
+      where: { id: sessionUser.id },
+      select: userSelect,
+    })
+  }
 
   // Skor dihitung di server dari jumlah benar/percobaan — nilai skor
   // mentah dari client tidak pernah dipercaya.

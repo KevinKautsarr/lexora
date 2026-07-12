@@ -34,7 +34,11 @@ export async function checkAndResetWeeklyLeagueGlobal() {
     return
   }
 
-  // Fetch all users to calculate promotion, demotion, and win rewards
+  // Fetch all users to calculate promotion, demotion, and win rewards.
+  // CATATAN SKALA: select sudah minimal (3 field kecil), tapi tetap memuat
+  // seluruh user ke memori — masih aman sampai puluhan ribu user (~beberapa
+  // MB). Di atas itu, ranking perlu dipindah ke SQL (window function
+  // ROW_NUMBER() OVER (PARTITION BY division ORDER BY xpThisWeek DESC)).
   const users = await prisma.user.findMany({
     select: { id: true, division: true, xpThisWeek: true },
   })
@@ -54,8 +58,13 @@ export async function checkAndResetWeeklyLeagueGlobal() {
     .filter((u) => u.division === 'GOLD')
     .sort((a, b) => b.xpThisWeek - a.xpThisWeek)
 
-  // Build the list of prisma update transactions
-  const updates = users.map((u) => {
+  // Kelompokkan user per transisi (divisi-lama → divisi-baru, menang emas
+  // atau tidak) lalu eksekusi dengan updateMany per kelompok — maksimal ~7
+  // query berapa pun jumlah user, bukan 1 query update per user.
+  type Bucket = { division: string; newDiv: string; wonGold: boolean; ids: string[] }
+  const buckets = new Map<string, Bucket>()
+
+  for (const u of users) {
     let newDiv = u.division
     let wonGold = false
 
@@ -104,17 +113,24 @@ export async function checkAndResetWeeklyLeagueGlobal() {
       }
     }
 
-    return prisma.user.update({
-      where: { id: u.id },
+    const key = `${u.division}|${newDiv}|${wonGold}`
+    const bucket = buckets.get(key)
+    if (bucket) bucket.ids.push(u.id)
+    else buckets.set(key, { division: u.division, newDiv, wonGold, ids: [u.id] })
+  }
+
+  const updates = Array.from(buckets.values()).map((b) =>
+    prisma.user.updateMany({
+      where: { id: { in: b.ids } },
       data: {
-        previousDivision: u.division, // Retain for notification popup
-        division: newDiv,
+        previousDivision: b.division, // Retain for notification popup
+        division: b.newDiv,
         xpThisWeek: 0,
         lastWeekStart: currentWeekStart,
-        ...(wonGold ? { goldWins: { increment: 1 } } : {}),
+        ...(b.wonGold ? { goldWins: { increment: 1 } } : {}),
       },
-    })
-  })
+    }),
+  )
 
   // Execute reset transactionally
   await prisma.$transaction(updates)
