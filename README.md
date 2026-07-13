@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/logo-full-transparent.png" alt="Logo Lexora" width="96" height="96" />
+<img src="public/images/01_favicon_avatar.png" alt="Logo Lexora" width="96" height="96" />
 
 # LEXORA
 
