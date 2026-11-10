@@ -4,12 +4,12 @@ import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Mail, MailCheck } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
-import { authErrorMessage } from '@/lib/auth-errors'
+import { forgotPasswordErrorMessage } from '@/lib/forgot-password'
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -18,18 +18,20 @@ export default function ForgotPasswordPage() {
 
     setError(null)
     setLoading(true)
-    const { error } = await authClient.requestPasswordReset({
+
+    const { error: resetError } = await authClient.requestPasswordReset({
       email,
       redirectTo: '/reset-password',
     })
+
     setLoading(false)
-    if (error) {
-      setError(authErrorMessage(error, 'Gagal mengirim email — coba lagi'))
+
+    if (resetError) {
+      setError(forgotPasswordErrorMessage(resetError))
       requestAnimationFrame(() => errorRef.current?.focus())
       return
     }
-    // Selalu tampilkan pesan yang sama walau email tidak terdaftar —
-    // mencegah orang memakai form ini untuk menebak email siapa yang punya akun.
+
     setSent(true)
   }
 
@@ -59,7 +61,7 @@ export default function ForgotPasswordPage() {
               <p
                 ref={errorRef}
                 tabIndex={-1}
-                className="mt-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-xs font-medium text-red-700 focus:outline-none"
+                className="mt-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-xs font-medium text-red-500 focus:outline-none"
                 role="alert"
               >
                 {error}

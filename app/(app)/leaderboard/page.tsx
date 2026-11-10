@@ -8,6 +8,7 @@ import { getSessionUser } from '@/lib/session'
 import EmptyState from '@/components/EmptyState'
 import LeagueBadge from '@/components/LeagueBadge'
 import { checkAndResetWeeklyLeagueGlobal, getWeekStart } from '@/lib/league'
+import { parseDivision, Division } from '@/lib/division'
 
 const TOP_LIMIT = 20
 
@@ -51,7 +52,7 @@ const DIVISION_META = {
   },
 } as const
 
-type Division = keyof typeof DIVISION_META
+// Division type diekspor dari @/lib/division untuk konsistensi validasi.
 
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank }: { rank: number }) {
@@ -260,9 +261,10 @@ export default async function LeaderboardPage({
     select: { id: true, name: true, xp: true, xpThisWeek: true, division: true, createdAt: true },
   })
 
-  const selectedDivision = (
-    sp.division?.toUpperCase() || me.division || 'BRONZE'
-  ) as Division
+  // Validasi division via whitelist: jika nilai dari searchParams tidak ada di
+  // enum BRONZE/SILVER/GOLD, fallback aman ke divisi user sendiri atau 'BRONZE'.
+  const fallbackDivision = parseDivision(me.division, 'BRONZE')
+  const selectedDivision = parseDivision(sp.division, fallbackDivision)
 
   const [topUsers, myRankCount] = await Promise.all([
     prisma.user.findMany({

@@ -60,6 +60,12 @@ function verifyEmailHtml(name: string | null | undefined, url: string): string {
   )
 }
 
+// Validasi startup: BETTER_AUTH_URL wajib diset di production untuk menjamin
+// origin check CSRF, pembuatan cookie aman, dan callback OAuth bekerja dengan benar.
+if (process.env.NODE_ENV === 'production' && !process.env.BETTER_AUTH_URL) {
+  throw new Error('BETTER_AUTH_URL wajib diset di production')
+}
+
 export const auth = betterAuth({
   // Di production WAJIB set BETTER_AUTH_URL ke URL publik aplikasi
   // (mis. https://lexora.vercel.app) — dipakai untuk origin check CSRF,
@@ -119,6 +125,15 @@ export const auth = betterAuth({
     // untuk sesi lama. Aksi sensitif (hapus akun) sudah dilindungi konfirmasi
     // ketik-ulang email di sisi aplikasi, jadi freshness check tak diperlukan.
     freshAge: 0,
+  },
+  rateLimit: {
+    // Persistensi rate limit di serverless (Vercel): menggunakan storage
+    // database via Prisma adapter agar bucket tidak reset antar-invokasi lambda.
+    // Aturan khusus bawaan tetap berlaku:
+    // - sign-in / sign-up / ganti kredensial: 3 percobaan per 10 detik
+    // - reset-password / verifikasi email: 3 percobaan per 60 detik
+    // Di dev otomatis non-aktif (enabled: isProduction), aktif di production.
+    storage: 'database',
   },
   // nextCookies harus jadi plugin terakhir: menyalin Set-Cookie ke
   // cookie store Next saat auth API dipanggil dari server actions.
