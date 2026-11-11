@@ -44,17 +44,30 @@ function displayIp(ip: string | null): string | null {
   return ip
 }
 
-export default function SessionsList({ sessions }: { sessions: ActiveSession[] }) {
+export default function SessionsList({
+  sessions,
+  needsPassword,
+}: {
+  sessions: ActiveSession[]
+  /** User credential wajib konfirmasi password; user Google-only tidak punya password. */
+  needsPassword: boolean
+}) {
   const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null)
   const [pending, startTransition] = useTransition()
 
   const otherCount = sessions.filter((s) => !s.isCurrent).length
 
-  function handleRevoke() {
+  function handleRevoke(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setFeedback(null)
+    const form = e.currentTarget
+    const formData = new FormData(form)
     startTransition(async () => {
-      const res = await revokeOtherSessions()
+      const res = await revokeOtherSessions(formData)
       setFeedback(res)
+      if (res?.ok) {
+        form.reset()
+      }
     })
   }
 
@@ -91,27 +104,54 @@ export default function SessionsList({ sessions }: { sessions: ActiveSession[] }
         })}
       </ul>
 
-      {feedback && (
+      {otherCount > 0 && (
+        <form onSubmit={handleRevoke} className="mt-2 flex flex-col gap-3">
+          {needsPassword && (
+            <label className="flex flex-col gap-1 text-xs font-bold text-zinc-400">
+              Password untuk konfirmasi
+              <input
+                type="password"
+                name="password"
+                required
+                autoComplete="current-password"
+                placeholder="••••••••"
+                aria-label="Password untuk konfirmasi keluar dari perangkat lain"
+                className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-base text-zinc-100 focus:border-brand-500"
+              />
+            </label>
+          )}
+
+          {feedback && (
+            <p
+              role={feedback.ok ? 'status' : 'alert'}
+              className={`rounded-lg px-3 py-2 text-sm ${
+                feedback.ok ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-700'
+              }`}
+            >
+              {feedback.message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="flex items-center justify-center gap-2 self-start rounded-xl border border-zinc-700 bg-zinc-800/60 px-4 py-2.5 text-sm font-bold text-zinc-300 transition-colors hover:border-rose-500/40 hover:bg-rose-500/8 hover:text-rose-400 disabled:opacity-50 cursor-pointer"
+          >
+            <LogOut size={16} aria-hidden />
+            {pending ? 'Mengeluarkan…' : `Keluar dari ${otherCount} perangkat lain`}
+          </button>
+        </form>
+      )}
+
+      {otherCount === 0 && feedback && (
         <p
-          role="status"
+          role={feedback.ok ? 'status' : 'alert'}
           className={`rounded-lg px-3 py-2 text-sm ${
             feedback.ok ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-700'
           }`}
         >
           {feedback.message}
         </p>
-      )}
-
-      {otherCount > 0 && (
-        <button
-          type="button"
-          onClick={handleRevoke}
-          disabled={pending}
-          className="flex items-center justify-center gap-2 self-start rounded-xl border border-zinc-700 bg-zinc-800/60 px-4 py-2.5 text-sm font-bold text-zinc-300 transition-colors hover:border-rose-500/40 hover:bg-rose-500/8 hover:text-rose-400 disabled:opacity-50 cursor-pointer"
-        >
-          <LogOut size={16} aria-hidden />
-          {pending ? 'Mengeluarkan…' : `Keluar dari ${otherCount} perangkat lain`}
-        </button>
       )}
     </div>
   )

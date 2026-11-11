@@ -125,7 +125,7 @@ export default async function SettingsPage() {
         <p className="mb-4 text-xs text-zinc-500 leading-relaxed">
           Perangkat yang sedang login ke akunmu. Keluarkan yang tidak kamu kenali.
         </p>
-        <SessionsList sessions={sessions} />
+        <SessionsList sessions={sessions} needsPassword={hasPassword} />
       </section>
 
       {/* ── Keluar dari Akun — hanya di mobile; desktop punya Logout di sidebar ── */}

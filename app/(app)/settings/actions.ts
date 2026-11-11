@@ -6,6 +6,7 @@ import { verifyPassword } from 'better-auth/crypto'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/session'
+import { evaluateRevokePassword } from '@/lib/revoke-sessions'
 
 export type UpdateNameState = { ok: boolean; message: string } | null
 
@@ -105,10 +106,37 @@ export async function listActiveSessions(): Promise<ActiveSession[]> {
 
 export type RevokeState = { ok: boolean; message: string } | null
 
-/** Keluarkan semua sesi selain perangkat saat ini. */
-export async function revokeOtherSessions(): Promise<RevokeState> {
+/**
+ * Keluarkan semua sesi selain perangkat saat ini.
+ * Jika user memiliki akun credential dengan password, wajib memasukkan password
+ * untuk konfirmasi di server sebelum sesi dicabut.
+ */
+export async function revokeOtherSessions(formData?: FormData): Promise<RevokeState> {
   const sessionUser = await getSessionUser()
   if (!sessionUser) return { ok: false, message: 'Harus login dulu' }
+
+  const credential = await prisma.account.findFirst({
+    where: { userId: sessionUser.id, providerId: 'credential' },
+    select: { password: true },
+  })
+  const hasPassword = Boolean(credential?.password)
+  const passwordRaw = formData?.get('password')
+  const passwordInput = typeof passwordRaw === 'string' ? passwordRaw : ''
+
+  let isPasswordValid = false
+  if (hasPassword && passwordInput && credential?.password) {
+    isPasswordValid = await verifyPassword({ hash: credential.password, password: passwordInput })
+  }
+
+  const decision = evaluateRevokePassword({
+    hasPassword,
+    passwordInput,
+    isPasswordValid,
+  })
+
+  if (!decision.allowed) {
+    return { ok: false, message: decision.message }
+  }
 
   try {
     const h = await headers()
