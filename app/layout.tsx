@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Baloo_2 } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,10 +16,26 @@ const geistMono = Geist_Mono({
 // Display face — Baloo 2: rounded, hangat, ramah. Dipilih untuk menyelaraskan
 // dengan mascot & node badge yang membulat serta nuansa gamified-belajar,
 // tanpa terasa kekanakan. Dipakai HANYA untuk judul besar (restraint).
-const balooDisplay = Baloo_2({
+const balooDisplay = localFont({
+  src: [
+    {
+      path: "./fonts/baloo-2-latin-600-normal.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/baloo-2-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/baloo-2-latin-800-normal.woff2",
+      weight: "800",
+      style: "normal",
+    },
+  ],
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
