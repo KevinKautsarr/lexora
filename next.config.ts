@@ -15,6 +15,21 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   // Matikan API browser yang tidak dipakai app ini.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  // CSP mode Report-Only: memantau dan mengumpulkan pelanggaran di console browser tanpa memblokir.
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
+  },
 ] as const;
 
 const nextConfig: NextConfig = {
